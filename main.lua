@@ -608,6 +608,73 @@ toggleColorBtn.MouseButton1Click:Connect(function()
             MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         end
     else
+        toggleColorBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+        toggleColorBtn.Text = "Màu Menu Tùy Chỉnh: TẮT ❌"
+        RainbowGradient.Enabled = true
+        MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    end
+end)
+
+toggleFpsBtn.MouseButton1Click:Connect(function()
+    isFpsModeOn = not isFpsModeOn
+    if isFpsModeOn then
+        toggleFpsBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
+        toggleFpsBtn.Text = "Màn Hình Đen Giảm FPS: BẬT ✅"
+        BlackScreenGui.Enabled = true
+    else
+        toggleFpsBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+        toggleFpsBtn.Text = "Màn Hình Đen Giảm FPS: TẮT ❌"
+        BlackScreenGui.Enabled = false
+    end
+end)
+
+musicDropBtn.MouseButton1Click:Connect(function() 
+    musicDropFrame.Visible = not musicDropFrame.Visible 
+    dropFrame.Visible = false
+    colorDropFrame.Visible = false
+    configDropFrame.Visible = false
+end)
+
+local mh = 0
+for i, mItem in ipairs(presetMusics) do
+    local mBtn = Instance.new("TextButton", musicDropFrame)
+    mBtn.LayoutOrder = i
+    mBtn.Size, mBtn.BackgroundColor3, mBtn.Text, mBtn.Font, mBtn.TextSize, mBtn.TextXAlignment, mBtn.ZIndex = UDim2.new(1,0,0,26), Color3.fromRGB(255,255,255), " " .. mItem.Name, Enum.Font.SourceSansSemibold, 12, Enum.TextXAlignment.Left, 21
+    Instance.new("UICorner", mBtn).CornerRadius = UDim.new(0, 4)
+    ApplyBlackTextWhiteOutline(mBtn)
+    mBtn.MouseButton1Click:Connect(function()
+        currentSoundId = mItem.Id
+        musicDropBtn.Text = " 🎵 Đã chọn: " .. mItem.Name
+        musicDropFolder = false
+        musicDropFrame.Visible = false
+        if HubSound.IsPlaying then
+            HubSound.SoundId = "rbxassetid://" .. currentSoundId
+            HubSound:Play()
+        end
+    end)
+    mh = mh + 30
+end
+musicDropFrame.CanvasSize = UDim2.new(0,0,0,mh)
+
+customIdBox.FocusLost:Connect(function()
+    if customIdBox.Text ~= "" and tonumber(customIdBox.Text) then
+        currentSoundId = customIdBox.Text
+        musicDropBtn.Text = " 🎵 ID Custom: " .. currentSoundId
+        if HubSound.IsPlaying then
+            HubSound.SoundId = "rbxassetid://" .. currentSoundId
+            HubSound:Play()
+        end
+    end
+end)
+
+toggleMusicBtn.MouseButton1Click:Connect(function()
+    isMusicPlaying = not isMusicPlaying
+    if isMusicPlaying then
+        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
+        toggleMusicBtn.Text = "Phát Nhạc Background: BẬT ✅"
+        HubSound.SoundId = "rbxassetid://" .. currentSoundId
+        HubSound:Play()
+    else
         toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
         toggleMusicBtn.Text = "Phát Nhạc Background: TẮT ❌"
         HubSound:Stop()
