@@ -101,7 +101,6 @@ UserInputService.InputChanged:Connect(function(input)
         MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
     end
 end)
-
 local TabBarLeftScroll = Instance.new("ScrollingFrame", MainFrame)
 TabBarLeftScroll.Position, TabBarLeftScroll.Size, TabBarLeftScroll.BackgroundTransparency, TabBarLeftScroll.CanvasSize, TabBarLeftScroll.ScrollBarThickness, TabBarLeftScroll.ZIndex = UDim2.new(0, 8, 0, 48), UDim2.new(0, 100, 1, -56), 1, UDim2.new(0, 0, 0, 340), 3, 6
 TabBarLeftScroll.ClipsDescendants = true
@@ -214,7 +213,6 @@ AddScriptButton(tabContainers[1].HasKeyScroll, "5. Speed hub(có key)", function
 AddScriptButton(tabContainers[1].HasKeyScroll, "6. Neohub(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/neohubdev/script/main/script"))() end)
 AddScriptButton(tabContainers[1].HasKeyScroll, "7. Real kid(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua"))() end)
 AddScriptButton(tabContainers[1].HasKeyScroll, "8. Chilli v2(có key)", function() loadstring(game:HttpGet("https://gist.githubusercontent.com/ronnei/1fa67c56dd9af203b192d15e752928e5/raw/4e2d5105640e09a008b4ae6df23f9708cadfef06/chilliv2-stealanegg"))() end)
-
 -- TAB 2: BLOX FRUIT
 AddScriptButton(tabContainers[2].NoKeyScroll, "1. RedzHub v2 (no key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/UCT-hub/main/refs/heads/main/redz-v2"))() end)
 AddScriptButton(tabContainers[2].NoKeyScroll, "2. Quantumx Hub(nokey)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))() end)
@@ -225,6 +223,7 @@ AddScriptButton(tabContainers[2].HasKeyScroll, "3. TeddyHub(có key)", function(
 AddScriptButton(tabContainers[2].HasKeyScroll, "4. Gravity Hub(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua"))() end)
 AddScriptButton(tabContainers[2].HasKeyScroll, "5. Realkid hub(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua"))() end)
 AddScriptButton(tabContainers[2].HasKeyScroll, "6. BananaHub(có key)", function() repeat task.wait() until game:IsLoaded() and game.Players.LocalPlayer getgenv().Team = "Marines" loadstring(game:HttpGet("https://raw.githubusercontent.com/obiyeueim/vthangsitink/main/BananaHub.lua"))() end)
+
 -- TAB 3, 4, 5
 AddScriptButton(tabContainers[3].NoKeyScroll, "1. break and steal an egg(không sài dc nx)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/joustingmatch/Ouroboros/main/loader.lua"))() end)
 AddScriptButton(tabContainers[3].HasKeyScroll, "1. Tên Script Có Key (Tab 3)", function() end)
@@ -241,7 +240,7 @@ local selScript, isAuto = nil, false
 
 -- 1. CHỨC NĂNG TẠO VÀ LƯU CẤU HÌNH (CONFIG SYSTEM)
 local configFolder = "VzNamHub_Configs"
-if makefolder and not isfolder(configFolder) then
+if typeof(makefolder) == "function" then
     pcall(makefolder, configFolder)
 end
 
@@ -301,7 +300,6 @@ toggleAuto.LayoutOrder = 9
 toggleAuto.Size, toggleAuto.BackgroundColor3, toggleAuto.Text, toggleAuto.Font, toggleAuto.TextSize, toggleAuto.ZIndex = UDim2.new(1,0,0,32), Color3.fromRGB(200,50,50), "Auto Load Script Chạy: TẮT ❌", Enum.Font.SourceSansBold, 12, 8
 Instance.new("UICorner", toggleAuto).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(toggleAuto)
-
 -- 3. GROUP MÀU MENU
 local colorList = {
     {Name = "🌸 Hồng Kẹo Đắng", Color = Color3.fromRGB(255, 105, 180)},
@@ -364,7 +362,7 @@ ApplyBlackTextWhiteOutline(customIdBox)
 
 local musicDropBtn = Instance.new("TextButton", t6)
 musicDropBtn.LayoutOrder = 15
-musicDropBtn.Size, musicDropBtn.BackgroundColor3, musicDropBtn.Text, musicDropBtn.Font, musicDropBtn.TextSize, musicDropDropBtnTextXAlignment and musicDropBtn.TextXAlignment or Enum.TextXAlignment.Left, musicDropBtn.ZIndex = UDim2.new(1,0,0,34), Color3.fromRGB(240,240,240), " 🎵 Chọn Nhạc Nền...", Enum.Font.SourceSansSemibold, 13, Enum.TextXAlignment.Left, 10
+musicDropBtn.Size, musicDropBtn.BackgroundColor3, musicDropBtn.Text, musicDropBtn.Font, musicDropBtn.TextSize, musicDropBtn.TextXAlignment, musicDropBtn.ZIndex = UDim2.new(1,0,0,34), Color3.fromRGB(240,240,240), " 🎵 Chọn Nhạc Nền...", Enum.Font.SourceSansSemibold, 13, Enum.TextXAlignment.Left, 10
 Instance.new("UICorner", musicDropBtn).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(musicDropBtn)
 
@@ -437,7 +435,7 @@ local function refreshConfigList()
     for _, child in ipairs(configDropFrame:GetChildren()) do
         if child:IsA("TextButton") then child:Destroy() end
     end
-    if not listfiles then return end
+    if typeof(listfiles) ~= "function" then return end
     local success, files = pcall(listfiles, configFolder)
     if success and files then
         local cfh = 0
@@ -475,7 +473,7 @@ saveConfigBtn.MouseButton1Click:Connect(function()
         configNameBox.PlaceholderText = "📝 Nhập tên cấu hình..."
         return 
     end
-    if writefile then
+    if typeof(writefile) == "function" then
         local configData = {
             Script = selScript and selScript.Name or "",
             ColorName = selectedColorObj.Name,
@@ -496,7 +494,7 @@ end)
 loadConfigBtn.MouseButton1Click:Connect(function()
     if selectedConfigName == "" then return end
     local path = configFolder .. "/" .. selectedConfigName .. ".json"
-    if readfile and isfile and isfile(path) then
+    if typeof(readfile) == "function" and typeof(isfile) == "function" and isfile(path) then
         local success, data = pcall(function()
             return HttpService:JSONDecode(readfile(path))
         end)
@@ -645,7 +643,6 @@ for i, mItem in ipairs(presetMusics) do
     mBtn.MouseButton1Click:Connect(function()
         currentSoundId = mItem.Id
         musicDropBtn.Text = " 🎵 Đã chọn: " .. mItem.Name
-        musicDropFolder = false
         musicDropFrame.Visible = false
         if HubSound.IsPlaying then
             HubSound.SoundId = "rbxassetid://" .. currentSoundId
