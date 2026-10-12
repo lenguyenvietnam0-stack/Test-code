@@ -311,7 +311,7 @@ local presetMusics = {
     {Name = "🎶 Phonk Beat", Id = "1843404008"},
     {Name = "🎵 Anime Relaxing", Id = "9043887091"},
     {Name = "🎶 EDM Hype", Id = "1837871000"},
-    {Name = "🎶 Như Một Người Dưng", Id = "91897652967267"}
+    {Name = "🎶 Như Một Người Dưng", Id = "91897652967267"},
     {Name = "🎶 Phonk 1", Id = "91825664919227"}
 }
 local currentSoundId = presetMusics[1].Id
