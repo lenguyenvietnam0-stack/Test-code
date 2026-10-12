@@ -1,4 +1,4 @@
-local CoreGui, Players, TweenService, UserInputService, SoundService = game:GetService("CoreGui"), game:GetService("Players"), game:GetService("TweenService"), game:GetService("UserInputService"), game:GetService("SoundService")
+local CoreGui, Players, TweenService, UserInputService, SoundService, HttpService = game:GetService("CoreGui"), game:GetService("Players"), game:GetService("TweenService"), game:GetService("UserInputService"), game:GetService("SoundService"), game:GetService("HttpService")
 local localPlayer = Players.LocalPlayer
 
 if CoreGui:FindFirstChild("VzNamHubGui") then CoreGui.VzNamHubGui:Destroy() end
@@ -146,7 +146,7 @@ local function CreateCustomContainer(visible)
     frame.Position, frame.Size, frame.BackgroundTransparency, frame.Visible, frame.ZIndex, frame.ClipsDescendants = UDim2.new(0, 114, 0, 48), UDim2.new(1, -122, 1, -56), 1, visible, 6, true
     local scroll = Instance.new("ScrollingFrame", frame) 
     scroll.Position, scroll.Size, scroll.BackgroundTransparency, scroll.ScrollBarThickness, scroll.ZIndex, scroll.ClipsDescendants = UDim2.new(0, 0, 0, 0), UDim2.new(1, 0, 1, 0), 1, 4, 7, true
-    scroll.CanvasSize = UDim2.new(0, 0, 0, 550)
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 750)
     local scrollLayout = Instance.new("UIListLayout", scroll)
     scrollLayout.Padding = UDim.new(0, 8)
     scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -225,15 +225,13 @@ AddScriptButton(tabContainers[2].HasKeyScroll, "3. TeddyHub(có key)", function(
 AddScriptButton(tabContainers[2].HasKeyScroll, "4. Gravity Hub(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua"))() end)
 AddScriptButton(tabContainers[2].HasKeyScroll, "5. Realkid hub(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua"))() end)
 AddScriptButton(tabContainers[2].HasKeyScroll, "6. BananaHub(có key)", function() repeat task.wait() until game:IsLoaded() and game.Players.LocalPlayer getgenv().Team = "Marines" loadstring(game:HttpGet("https://raw.githubusercontent.com/obiyeueim/vthangsitink/main/BananaHub.lua"))() end)
--- TAB 3
+-- TAB 3, 4, 5
 AddScriptButton(tabContainers[3].NoKeyScroll, "1. break and steal an egg(không sài dc nx)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/joustingmatch/Ouroboros/main/loader.lua"))() end)
 AddScriptButton(tabContainers[3].HasKeyScroll, "1. Tên Script Có Key (Tab 3)", function() end)
 
--- TAB 4
 AddScriptButton(tabContainers[4].NoKeyScroll, "1. Tên Script No Key (Tab 4)", function() end)
 AddScriptButton(tabContainers[4].HasKeyScroll, "1. Tên Script Có Key (Tab 4)", function() end)
 
--- TAB 5
 AddScriptButton(tabContainers[5].NoKeyScroll, "1. Tên Script No Key (Tab 5)", function() end)
 AddScriptButton(tabContainers[5].HasKeyScroll, "1. Tên Script Có Key (Tab 5)", function() end)
 
@@ -241,31 +239,70 @@ local t6 = tabContainers[6].Scroll
 t6.ClipsDescendants = true
 local selScript, isAuto = nil, false
 
+-- 1. CHỨC NĂNG TẠO VÀ LƯU CẤU HÌNH (CONFIG SYSTEM)
+local configFolder = "VzNamHub_Configs"
+if makefolder and not isfolder(configFolder) then
+    pcall(makefolder, configFolder)
+end
+
+local configNameBox = Instance.new("TextBox", t6)
+configNameBox.LayoutOrder = 1
+configNameBox.Size, configNameBox.BackgroundColor3, configNameBox.PlaceholderText, configNameBox.Text, configNameBox.Font, configNameBox.TextSize, configNameBox.ZIndex = UDim2.new(1,0,0,32), Color3.fromRGB(240,240,240), "📝 Nhập tên cấu hình...", "", Enum.Font.SourceSansSemibold, 13, 8
+Instance.new("UICorner", configNameBox).CornerRadius = UDim.new(0, 6)
+ApplyBlackTextWhiteOutline(configNameBox)
+
+local saveConfigBtn = Instance.new("TextButton", t6)
+saveConfigBtn.LayoutOrder = 2
+saveConfigBtn.Size, saveConfigBtn.BackgroundColor3, saveConfigBtn.Text, saveConfigBtn.Font, saveConfigBtn.TextSize, saveConfigBtn.ZIndex = UDim2.new(1,0,0,32), Color3.fromRGB(50,200,50), "💾 Lưu Cấu Hình Này ✅", Enum.Font.SourceSansBold, 12, 8
+Instance.new("UICorner", saveConfigBtn).CornerRadius = UDim.new(0, 6)
+ApplyBlackTextWhiteOutline(saveConfigBtn)
+
+local selectedConfigName = ""
+local configDropBtn = Instance.new("TextButton", t6)
+configDropBtn.LayoutOrder = 3
+configDropBtn.Size, configDropBtn.BackgroundColor3, configDropBtn.Text, configDropBtn.Font, configDropBtn.TextSize, configDropBtn.TextXAlignment, configDropBtn.ZIndex = UDim2.new(1,0,0,34), Color3.fromRGB(240,240,240), " 📂 Chọn Cấu Hình Đã Lưu...", Enum.Font.SourceSansSemibold, 13, Enum.TextXAlignment.Left, 10
+Instance.new("UICorner", configDropBtn).CornerRadius = UDim.new(0, 6)
+ApplyBlackTextWhiteOutline(configDropBtn)
+
+local configDropFrame = Instance.new("ScrollingFrame", t6)
+configDropFrame.LayoutOrder = 4
+configDropFrame.Size, configDropFrame.BackgroundColor3, configDropFrame.CanvasSize, configDropFrame.ScrollBarThickness, configDropFrame.Visible, configDropFrame.ZIndex, configDropFrame.ClipsDescendants = UDim2.new(1,0,0,90), Color3.fromRGB(250,250,250), UDim2.new(0,0,0,0), 3, false, 20, true
+Instance.new("UICorner", configDropFrame).CornerRadius = UDim.new(0, 6)
+Instance.new("UIListLayout", configDropFrame).Padding = UDim.new(0, 4)
+
+local loadConfigBtn = Instance.new("TextButton", t6)
+loadConfigBtn.LayoutOrder = 5
+loadConfigBtn.Size, loadConfigBtn.BackgroundColor3, loadConfigBtn.Text, loadConfigBtn.Font, loadConfigBtn.TextSize, loadConfigBtn.ZIndex = UDim2.new(1,0,0,32), Color3.fromRGB(50,150,255), "📥 Tải Cấu Hình Đã Chọn 📂", Enum.Font.SourceSansBold, 12, 8
+Instance.new("UICorner", loadConfigBtn).CornerRadius = UDim.new(0, 6)
+ApplyBlackTextWhiteOutline(loadConfigBtn)
+
+-- 2. GROUP AUTO LOAD SCRIPT
 local dropBtn = Instance.new("TextButton", t6)
-dropBtn.LayoutOrder = 1
+dropBtn.LayoutOrder = 6
 dropBtn.Size, dropBtn.BackgroundColor3, dropBtn.Text, dropBtn.Font, dropBtn.TextSize, dropBtn.TextXAlignment, dropBtn.ZIndex = UDim2.new(1,0,0,34), Color3.fromRGB(240,240,240), " 📜 Chọn Script Auto Load...", Enum.Font.SourceSansSemibold, 13, Enum.TextXAlignment.Left, 10
 Instance.new("UICorner", dropBtn).CornerRadius = UDim.new(0, 6)
 local dropStroke = Instance.new("UIStroke", dropBtn) dropStroke.Color = Color3.fromRGB(200,200,200)
 ApplyBlackTextWhiteOutline(dropBtn)
 
 local dropFrame = Instance.new("ScrollingFrame", t6)
-dropFrame.LayoutOrder = 2
+dropFrame.LayoutOrder = 7
 dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible, dropFrame.ZIndex, dropFrame.ClipsDescendants = UDim2.new(1,0,0,90), Color3.fromRGB(250,250,250), UDim2.new(0,0,0,0), 3, false, 20, true
 Instance.new("UICorner", dropFrame).CornerRadius = UDim.new(0, 6)
 Instance.new("UIListLayout", dropFrame).Padding = UDim.new(0, 4)
 
 local clearBtn = Instance.new("TextButton", t6)
-clearBtn.LayoutOrder = 3
+clearBtn.LayoutOrder = 8
 clearBtn.Size, clearBtn.BackgroundColor3, clearBtn.Text, clearBtn.Font, clearBtn.TextSize, clearBtn.ZIndex = UDim2.new(1,0,0,28), Color3.fromRGB(150,150,150), "🚫 Hủy chọn Script ❌", Enum.Font.SourceSansBold, 12, 8
 Instance.new("UICorner", clearBtn).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(clearBtn)
 
 local toggleAuto = Instance.new("TextButton", t6)
-toggleAuto.LayoutOrder = 4
+toggleAuto.LayoutOrder = 9
 toggleAuto.Size, toggleAuto.BackgroundColor3, toggleAuto.Text, toggleAuto.Font, toggleAuto.TextSize, toggleAuto.ZIndex = UDim2.new(1,0,0,32), Color3.fromRGB(200,50,50), "Auto Load Script Chạy: TẮT ❌", Enum.Font.SourceSansBold, 12, 8
 Instance.new("UICorner", toggleAuto).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(toggleAuto)
 
+-- 3. GROUP MÀU MENU
 local colorList = {
     {Name = "🌸 Hồng Kẹo Đắng", Color = Color3.fromRGB(255, 105, 180)},
     {Name = "🌈 Màu Cầu Vồng", Color = nil},
@@ -280,30 +317,31 @@ local selectedColorObj = colorList[1]
 local isColorApplied = true
 
 local colorDropBtn = Instance.new("TextButton", t6)
-colorDropBtn.LayoutOrder = 5
+colorDropBtn.LayoutOrder = 10
 colorDropBtn.Size, colorDropBtn.BackgroundColor3, colorDropBtn.Text, colorDropBtn.Font, colorDropBtn.TextSize, colorDropBtn.TextXAlignment, colorDropBtn.ZIndex = UDim2.new(1,0,0,34), Color3.fromRGB(240,240,240), " 🎨 Đã chọn: 🌸 Hồng Kẹo Đắng", Enum.Font.SourceSansSemibold, 13, Enum.TextXAlignment.Left, 10
 Instance.new("UICorner", colorDropBtn).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(colorDropBtn)
 
 local colorDropFrame = Instance.new("ScrollingFrame", t6)
-colorDropFrame.LayoutOrder = 6
+colorDropFrame.LayoutOrder = 11
 colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible, colorDropFrame.ZIndex, colorDropFrame.ClipsDescendants = UDim2.new(1,0,0,100), Color3.fromRGB(250,250,250), UDim2.new(0,0,0,0), 3, false, 20, true
 Instance.new("UICorner", colorDropFrame).CornerRadius = UDim.new(0, 6)
 Instance.new("UIListLayout", colorDropFrame).Padding = UDim.new(0, 4)
 
 local toggleColorBtn = Instance.new("TextButton", t6)
-toggleColorBtn.LayoutOrder = 7
+toggleColorBtn.LayoutOrder = 12
 toggleColorBtn.Size, toggleColorBtn.BackgroundColor3, toggleColorBtn.Text, toggleColorBtn.Font, toggleColorBtn.TextSize, toggleColorBtn.ZIndex = UDim2.new(1,0,0,32), Color3.fromRGB(50,200,50), "Màu Menu Tùy Chỉnh: BẬT ✅", Enum.Font.SourceSansBold, 12, 8
 Instance.new("UICorner", toggleColorBtn).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(toggleColorBtn)
 
 local isFpsModeOn = false
 local toggleFpsBtn = Instance.new("TextButton", t6)
-toggleFpsBtn.LayoutOrder = 8
+toggleFpsBtn.LayoutOrder = 13
 toggleFpsBtn.Size, toggleFpsBtn.BackgroundColor3, toggleFpsBtn.Text, toggleFpsBtn.Font, toggleFpsBtn.TextSize, toggleFpsBtn.ZIndex = UDim2.new(1,0,0,32), Color3.fromRGB(200,50,50), "Màn Hình Đen Giảm FPS: TẮT ❌", Enum.Font.SourceSansBold, 12, 8
 Instance.new("UICorner", toggleFpsBtn).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(toggleFpsBtn)
 
+-- 4. GROUP NHẠC BACKGROUND
 local HubSound = SoundService:FindFirstChild("VzNamHubSound") or Instance.new("Sound", SoundService)
 HubSound.Name = "VzNamHubSound"
 HubSound.Looped = true
@@ -319,27 +357,28 @@ local presetMusics = {
 local currentSoundId = presetMusics[1].Id
 
 local customIdBox = Instance.new("TextBox", t6)
-customIdBox.LayoutOrder = 9
+customIdBox.LayoutOrder = 14
 customIdBox.Size, customIdBox.BackgroundColor3, customIdBox.PlaceholderText, customIdBox.Text, customIdBox.Font, customIdBox.TextSize, customIdBox.ZIndex = UDim2.new(1,0,0,30), Color3.fromRGB(240,240,240), "Nhập Sound ID tùy chỉnh...", "", Enum.Font.SourceSansSemibold, 12, 8
 Instance.new("UICorner", customIdBox).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(customIdBox)
 
 local musicDropBtn = Instance.new("TextButton", t6)
-musicDropBtn.LayoutOrder = 10
-musicDropBtn.Size, musicDropBtn.BackgroundColor3, musicDropBtn.Text, musicDropBtn.Font, musicDropBtn.TextSize, musicDropBtn.TextXAlignment, musicDropBtn.ZIndex = UDim2.new(1,0,0,34), Color3.fromRGB(240,240,240), " 🎵 Chọn Nhạc Nền...", Enum.Font.SourceSansSemibold, 13, Enum.TextXAlignment.Left, 10
+musicDropBtn.LayoutOrder = 15
+musicDropBtn.Size, musicDropBtn.BackgroundColor3, musicDropBtn.Text, musicDropBtn.Font, musicDropBtn.TextSize, musicDropDropBtnTextXAlignment and musicDropBtn.TextXAlignment or Enum.TextXAlignment.Left, musicDropBtn.ZIndex = UDim2.new(1,0,0,34), Color3.fromRGB(240,240,240), " 🎵 Chọn Nhạc Nền...", Enum.Font.SourceSansSemibold, 13, Enum.TextXAlignment.Left, 10
 Instance.new("UICorner", musicDropBtn).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(musicDropBtn)
 
 local musicDropFrame = Instance.new("ScrollingFrame", t6)
-musicDropFrame.LayoutOrder = 11
+musicDropFrame.LayoutOrder = 16
 musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible, musicDropFrame.ZIndex, musicDropFrame.ClipsDescendants = UDim2.new(1,0,0,130), Color3.fromRGB(250,250,250), UDim2.new(0,0,0,0), 3, false, 20, true
 Instance.new("UICorner", musicDropFrame).CornerRadius = UDim.new(0, 6)
 local musicLayout = Instance.new("UIListLayout", musicDropFrame)
 musicLayout.Padding = UDim.new(0, 4)
 musicLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+-- 5. THANH TRƯỢT ÂM LƯỢNG NGANG
 local volumeContainer = Instance.new("Frame", t6)
-volumeContainer.LayoutOrder = 12
+volumeContainer.LayoutOrder = 17
 volumeContainer.Size, volumeContainer.BackgroundColor3, volumeContainer.BackgroundTransparency, volumeContainer.ZIndex, volumeContainer.ClipsDescendants = UDim2.new(1, 0, 0, 32), Color3.fromRGB(240, 240, 240), 0, 8, true
 Instance.new("UICorner", volumeContainer).CornerRadius = UDim.new(0, 6)
 
@@ -388,15 +427,101 @@ end)
 
 local isMusicPlaying = false
 local toggleMusicBtn = Instance.new("TextButton", t6)
-toggleMusicBtn.LayoutOrder = 13
+toggleMusicBtn.LayoutOrder = 18
 toggleMusicBtn.Size, toggleMusicBtn.BackgroundColor3, toggleMusicBtn.Text, toggleMusicBtn.Font, toggleMusicBtn.TextSize, toggleMusicBtn.ZIndex = UDim2.new(1,0,0,32), Color3.fromRGB(200,50,50), "Phát Nhạc Background: TẮT ❌", Enum.Font.SourceSansBold, 12, 8
 Instance.new("UICorner", toggleMusicBtn).CornerRadius = UDim.new(0, 6)
 ApplyBlackTextWhiteOutline(toggleMusicBtn)
 
+-- HÀM LOAD VÀ REFRESH DANH SÁCH CONFIG
+local function refreshConfigList()
+    for _, child in ipairs(configDropFrame:GetChildren()) do
+        if child:IsA("TextButton") then child:Destroy() end
+    end
+    if not listfiles then return end
+    local success, files = pcall(listfiles, configFolder)
+    if success and files then
+        local cfh = 0
+        for i, file in ipairs(files) do
+            local fileName = file:match("([^/]+)$"):gsub("%.json$", "")
+            local cBtn = Instance.new("TextButton", configDropFrame)
+            cBtn.LayoutOrder = i
+            cBtn.Size, cBtn.BackgroundColor3, cBtn.Text, cBtn.Font, cBtn.TextSize, cBtn.TextXAlignment, cBtn.ZIndex = UDim2.new(1,0,0,26), Color3.fromRGB(255,255,255), " 📁 " .. fileName, Enum.Font.SourceSansSemibold, 12, Enum.TextXAlignment.Left, 21
+            Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 4)
+            ApplyBlackTextWhiteOutline(cBtn)
+            cBtn.MouseButton1Click:Connect(function()
+                selectedConfigName = fileName
+                configDropBtn.Text = " 📂 Đã chọn: " .. fileName
+                configDropFrame.Visible = false
+            end)
+            cfh = cfh + 30
+        end
+        configDropFrame.CanvasSize = UDim2.new(0,0,0,cfh)
+    end
+end
+
+configDropBtn.MouseButton1Click:Connect(function()
+    refreshConfigList()
+    configDropFrame.Visible = not configDropFrame.Visible
+    dropFrame.Visible = false
+    colorDropFrame.Visible = false
+    musicDropFrame.Visible = false
+end)
+
+saveConfigBtn.MouseButton1Click:Connect(function()
+    local cName = configNameBox.Text
+    if cName == "" then 
+        configNameBox.PlaceholderText = "⚠️ Vui lòng nhập tên!"
+        task.wait(1.5)
+        configNameBox.PlaceholderText = "📝 Nhập tên cấu hình..."
+        return 
+    end
+    if writefile then
+        local configData = {
+            Script = selScript and selScript.Name or "",
+            ColorName = selectedColorObj.Name,
+            SoundId = currentSoundId,
+            Volume = HubSound.Volume,
+            FpsMode = isFpsModeOn
+        }
+        local success = pcall(writefile, configFolder .. "/" .. cName .. ".json", HttpService:JSONEncode(configData))
+        if success then
+            saveConfigBtn.Text = "💾 Đã Lưu Thành Công! ✅"
+            task.wait(1.5)
+            saveConfigBtn.Text = "💾 Lưu Cấu Hình Này ✅"
+            refreshConfigList()
+        end
+    end
+end)
+
+loadConfigBtn.MouseButton1Click:Connect(function()
+    if selectedConfigName == "" then return end
+    local path = configFolder .. "/" .. selectedConfigName .. ".json"
+    if readfile and isfile and isfile(path) then
+        local success, data = pcall(function()
+            return HttpService:JSONDecode(readfile(path))
+        end)
+        if success and data then
+            currentSoundId = data.SoundId or currentSoundId
+            HubSound.Volume = data.Volume or 0.5
+            sliderFill.Size = UDim2.new(HubSound.Volume, 0, 1, 0)
+            volLabel.Text = "🔊 Âm lượng: " .. math.floor(HubSound.Volume * 100) .. "%"
+            if HubSound.IsPlaying then
+                HubSound.SoundId = "rbxassetid://" .. currentSoundId
+                HubSound:Play()
+            end
+            loadConfigBtn.Text = "📥 Tải Cấu Hình Thành Công! ✅"
+            task.wait(1.5)
+            loadConfigBtn.Text = "📥 Tải Cấu Hình Đã Chọn 📂"
+        end
+    end
+end)
+
+-- XỬ LÝ SỰ KIỆN CÁC DROPDOWN KHÁC
 dropBtn.MouseButton1Click:Connect(function() 
     dropFrame.Visible = not dropFrame.Visible 
     colorDropFrame.Visible = false
     musicDropFrame.Visible = false
+    configDropFrame.Visible = false
 end)
 
 local h = 0
@@ -443,6 +568,7 @@ colorDropBtn.MouseButton1Click:Connect(function()
     colorDropFrame.Visible = not colorDropFrame.Visible 
     dropFrame.Visible = false
     musicDropFrame.Visible = false
+    configDropFrame.Visible = false
 end)
 
 local ch = 0
@@ -482,71 +608,6 @@ toggleColorBtn.MouseButton1Click:Connect(function()
             MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         end
     else
-        toggleColorBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
-        toggleColorBtn.Text = "Màu Menu Tùy Chỉnh: TẮT ❌"
-        RainbowGradient.Enabled = true
-        MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    end
-end)
-
-toggleFpsBtn.MouseButton1Click:Connect(function()
-    isFpsModeOn = not isFpsModeOn
-    if isFpsModeOn then
-        toggleFpsBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
-        toggleFpsBtn.Text = "Màn Hình Đen Giảm FPS: BẬT ✅"
-        BlackScreenGui.Enabled = true
-    else
-        toggleFpsBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
-        toggleFpsBtn.Text = "Màn Hình Đen Giảm FPS: TẮT ❌"
-        BlackScreenGui.Enabled = false
-    end
-end)
-
-musicDropBtn.MouseButton1Click:Connect(function() 
-    musicDropFrame.Visible = not musicDropFrame.Visible 
-    dropFrame.Visible = false
-    colorDropFrame.Visible = false
-end)
-
-local mh = 0
-for i, mItem in ipairs(presetMusics) do
-    local mBtn = Instance.new("TextButton", musicDropFrame)
-    mBtn.LayoutOrder = i
-    mBtn.Size, mBtn.BackgroundColor3, mBtn.Text, mBtn.Font, mBtn.TextSize, mBtn.TextXAlignment, mBtn.ZIndex = UDim2.new(1,0,0,26), Color3.fromRGB(255,255,255), " " .. mItem.Name, Enum.Font.SourceSansSemibold, 12, Enum.TextXAlignment.Left, 21
-    Instance.new("UICorner", mBtn).CornerRadius = UDim.new(0, 4)
-    ApplyBlackTextWhiteOutline(mBtn)
-    mBtn.MouseButton1Click:Connect(function()
-        currentSoundId = mItem.Id
-        musicDropBtn.Text = " 🎵 Đã chọn: " .. mItem.Name
-        musicDropFrame.Visible = false
-        if HubSound.IsPlaying then
-            HubSound.SoundId = "rbxassetid://" .. currentSoundId
-            HubSound:Play()
-        end
-    end)
-    mh = mh + 30
-end
-musicDropFrame.CanvasSize = UDim2.new(0,0,0,mh)
-
-customIdBox.FocusLost:Connect(function()
-    if customIdBox.Text ~= "" and tonumber(customIdBox.Text) then
-        currentSoundId = customIdBox.Text
-        musicDropBtn.Text = " 🎵 ID Custom: " .. currentSoundId
-        if HubSound.IsPlaying then
-            HubSound.SoundId = "rbxassetid://" .. currentSoundId
-            HubSound:Play()
-        end
-    end
-end)
-
-toggleMusicBtn.MouseButton1Click:Connect(function()
-    isMusicPlaying = not isMusicPlaying
-    if isMusicPlaying then
-        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
-        toggleMusicBtn.Text = "Phát Nhạc Background: BẬT ✅"
-        HubSound.SoundId = "rbxassetid://" .. currentSoundId
-        HubSound:Play()
-    else
         toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
         toggleMusicBtn.Text = "Phát Nhạc Background: TẮT ❌"
         HubSound:Stop()
@@ -554,3 +615,4 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
 end)
 
 ToggleBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+refreshConfigList()
