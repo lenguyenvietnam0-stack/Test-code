@@ -255,29 +255,85 @@ table.insert(Tabs, {Container = t6Scroll, Indicator = t6Indicator})
 local configFolder = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
 
--- TIÊU ĐỀ PROFILES
-local profileHeader = Instance.new("TextButton", t6Scroll)
-profileHeader.LayoutOrder = 1
-profileHeader.Size, profileHeader.BackgroundColor3, profileHeader.Text, profileHeader.TextColor3, profileHeader.TextSize, profileHeader.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(20, 22, 30), "📦 Quản Lý Profiles", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
-Instance.new("UICorner", profileHeader).CornerRadius = UDim.new(0, 5)
+-- ⌄ CẤU HÌNH
+local configHeader = Instance.new("TextButton", t6Scroll)
+configHeader.LayoutOrder = 1
+configHeader.Size, configHeader.BackgroundColor3, configHeader.Text, configHeader.TextColor3, configHeader.TextSize, configHeader.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(20, 22, 30), "⌄ Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
+Instance.new("UICorner", configHeader).CornerRadius = UDim.new(0, 5)
 
--- Ô NHẬP TÊN CẤU HÌNH MỚI
-local newConfigInput = Instance.new("TextBox", t6Scroll)
-newConfigInput.LayoutOrder = 2
-newConfigInput.Size, newConfigInput.BackgroundColor3, newConfigInput.TextColor3, newConfigInput.PlaceholderText, newConfigInput.PlaceholderColor3, newConfigInput.TextSize, newConfigInput.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(22, 25, 34), Color3.fromRGB(255, 255, 255), "Nhập tên cấu hình mới...", Color3.fromRGB(140, 140, 150), 10, Enum.Font.FredokaOne
-Instance.new("UICorner", newConfigInput).CornerRadius = UDim.new(0, 5)
+-- 1. Startup Cấu Hình
+local startupFrame = Instance.new("Frame", t6Scroll)
+startupFrame.LayoutOrder = 2
+startupFrame.Size, startupFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 34), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", startupFrame).CornerRadius = UDim.new(0, 5)
+Instance.new("UIStroke", startupFrame).Color, Instance.new("UIStroke", startupFrame).Thickness = Color3.fromRGB(40, 43, 52), 1
 
--- NÚT LƯU CẤU HÌNH
-local saveBtn = Instance.new("TextButton", t6Scroll)
-saveBtn.LayoutOrder = 3
-saveBtn.Size, saveBtn.BackgroundColor3, saveBtn.Text, saveBtn.TextColor3, saveBtn.TextSize, saveBtn.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(220, 50, 50), "💾 Lưu Cấu Hình (Default)", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
-Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 5)
+local startupLabel = Instance.new("TextLabel", startupFrame)
+startupLabel.Size, startupLabel.Position, startupLabel.BackgroundTransparency, startupLabel.Text, startupLabel.TextColor3, startupLabel.TextSize, startupLabel.Font, startupLabel.TextXAlignment = UDim2.new(1, -12, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Startup Cấu Hình: Default", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
 
--- NÚT TẢI CẤU HÌNH DEFAULT
-local loadDefaultBtn = Instance.new("TextButton", t6Scroll)
-loadDefaultBtn.LayoutOrder = 4
-loadDefaultBtn.Size, loadDefaultBtn.BackgroundColor3, loadDefaultBtn.Text, loadDefaultBtn.TextColor3, loadDefaultBtn.TextSize, loadDefaultBtn.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(50, 120, 220), "📂 Tải Cấu Hình Default", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
-Instance.new("UICorner", loadDefaultBtn).CornerRadius = UDim.new(0, 5)
+-- 2. Auto Lưu Cấu Hình
+local autoSaveFrame = Instance.new("Frame", t6Scroll)
+autoSaveFrame.LayoutOrder = 3
+autoSaveFrame.Size, autoSaveFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 42), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", autoSaveFrame).CornerRadius = UDim.new(0, 5)
+Instance.new("UIStroke", autoSaveFrame).Color, Instance.new("UIStroke", autoSaveFrame).Thickness = Color3.fromRGB(40, 43, 52), 1
+
+local asTitle = Instance.new("TextLabel", autoSaveFrame)
+asTitle.Size, asTitle.Position, asTitle.BackgroundTransparency, asTitle.Text, asTitle.TextColor3, asTitle.TextSize, asTitle.Font, asTitle.TextXAlignment = UDim2.new(1, -50, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Auto Lưu Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+
+local asSub = Instance.new("TextLabel", autoSaveFrame)
+asSub.Size, asSub.Position, asSub.BackgroundTransparency, asSub.Text, asSub.TextColor3, asSub.TextSize, asSub.Font, asSub.TextXAlignment = UDim2.new(1, -50, 0, 16), UDim2.new(0, 8, 0, 21), 1, "Auto save: Default", Color3.fromRGB(140, 140, 150), 9, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+
+local autoSaveToggle = Instance.new("TextButton", autoSaveFrame)
+autoSaveToggle.Size, autoSaveToggle.Position, autoSaveToggle.BackgroundColor3, autoSaveToggle.Text = UDim2.new(0, 36, 0, 20), UDim2.new(1, -44, 0.5, -10), Color3.fromRGB(50, 200, 50), ""
+Instance.new("UICorner", autoSaveToggle).CornerRadius = UDim.new(1, 0)
+local asBox = Instance.new("Frame", autoSaveToggle)
+asBox.Size, asBox.Position, asBox.BackgroundColor3 = UDim2.new(0, 16, 0, 16), UDim2.new(1, -18, 0.5, -8), Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", asBox).CornerRadius = UDim.new(1, 0)
+
+local isAutoSave = true
+autoSaveToggle.MouseButton1Click:Connect(function()
+    isAutoSave = not isAutoSave
+    if isAutoSave then
+        autoSaveToggle.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        asBox.Position = UDim2.new(1, -18, 0.5, -8)
+    else
+        autoSaveToggle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        asBox.Position = UDim2.new(0, 2, 0.5, -8)
+    end
+end)
+
+-- 3. Auto Tải Cấu Hình
+local autoLoadFrame = Instance.new("Frame", t6Scroll)
+autoLoadFrame.LayoutOrder = 4
+autoLoadFrame.Size, autoLoadFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 42), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", autoLoadFrame).CornerRadius = UDim.new(0, 5)
+Instance.new("UIStroke", autoLoadFrame).Color, Instance.new("UIStroke", autoLoadFrame).Thickness = Color3.fromRGB(40, 43, 52), 1
+
+local alTitle = Instance.new("TextLabel", autoLoadFrame)
+alTitle.Size, alTitle.Position, alTitle.BackgroundTransparency, alTitle.Text, alTitle.TextColor3, alTitle.TextSize, alTitle.Font, alTitle.TextXAlignment = UDim2.new(1, -50, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Auto Tải Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+
+local alSub = Instance.new("TextLabel", autoLoadFrame)
+alSub.Size, alSub.Position, alSub.BackgroundTransparency, alSub.Text, alSub.TextColor3, alSub.TextSize, alSub.Font, alSub.TextXAlignment = UDim2.new(1, -50, 0, 16), UDim2.new(0, 8, 0, 21), 1, "Auto load: Default", Color3.fromRGB(140, 140, 150), 9, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+
+local autoLoadToggle = Instance.new("TextButton", autoLoadFrame)
+autoLoadToggle.Size, autoLoadToggle.Position, autoLoadToggle.BackgroundColor3, autoLoadToggle.Text = UDim2.new(0, 36, 0, 20), UDim2.new(1, -44, 0.5, -10), Color3.fromRGB(50, 200, 50), ""
+Instance.new("UICorner", autoLoadToggle).CornerRadius = UDim.new(1, 0)
+local alBox = Instance.new("Frame", autoLoadToggle)
+alBox.Size, alBox.Position, alBox.BackgroundColor3 = UDim2.new(0, 16, 0, 16), UDim2.new(1, -18, 0.5, -8), Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", alBox).CornerRadius = UDim.new(1, 0)
+
+local isAutoLoad = true
+autoLoadToggle.MouseButton1Click:Connect(function()
+    isAutoLoad = not isAutoLoad
+    if isAutoLoad then
+        autoLoadToggle.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        alBox.Position = UDim2.new(1, -18, 0.5, -8)
+    else
+        autoLoadToggle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        alBox.Position = UDim2.new(0, 2, 0.5, -8)
+    end
+end)
 
 -- SCRIPT AUTO LOAD
 local selScript, isAuto = nil, false
@@ -346,28 +402,9 @@ customIdBox.FocusLost:Connect(function()
     end
 end)
 
-local isMusicPlaying = false
-local toggleMusicBtn = Instance.new("TextButton", t6Scroll)
-toggleMusicBtn.LayoutOrder = 11
-toggleMusicBtn.Size, toggleMusicBtn.BackgroundColor3, toggleMusicBtn.Text, toggleMusicBtn.TextColor3, toggleMusicBtn.TextSize, toggleMusicBtn.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(200, 50, 50), "Phát Nhạc Background: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
-Instance.new("UICorner", toggleMusicBtn).CornerRadius = UDim.new(0, 5)
-toggleMusicBtn.MouseButton1Click:Connect(function()
-    isMusicPlaying = not isMusicPlaying
-    if isMusicPlaying then
-        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-        toggleMusicBtn.Text = "Phát Nhạc Background: BẬT ✅"
-        HubSound.SoundId = "rbxassetid://" .. currentSoundId
-        HubSound:Play()
-    else
-        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        toggleMusicBtn.Text = "Phát Nhạc Background: TẮT ❌"
-        HubSound:Stop()
-    end
-end)
-
--- THANH KÉO ÂM LƯỢNG
+-- THANH KÉO ÂM LƯỢNG (ĐÃ DỜI XUỐNG SÁT CHỖ CHỌN NHẠC)
 local volumeFrame = Instance.new("Frame", t6Scroll)
-volumeFrame.LayoutOrder = 12
+volumeFrame.LayoutOrder = 11
 volumeFrame.Size, volumeFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", volumeFrame).CornerRadius = UDim.new(0, 5)
 
@@ -401,6 +438,25 @@ UserInputService.InputChanged:Connect(function(input)
         volumeBarFill.Size = UDim2.new(percent, 0, 1, 0)
         HubSound.Volume = percent
         volumeLabel.Text = "🔊 Âm lượng: " .. math.floor(percent * 100) .. "%"
+    end
+end)
+
+local isMusicPlaying = false
+local toggleMusicBtn = Instance.new("TextButton", t6Scroll)
+toggleMusicBtn.LayoutOrder = 12
+toggleMusicBtn.Size, toggleMusicBtn.BackgroundColor3, toggleMusicBtn.Text, toggleMusicBtn.TextColor3, toggleMusicBtn.TextSize, toggleMusicBtn.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(200, 50, 50), "Phát Nhạc Background: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
+Instance.new("UICorner", toggleMusicBtn).CornerRadius = UDim.new(0, 5)
+toggleMusicBtn.MouseButton1Click:Connect(function()
+    isMusicPlaying = not isMusicPlaying
+    if isMusicPlaying then
+        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        toggleMusicBtn.Text = "Phát Nhạc Background: BẬT ✅"
+        HubSound.SoundId = "rbxassetid://" .. currentSoundId
+        HubSound:Play()
+    else
+        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        toggleMusicBtn.Text = "Phát Nhạc Background: TẮT ❌"
+        HubSound:Stop()
     end
 end)
 
@@ -517,42 +573,6 @@ end)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         resizing = false
-    end
-end)
-
-saveBtn.MouseButton1Click:Connect(function()
-    local cName = newConfigInput.Text ~= "" and newConfigInput.Text or "Default"
-    if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
-    if typeof(writefile) == "function" then
-        pcall(writefile, configFolder .. "/" .. cName .. ".json", HttpService:JSONEncode({
-            Script = selScript and selScript.Name or "", 
-            SoundId = currentSoundId
-        }))
-        saveBtn.Text = "Đã lưu: " .. cName
-        task.wait(1.5)
-        saveBtn.Text = "💾 Lưu Cấu Hình (" .. cName .. ")"
-    end
-end)
-
-loadDefaultBtn.MouseButton1Click:Connect(function()
-    local cName = newConfigInput.Text ~= "" and newConfigInput.Text or "Default"
-    if typeof(readfile) == "function" and isfile(configFolder .. "/" .. cName .. ".json") then
-        local success, data = pcall(function() return HttpService:JSONDecode(readfile(configFolder .. "/" .. cName .. ".json")) end)
-        if success and data then
-            if data.SoundId then currentSoundId = data.SoundId end
-            if data.Script and data.Script ~= "" then
-                for _, scr in ipairs(RegisteredScripts) do
-                    if scr.Name == data.Script then
-                        selScript = scr
-                        dropBtn.Text = " 📜 " .. scr.Name
-                        break
-                    end
-                end
-            end
-            loadDefaultBtn.Text = "Đã tải: " .. cName
-            task.wait(1.5)
-            loadDefaultBtn.Text = "📂 Tải Cấu Hình " .. cName
-        end
     end
 end)
 
