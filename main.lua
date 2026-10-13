@@ -468,7 +468,7 @@ RunService.RenderStepped:Connect(function()
 end)
 miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1400)
 -- ============================================================================
--- TAB 7: CẤU HÌNH & PROFILES (Bố cục chuẩn, cố định không bị nhảy vị trí)
+-- TAB 7: CẤU HÌNH & PROFILES (Phần 1)
 -- ============================================================================
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
 tabConfigBtn.Size, tabConfigBtn.BackgroundColor3, tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0, "   📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
@@ -496,33 +496,9 @@ if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
 local currentConfigName = "Default"
 local startupConfigName = "Default"
 
--- 1. New Cấu Hình Name (Nằm ở trên cùng)
-local newConfigFrame = Instance.new("Frame", configScroll)
-newConfigFrame.LayoutOrder = 1 newConfigFrame.Size, newConfigFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 38), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", newConfigFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", newConfigFrame).Color = Color3.fromRGB(40, 43, 52)
-local ncLabel = Instance.new("TextLabel", newConfigFrame)
-ncLabel.Size, ncLabel.Position, ncLabel.BackgroundTransparency, ncLabel.Text, ncLabel.TextColor3, ncLabel.TextSize, ncLabel.Font, ncLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "New Cấu Hình Name", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
-
-local configNameBox = Instance.new("TextBox", newConfigFrame)
-configNameBox.Size, configNameBox.Position, configNameBox.BackgroundColor3, configNameBox.PlaceholderText, configNameBox.Text, configNameBox.TextColor3, configNameBox.TextSize, configNameBox.Font = UDim2.new(0.45, 0, 0, 24), UDim2.new(0.53, 0, 0.5, -12), Color3.fromRGB(15, 16, 22), "New config name...", "", Color3.fromRGB(255, 255, 255), 10, Enum.Font.Gotham
-Instance.new("UICorner", configNameBox).CornerRadius = UDim.new(0, 4)
-
--- 2. Create New Cấu Hình
-local createFrame = Instance.new("Frame", configScroll)
-createFrame.LayoutOrder = 2 createFrame.Size, createFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 42), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", createFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", createFrame).Color = Color3.fromRGB(40, 43, 52)
-local crTitle = Instance.new("TextLabel", createFrame)
-crTitle.Size, crTitle.Position, crTitle.BackgroundTransparency, crTitle.Text, crTitle.TextColor3, crTitle.TextSize, crTitle.Font, crTitle.TextXAlignment = UDim2.new(1, -110, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Create New Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
-local crSub = Instance.new("TextLabel", createFrame)
-crSub.Size, crSub.Position, crSub.BackgroundTransparency, crSub.Text, crSub.TextColor3, crSub.TextSize, crSub.Font, crSub.TextXAlignment = UDim2.new(1, -110, 0, 16), UDim2.new(0, 8, 0, 21), 1, "New config copies current settings", Color3.fromRGB(140, 140, 150), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
-
-local createBtn = Instance.new("TextButton", createFrame)
-createBtn.Size, createBtn.Position, createBtn.BackgroundColor3, createBtn.Text, createBtn.TextColor3, createBtn.TextSize, createBtn.Font = UDim2.new(0, 95, 0, 26), UDim2.new(1, -103, 0.5, -13), Color3.fromRGB(220, 50, 50), "Create New", Color3.fromRGB(255, 255, 255), 10, Enum.Font.GothamBold
-Instance.new("UICorner", createBtn).CornerRadius = UDim.new(0, 4)
-
--- 3. Nút Profiles (Nút bấm thu gọn/mở rộng nhóm quản lý cấu hình)
+-- Nút Profiles (Thu gọn / Mở rộng)
 local profilesToggleBtn = Instance.new("TextButton", configScroll)
-profilesToggleBtn.LayoutOrder = 3
+profilesToggleBtn.LayoutOrder = 1
 profilesToggleBtn.Size, profilesToggleBtn.BackgroundColor3, profilesToggleBtn.Text, profilesToggleBtn.TextColor3, profilesToggleBtn.TextSize, profilesToggleBtn.Font, profilesToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ Profiles", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
 Instance.new("UICorner", profilesToggleBtn).CornerRadius = UDim.new(0, 5)
 
@@ -530,7 +506,7 @@ local profilesSubLabel = Instance.new("TextLabel", profilesToggleBtn)
 profilesSubLabel.Size, profilesSubLabel.Position, profilesSubLabel.BackgroundTransparency, profilesSubLabel.Text, profilesSubLabel.TextColor3, profilesSubLabel.TextSize, profilesSubLabel.Font, profilesSubLabel.TextXAlignment = UDim2.new(1, 0, 0, 16), UDim2.new(0, 0, 1, -16), 1, "Quản lý các cấu hình", Color3.fromRGB(140, 140, 150), 9, Enum.Font.Gotham, Enum.TextXAlignment.Center
 
 local profilesContainer = Instance.new("Frame", configScroll)
-profilesContainer.LayoutOrder = 4
+profilesContainer.LayoutOrder = 2
 profilesContainer.Size, profilesContainer.AutomaticSize = UDim2.new(1, -4, 0, 0), Enum.AutomaticSize.Y
 profilesContainer.BackgroundTransparency = 1
 profilesContainer.Visible = true
@@ -542,9 +518,33 @@ profilesToggleBtn.MouseButton1Click:Connect(function()
     profilesSubLabel.Visible = profilesContainer.Visible
 end)
 
--- Các tính năng bên trong Profiles: Delete, Startup, Tải, Lưu
+-- New Cấu Hình Name
+local newConfigFrame = Instance.new("Frame", profilesContainer)
+newConfigFrame.LayoutOrder = 1 newConfigFrame.Size, newConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", newConfigFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", newConfigFrame).Color = Color3.fromRGB(40, 43, 52)
+local ncLabel = Instance.new("TextLabel", newConfigFrame)
+ncLabel.Size, ncLabel.Position, ncLabel.BackgroundTransparency, ncLabel.Text, ncLabel.TextColor3, ncLabel.TextSize, ncLabel.Font, ncLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "New Cấu Hình Name", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
+
+local configNameBox = Instance.new("TextBox", newConfigFrame)
+configNameBox.Size, configNameBox.Position, configNameBox.BackgroundColor3, configNameBox.PlaceholderText, configNameBox.Text, configNameBox.TextColor3, configNameBox.TextSize, configNameBox.Font = UDim2.new(0.45, 0, 0, 24), UDim2.new(0.53, 0, 0.5, -12), Color3.fromRGB(15, 16, 22), "New config name...", "", Color3.fromRGB(255, 255, 255), 10, Enum.Font.Gotham
+Instance.new("UICorner", configNameBox).CornerRadius = UDim.new(0, 4)
+
+-- Create New Cấu Hình
+local createFrame = Instance.new("Frame", profilesContainer)
+createFrame.LayoutOrder = 2 createFrame.Size, createFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 42), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", createFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", createFrame).Color = Color3.fromRGB(40, 43, 52)
+local crTitle = Instance.new("TextLabel", createFrame)
+crTitle.Size, crTitle.Position, crTitle.BackgroundTransparency, crTitle.Text, crTitle.TextColor3, crTitle.TextSize, crTitle.Font, crTitle.TextXAlignment = UDim2.new(1, -110, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Create New Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
+local crSub = Instance.new("TextLabel", createFrame)
+crSub.Size, crSub.Position, crSub.BackgroundTransparency, crSub.Text, crSub.TextColor3, crSub.TextSize, crSub.Font, crSub.TextXAlignment = UDim2.new(1, -110, 0, 16), UDim2.new(0, 8, 0, 21), 1, "New config copies current settings", Color3.fromRGB(140, 140, 150), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+
+local createBtn = Instance.new("TextButton", createFrame)
+createBtn.Size, createBtn.Position, createBtn.BackgroundColor3, createBtn.Text, createBtn.TextColor3, createBtn.TextSize, createBtn.Font = UDim2.new(0, 95, 0, 26), UDim2.new(1, -103, 0.5, -13), Color3.fromRGB(220, 50, 50), "Create New", Color3.fromRGB(255, 255, 255), 10, Enum.Font.GothamBold
+Instance.new("UICorner", createBtn).CornerRadius = UDim.new(0, 4)
+
+-- Delete Cấu Hình
 local deleteFrame = Instance.new("Frame", profilesContainer)
-deleteFrame.LayoutOrder = 1 deleteFrame.Size, deleteFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
+deleteFrame.LayoutOrder = 3 deleteFrame.Size, deleteFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", deleteFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", deleteFrame).Color = Color3.fromRGB(40, 43, 52)
 local delLabel = Instance.new("TextLabel", deleteFrame)
 delLabel.Size, delLabel.Position, delLabel.BackgroundTransparency, delLabel.Text, delLabel.TextColor3, delLabel.TextSize, delLabel.Font, delLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Delete Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -554,12 +554,13 @@ delBtn.Size, delBtn.Position, delBtn.BackgroundColor3, delBtn.Text, delBtn.TextC
 Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 4)
 
 local delDropFrame = Instance.new("ScrollingFrame", profilesContainer)
-delDropFrame.LayoutOrder = 2 delDropFrame.Size, delDropFrame.BackgroundColor3, delDropFrame.CanvasSize, delDropFrame.ScrollBarThickness, delDropFrame.Visible = UDim2.new(1, 0, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+delDropFrame.LayoutOrder = 4 delDropFrame.Size, delDropFrame.BackgroundColor3, delDropFrame.CanvasSize, delDropFrame.ScrollBarThickness, delDropFrame.Visible = UDim2.new(1, 0, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", delDropFrame).CornerRadius = UDim.new(0, 5)
 local delDropLayout = Instance.new("UIListLayout", delDropFrame) delDropLayout.Padding = UDim.new(0, 4)
 
+-- Cấu Hình Khởi Động
 local startupConfigFrame = Instance.new("Frame", profilesContainer)
-startupConfigFrame.LayoutOrder = 3 startupConfigFrame.Size, startupConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
+startupConfigFrame.LayoutOrder = 5 startupConfigFrame.Size, startupConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", startupConfigFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", startupConfigFrame).Color = Color3.fromRGB(40, 43, 52)
 local stLabel = Instance.new("TextLabel", startupConfigFrame)
 stLabel.Size, stLabel.Position, stLabel.BackgroundTransparency, stLabel.Text, stLabel.TextColor3, stLabel.TextSize, stLabel.Font, stLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Cấu Hình Khởi Động", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -569,12 +570,15 @@ stBtn.Size, stBtn.Position, stBtn.BackgroundColor3, stBtn.Text, stBtn.TextColor3
 Instance.new("UICorner", stBtn).CornerRadius = UDim.new(0, 4)
 
 local stDropFrame = Instance.new("ScrollingFrame", profilesContainer)
-stDropFrame.LayoutOrder = 4 stDropFrame.Size, stDropFrame.BackgroundColor3, stDropFrame.CanvasSize, stDropFrame.ScrollBarThickness, stDropFrame.Visible = UDim2.new(1, 0, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+stDropFrame.LayoutOrder = 6 stDropFrame.Size, stDropFrame.BackgroundColor3, stDropFrame.CanvasSize, stDropFrame.ScrollBarThickness, stDropFrame.Visible = UDim2.new(1, 0, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", stDropFrame).CornerRadius = UDim.new(0, 5)
 local stDropLayout = Instance.new("UIListLayout", stDropFrame) stDropLayout.Padding = UDim.new(0, 4)
-
+-- ============================================================================
+-- TAB 7: CẤU HÌNH & PROFILES (Phần 2)
+-- ============================================================================
+-- Tải Cấu Hình
 local loadConfigFrame = Instance.new("Frame", profilesContainer)
-loadConfigFrame.LayoutOrder = 5 loadConfigFrame.Size, loadConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
+loadConfigFrame.LayoutOrder = 7 loadConfigFrame.Size, loadConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", loadConfigFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", loadConfigFrame).Color = Color3.fromRGB(40, 43, 52)
 local ldLabel = Instance.new("TextLabel", loadConfigFrame)
 ldLabel.Size, ldLabel.Position, ldLabel.BackgroundTransparency, ldLabel.Text, ldLabel.TextColor3, ldLabel.TextSize, ldLabel.Font, ldLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Tải Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -584,12 +588,13 @@ ldBtn.Size, ldBtn.Position, ldBtn.BackgroundColor3, ldBtn.Text, ldBtn.TextColor3
 Instance.new("UICorner", ldBtn).CornerRadius = UDim.new(0, 4)
 
 local ldDropFrame = Instance.new("ScrollingFrame", profilesContainer)
-ldDropFrame.LayoutOrder = 6 ldDropFrame.Size, ldDropFrame.BackgroundColor3, ldDropFrame.CanvasSize, ldDropFrame.ScrollBarThickness, ldDropFrame.Visible = UDim2.new(1, 0, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+ldDropFrame.LayoutOrder = 8 ldDropFrame.Size, ldDropFrame.BackgroundColor3, ldDropFrame.CanvasSize, ldDropFrame.ScrollBarThickness, ldDropFrame.Visible = UDim2.new(1, 0, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", ldDropFrame).CornerRadius = UDim.new(0, 5)
 local ldDropLayout = Instance.new("UIListLayout", ldDropFrame) ldDropLayout.Padding = UDim.new(0, 4)
 
+-- Lưu Cấu Hình (Save)
 local saveFrame = Instance.new("Frame", profilesContainer)
-saveFrame.LayoutOrder = 7 saveFrame.Size, saveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 42), Color3.fromRGB(22, 25, 34)
+saveFrame.LayoutOrder = 9 saveFrame.Size, saveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 42), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", saveFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", saveFrame).Color = Color3.fromRGB(40, 43, 52)
 local svTitle = Instance.new("TextLabel", saveFrame)
 svTitle.Size, svTitle.Position, svTitle.BackgroundTransparency, svTitle.Text, svTitle.TextColor3, svTitle.TextSize, svTitle.Font, svTitle.TextXAlignment = UDim2.new(1, -110, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Lưu Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
@@ -697,7 +702,7 @@ saveBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-configScroll.CanvasSize = UDim2.new(0, 0, 0, 700)
+configScroll.CanvasSize = UDim2.new(0, 0, 0, 850)
 
 for _, child in ipairs(SidebarScroll:GetChildren()) do
     if child:IsA("TextButton") then
