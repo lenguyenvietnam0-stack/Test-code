@@ -268,7 +268,7 @@ table.insert(Tabs, {Container = t6Scroll, Indicator = t6Indicator})
 local configFolder = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
 
--- 📦 PHẦN PROFILES (SỬ DỤNG AUTOMATIC SIZE ĐỂ KHÔNG BAO GIỜ BỊ CHÈN ĐÈ)
+-- 📦 PROFILES
 local profileDropdownOpen = false
 local profileToggleHeader = Instance.new("TextButton", t6Scroll)
 profileToggleHeader.LayoutOrder = 1
@@ -408,9 +408,10 @@ Instance.new("UICorner", dropBtn).CornerRadius = UDim.new(0, 5)
 
 local dropFrame = Instance.new("ScrollingFrame", t6Scroll)
 dropFrame.LayoutOrder = 4
-dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible, dropFrame.ZIndex = UDim2.new(1, -4, 0, 80), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
+dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible, dropFrame.ZIndex = UDim2.new(1, -4, 0, 110), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", dropFrame).CornerRadius = UDim.new(0, 5)
-Instance.new("UIListLayout", dropFrame).Padding = UDim.new(0, 4)
+local dropLayout = Instance.new("UIListLayout", dropFrame)
+dropLayout.Padding = UDim.new(0, 4)
 
 local toggleAuto = Instance.new("TextButton", t6Scroll)
 toggleAuto.LayoutOrder = 5
@@ -432,9 +433,10 @@ Instance.new("UICorner", musicDropBtn).CornerRadius = UDim.new(0, 5)
 
 local musicDropFrame = Instance.new("ScrollingFrame", t6Scroll)
 musicDropFrame.LayoutOrder = 8
-musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible, musicDropFrame.ZIndex = UDim2.new(1, -4, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
+musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible, musicDropFrame.ZIndex = UDim2.new(1, -4, 0, 110), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", musicDropFrame).CornerRadius = UDim.new(0, 5)
-Instance.new("UIListLayout", musicDropFrame).Padding = UDim.new(0, 4)
+local musicLayout = Instance.new("UIListLayout", musicDropFrame)
+musicLayout.Padding = UDim.new(0, 4)
 
 local presetMusics = {
     {Name = "🎵 Chill Lofi Music", Id = "1837879082"},
@@ -522,8 +524,6 @@ UserInputService.InputChanged:Connect(function(input)
         volumeLabel.Text = "🔊 Âm lượng: " .. math.floor(percent * 100) .. "%"
     end
 end)
-
--- 🎨 CHỌN MÀU & CẦU VỒNG
 local colorList = {
     {Name = "🌸 Hồng Kẹo Đắng", Color = Color3.fromRGB(255, 105, 180)},
     {Name = "🌈 Màu Cầu Vồng (RGB)", Color = "Rainbow"},
@@ -544,9 +544,10 @@ Instance.new("UICorner", colorDropBtn).CornerRadius = UDim.new(0, 5)
 
 local colorDropFrame = Instance.new("ScrollingFrame", t6Scroll)
 colorDropFrame.LayoutOrder = 12
-colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible, colorDropFrame.ZIndex = UDim2.new(1, -4, 0, 100), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
+colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible, colorDropFrame.ZIndex = UDim2.new(1, -4, 0, 120), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", colorDropFrame).CornerRadius = UDim.new(0, 5)
-Instance.new("UIListLayout", colorDropFrame).Padding = UDim.new(0, 4)
+local colorLayout = Instance.new("UIListLayout", colorDropFrame)
+colorLayout.Padding = UDim.new(0, 4)
 
 for i, cItem in ipairs(colorList) do
     local cBtn = Instance.new("TextButton", colorDropFrame)
@@ -565,6 +566,18 @@ colorDropBtn.MouseButton1Click:Connect(function()
     colorDropFrame.Visible = not colorDropFrame.Visible
     dropFrame.Visible = false
     musicDropFrame.Visible = false
+end)
+
+musicDropBtn.MouseButton1Click:Connect(function()
+    musicDropFrame.Visible = not musicDropFrame.Visible
+    dropFrame.Visible = false
+    colorDropFrame.Visible = false
+end)
+
+dropBtn.MouseButton1Click:Connect(function()
+    dropFrame.Visible = not dropFrame.Visible
+    musicDropFrame.Visible = false
+    colorDropFrame.Visible = false
 end)
 
 local toggleColorBtn = Instance.new("TextButton", t6Scroll)
@@ -598,7 +611,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 🖥️ MÀN HÌNH ĐEN GIẢM FPS (ĐÚNG MÀU ĐEN TUYỀN)
+-- 🖥️ MÀN HÌNH ĐEN GIẢM FPS
 local isFpsModeOn = false
 local toggleFpsBtn = Instance.new("TextButton", t6Scroll)
 toggleFpsBtn.LayoutOrder = 14
@@ -618,7 +631,7 @@ toggleFpsBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-t6Scroll.CanvasSize = UDim2.new(0, 0, 0, 800)
+t6Scroll.CanvasSize = UDim2.new(0, 0, 0, 950)
 
 -- 📐 RESIZE GÓC PHẢI DƯỚI
 local ResizeBtn = Instance.new("TextButton", MainFrame)
@@ -656,7 +669,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- LOGIC CẤU HÌNH & TẢI DROPDOWNS KHÔNG CHÈN ĐÈ
+-- LOGIC CẤU HÌNH & TẢI DROPDOWNS
 local function refreshAllProfileDropdowns()
     for _, c in ipairs(delDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
     for _, c in ipairs(startDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
@@ -837,4 +850,4 @@ pcall(function()
             loadConfigByName(defName)
         end
     end
-end) 
+end)
