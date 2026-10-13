@@ -24,13 +24,12 @@ task.spawn(function()
 
     local avatarUrl = "rbxassetid://15298567397"
 
-    -- KHUNG CHÍNH (Căn giữa chuẩn, không lệch viền)
+    -- KHUNG CHÍNH TRONG SUỐT GỐC
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 520, 0, 320)
     MainFrame.Position = UDim2.new(0.5, -260, 0.5, -160)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(12, 14, 18)
-    MainFrame.BackgroundTransparency = 0.05
+    MainFrame.BackgroundTransparency = 1
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
     MainFrame.Draggable = true
@@ -42,6 +41,7 @@ task.spawn(function()
     local OuterStroke = Instance.new("UIStroke", MainFrame) 
     OuterStroke.Color = Color3.fromRGB(0, 160, 255)
     OuterStroke.Thickness = 1.5
+    OuterStroke.Transparency = 0.1
     table.insert(AllUIStrokes, OuterStroke)
 
     local TopBar = Instance.new("Frame", MainFrame) 
@@ -61,7 +61,7 @@ task.spawn(function()
     Title.Position = UDim2.new(0, 32, 0, 0)
     Title.BackgroundTransparency = 1
     Title.Text = "🌸 VzNam Hub v4 🌸"
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextColor3 = Color3.fromRGB(255, 105, 180)
     Title.TextSize = 12
     Title.Font = Enum.Font.GothamBold
     Title.TextXAlignment = Enum.TextXAlignment.Center
@@ -71,7 +71,7 @@ task.spawn(function()
     CloseBtn.Position = UDim2.new(1, -28, 0.5, -13)
     CloseBtn.BackgroundTransparency = 1
     CloseBtn.Text = "✕"
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.TextColor3 = Color3.fromRGB(200, 200, 210)
     CloseBtn.TextSize = 11
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.MouseButton1Click:Connect(function()
@@ -81,12 +81,12 @@ task.spawn(function()
         ScreenGui:Destroy()
     end)
 
-    -- SIDEBAR PANEL
     local SidebarPanel = Instance.new("Frame", MainFrame)
     SidebarPanel.Name = "SidebarPanel"
-    SidebarPanel.Size = UDim2.new(0, 145, 1, -36)
-    SidebarPanel.Position = UDim2.new(0, 6, 0, 30)
+    SidebarPanel.Size = UDim2.new(0, 145, 1, -34)
+    SidebarPanel.Position = UDim2.new(0, 8, 0, 28)
     SidebarPanel.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
+    SidebarPanel.BackgroundTransparency = 0
     SidebarPanel.BorderSizePixel = 0
     Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
     
@@ -99,9 +99,10 @@ task.spawn(function()
     SearchBoxTab.Size = UDim2.new(1, -10, 0, 24)
     SearchBoxTab.Position = UDim2.new(0, 5, 0, 5)
     SearchBoxTab.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
+    SearchBoxTab.BackgroundTransparency = 0
     SearchBoxTab.Text = ""
     SearchBoxTab.PlaceholderText = "🔍 Search section..."
-    SearchBoxTab.PlaceholderColor3 = Color3.fromRGB(180, 180, 190)
+    SearchBoxTab.PlaceholderColor3 = Color3.fromRGB(130, 135, 145)
     SearchBoxTab.TextColor3 = Color3.fromRGB(255, 255, 255)
     SearchBoxTab.TextSize = 10
     SearchBoxTab.Font = Enum.Font.Gotham
@@ -131,12 +132,12 @@ task.spawn(function()
         end
     end)
 
-    -- CONTENT CONTAINER
     local ContentContainer = Instance.new("Frame", MainFrame)
     ContentContainer.Name = "ContentContainer"
-    ContentContainer.Size = UDim2.new(1, -157, 1, -36)
-    ContentContainer.Position = UDim2.new(0, 153, 0, 30)
+    ContentContainer.Size = UDim2.new(1, -160, 1, -34)
+    ContentContainer.Position = UDim2.new(0, 156, 0, 28)
     ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
+    ContentContainer.BackgroundTransparency = 0
     ContentContainer.BorderSizePixel = 0
     Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
     
@@ -159,34 +160,6 @@ task.spawn(function()
     ActiveTabTitle.Font = Enum.Font.GothamBold
     ActiveTabTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-    local SearchInputContent = Instance.new("TextBox", ContentHeader)
-    SearchInputContent.Size = UDim2.new(1, -45, 0, 22)
-    SearchInputContent.Position = UDim2.new(0, 10, 0.5, -11)
-    SearchInputContent.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
-    SearchInputContent.TextColor3 = Color3.fromRGB(255, 255, 255)
-    SearchInputContent.PlaceholderText = "Search features..."
-    SearchInputContent.PlaceholderColor3 = Color3.fromRGB(180, 180, 190)
-    SearchInputContent.TextSize = 10
-    SearchInputContent.Font = Enum.Font.Gotham
-    SearchInputContent.Visible = false
-    Instance.new("UICorner", SearchInputContent).CornerRadius = UDim.new(0, 4)
-
-    local SearchContentIcon = Instance.new("TextButton", ContentHeader)
-    SearchContentIcon.Size = UDim2.new(0, 24, 0, 24)
-    SearchContentIcon.Position = UDim2.new(1, -28, 0.5, -12)
-    SearchContentIcon.BackgroundTransparency = 1
-    SearchContentIcon.Text = "🔍"
-    SearchContentIcon.TextSize = 12
-    SearchContentIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-    local searching = false
-    SearchContentIcon.MouseButton1Click:Connect(function()
-        searching = not searching
-        SearchInputContent.Visible = searching
-        ActiveTabTitle.Visible = not searching
-        if searching then SearchInputContent:CaptureFocus() else SearchInputContent.Text = "" end
-    end)
-
     local Tabs = {}
 
     -- TRANG CHỦ
@@ -194,6 +167,7 @@ task.spawn(function()
     tabHomeBtn.LayoutOrder = 0
     tabHomeBtn.Size = UDim2.new(1, 0, 0, 32)
     tabHomeBtn.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
+    tabHomeBtn.BackgroundTransparency = 0
     tabHomeBtn.Text = "   🏠 Trang Chủ"
     tabHomeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     tabHomeBtn.TextSize = 11
@@ -208,7 +182,7 @@ task.spawn(function()
     local homeIndicator = Instance.new("Frame", tabHomeBtn)
     homeIndicator.Size = UDim2.new(0, 3, 0, 14)
     homeIndicator.Position = UDim2.new(0, 0, 0.5, -7)
-    homeIndicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    homeIndicator.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
     homeIndicator.BorderSizePixel = 0
     homeIndicator.Visible = false
     Instance.new("UICorner", homeIndicator).CornerRadius = UDim.new(0, 2)
@@ -235,7 +209,6 @@ task.spawn(function()
         homeScroll.Visible = true 
         homeIndicator.Visible = true 
         ActiveTabTitle.Text = "🏠 Trang Chủ"
-        SearchInputContent.Text = ""
     end)
 
     table.insert(Tabs, { Container = homeScroll, Indicator = homeIndicator })
@@ -275,7 +248,7 @@ task.spawn(function()
         tLbl.Position = UDim2.new(0, 44, 0, 4)
         tLbl.BackgroundTransparency = 1
         tLbl.Text = titleText
-        tLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+        tLbl.TextColor3 = Color3.fromRGB(255, 150, 100)
         tLbl.TextSize = 9
         tLbl.Font = Enum.Font.GothamBold
         tLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -285,7 +258,7 @@ task.spawn(function()
         mLbl.Position = UDim2.new(0, 44, 0, 19)
         mLbl.BackgroundTransparency = 1
         mLbl.Text = mainText
-        mLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+        mLbl.TextColor3 = Color3.fromRGB(220, 220, 230)
         mLbl.TextSize = 9
         mLbl.Font = Enum.Font.Gotham
         mLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -296,7 +269,7 @@ task.spawn(function()
             copyBtn.Position = UDim2.new(1, -73, 0.5, -12)
             copyBtn.BackgroundTransparency = 1
             copyBtn.Text = "📋 COPY"
-            copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            copyBtn.TextColor3 = Color3.fromRGB(200, 200, 210)
             copyBtn.TextSize = 10
             copyBtn.Font = Enum.Font.GothamBold
             
@@ -320,6 +293,7 @@ task.spawn(function()
         local tabBtn = Instance.new("TextButton", SidebarScroll)
         tabBtn.Size = UDim2.new(1, 0, 0, 32)
         tabBtn.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
+        tabBtn.BackgroundTransparency = 0
         tabBtn.Text = "   " .. tabName
         tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
         tabBtn.TextSize = 11
@@ -334,7 +308,7 @@ task.spawn(function()
         local indicator = Instance.new("Frame", tabBtn)
         indicator.Size = UDim2.new(0, 3, 0, 14)
         indicator.Position = UDim2.new(0, 0, 0.5, -7)
-        indicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        indicator.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
         indicator.BorderSizePixel = 0
         indicator.Visible = false
         Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 2)
@@ -398,18 +372,6 @@ task.spawn(function()
         scrollHasKey.ClipsDescendants = true
         local l2 = Instance.new("UIListLayout", scrollHasKey) l2.Padding = UDim.new(0, 5)
 
-        SearchInputContent:GetPropertyChangedSignal("Text"):Connect(function()
-            if containerFrame.Visible then
-                local query = string.lower(SearchInputContent.Text)
-                local targetScroll = scrollNoKey.Visible and scrollNoKey or scrollHasKey
-                for _, item in ipairs(targetScroll:GetChildren()) do
-                    if item:IsA("TextButton") then
-                        if query == "" or string.find(string.lower(item.Text), query) then item.Visible = true else item.Visible = false end
-                    end
-                end
-            end
-        end)
-
         noKeyBtn.MouseButton1Click:Connect(function()
             scrollNoKey.Visible = true 
             scrollHasKey.Visible = false
@@ -431,7 +393,6 @@ task.spawn(function()
             containerFrame.Visible = true
             indicator.Visible = true
             ActiveTabTitle.Text = tabName
-            SearchInputContent.Text = ""
         end)
 
         table.insert(Tabs, { Container = containerFrame, Indicator = indicator })
@@ -470,7 +431,7 @@ task.spawn(function()
         return Elements
     end
 
-    -- TAB 1: STEAL AN EGG
+    -- TAB 1: STEAL AN EGG (FULL SCRIPT)
     local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸")
     tab1:AddNoKey("1. Hop sv1 người(nokey)", function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end)
     tab1:AddNoKey("2. FyyCommunity", function() loadstring(game:HttpGet("https://FyyCommunity.my.id"))() end)
@@ -486,7 +447,7 @@ task.spawn(function()
     tab1:AddHasKey("7. Real kid(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua"))() end)
     tab1:AddHasKey("8. Chilli v2(có key)", function() loadstring(game:HttpGet("https://gist.githubusercontent.com/ronnei/1fa67c56dd9af203b192d15e752928e5/raw/4e2d5105640e09a008b4ae6df23f9708cadfef06/chilliv2-stealanegg"))() end)
 
-    -- TAB 2: BLOX FRUIT
+    -- TAB 2: BLOX FRUIT (FULL SCRIPT)
     local tab2 = CreateCategoryTab("🌸BLOX FRUIT🌸")
     tab2:AddNoKey("1. RedzHub v2 (no key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/UCT-hub/main/refs/heads/main/redz-v2"))() end)
     tab2:AddNoKey("2. Quantumx Hub(nokey)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))() end)
@@ -505,10 +466,11 @@ task.spawn(function()
     CreateCategoryTab("Tab 4")
     CreateCategoryTab("Tab 5")
 
-    -- TAB MISC (CÓ ĐỦ TÍNH NĂNG CHỌN MÀU VIỀN VÀ ÂM NHẠC NỀN)
+    -- TAB MISC (ĐỦ TÍNH NĂNG CHỌN MÀU VIỀN & ÂM NHẠC)
     local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
     tabMiscBtn.Size = UDim2.new(1, 0, 0, 32)
     tabMiscBtn.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
+    tabMiscBtn.BackgroundTransparency = 0
     tabMiscBtn.Text = "   ⚙️ MISC"
     tabMiscBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     tabMiscBtn.TextSize = 11
@@ -523,7 +485,7 @@ task.spawn(function()
     local miscIndicator = Instance.new("Frame", tabMiscBtn)
     miscIndicator.Size = UDim2.new(0, 3, 0, 14)
     miscIndicator.Position = UDim2.new(0, 0, 0.5, -7)
-    miscIndicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    miscIndicator.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
     miscIndicator.BorderSizePixel = 0
     miscIndicator.Visible = false
     Instance.new("UICorner", miscIndicator).CornerRadius = UDim.new(0, 2)
@@ -549,7 +511,7 @@ task.spawn(function()
     end)
     table.insert(Tabs, { Container = miscScroll, Indicator = miscIndicator })
 
-    -- 1. CHỌN MÀU VIỀN/MENU
+    -- 1. CHỌN MÀU VIỀN
     local colorToggleBtn = Instance.new("TextButton", miscScroll)
     colorToggleBtn.LayoutOrder = 1
     colorToggleBtn.Size = UDim2.new(1, -4, 0, 42)
@@ -705,10 +667,11 @@ task.spawn(function()
 
     miscScroll.CanvasSize = UDim2.new(0, 0, 0, 400)
 
-    -- TAB CẤU HÌNH & PROFILES (ĐÃ KHÔI PHỤC FULL 100% TÍNH NĂNG QUẢN LÝ CẤU HÌNH)
+    -- TAB CẤU HÌNH & PROFILES (ĐỦ HỆ THỐNG QUẢN LÝ FILE .JSON)
     local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
     tabConfigBtn.Size = UDim2.new(1, 0, 0, 32)
     tabConfigBtn.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
+    tabConfigBtn.BackgroundTransparency = 0
     tabConfigBtn.Text = "   📦 CẤU HÌNH"
     tabConfigBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     tabConfigBtn.TextSize = 11 tabConfigBtn.Font = Enum.Font.Gotham
@@ -722,7 +685,7 @@ task.spawn(function()
     local configIndicator = Instance.new("Frame", tabConfigBtn)
     configIndicator.Size = UDim2.new(0, 3, 0, 14)
     configIndicator.Position = UDim2.new(0, 0, 0.5, -7)
-    configIndicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    configIndicator.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
     configIndicator.BorderSizePixel = 0 configIndicator.Visible = false
     Instance.new("UICorner", configIndicator).CornerRadius = UDim.new(0, 2)
 
@@ -772,7 +735,6 @@ task.spawn(function()
         profilesToggleBtn.Text = profilesContainer.Visible and "  ↑ Cấu Hình & Profiles" or "  ↓ Cấu Hình & Profiles"
     end)
 
-    -- Nhập tên cấu hình mới
     local newConfigFrame = Instance.new("Frame", profilesContainer)
     newConfigFrame.LayoutOrder = 1 newConfigFrame.Size = UDim2.new(1, 0, 0, 38)
     newConfigFrame.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
@@ -793,7 +755,6 @@ task.spawn(function()
     configNameBox.TextSize = 10 configNameBox.Font = Enum.Font.Gotham
     Instance.new("UICorner", configNameBox).CornerRadius = UDim.new(0, 4)
 
-    -- Tạo mới cấu hình
     local createFrame = Instance.new("Frame", profilesContainer)
     createFrame.LayoutOrder = 2 createFrame.Size = UDim2.new(1, 0, 0, 42)
     createFrame.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
@@ -814,7 +775,6 @@ task.spawn(function()
     createBtn.Font = Enum.Font.GothamBold
     Instance.new("UICorner", createBtn).CornerRadius = UDim.new(0, 4)
 
-    -- Xóa Cấu Hình
     local deleteFrame = Instance.new("Frame", profilesContainer)
     deleteFrame.LayoutOrder = 3 deleteFrame.Size = UDim2.new(1, 0, 0, 38)
     deleteFrame.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
@@ -845,7 +805,6 @@ task.spawn(function()
     table.insert(AllUIStrokes, ddfStroke)
     local delDropLayout = Instance.new("UIListLayout", delDropFrame) delDropLayout.Padding = UDim.new(0, 4)
 
-    -- Cấu Hình Khởi Động
     local startupProfileFrame = Instance.new("Frame", profilesContainer)
     startupProfileFrame.LayoutOrder = 5 startupProfileFrame.Size = UDim2.new(1, 0, 0, 38)
     startupProfileFrame.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
@@ -876,7 +835,6 @@ task.spawn(function()
     table.insert(AllUIStrokes, spdStroke)
     local stProfileLayout = Instance.new("UIListLayout", stProfileDrop) stProfileLayout.Padding = UDim.new(0, 4)
 
-    -- Tải Cấu Hình
     local loadConfigFrame = Instance.new("Frame", profilesContainer)
     loadConfigFrame.LayoutOrder = 7 loadConfigFrame.Size = UDim2.new(1, 0, 0, 38)
     loadConfigFrame.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
@@ -907,7 +865,6 @@ task.spawn(function()
     table.insert(AllUIStrokes, ldfStroke)
     local ldDropLayout = Instance.new("UIListLayout", ldDropFrame) ldDropLayout.Padding = UDim.new(0, 4)
 
-    -- Nút Lưu Cấu Hình Hiện Tại
     local saveFrame = Instance.new("Frame", profilesContainer)
     saveFrame.LayoutOrder = 9 saveFrame.Size = UDim2.new(1, 0, 0, 42)
     saveFrame.BackgroundColor3 = Color3.fromRGB(22, 25, 34)
@@ -928,7 +885,6 @@ task.spawn(function()
     saveBtn.Font = Enum.Font.GothamBold
     Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 4)
 
-    -- Logic làm mới danh sách profiles trong ổ cứng
     local function refreshAllDropdowns()
         for _, drop in ipairs({delDropFrame, stProfileDrop, ldDropFrame}) do
             for _, child in ipairs(drop:GetChildren()) do
@@ -1039,7 +995,7 @@ task.spawn(function()
 
     configScroll.CanvasSize = UDim2.new(0, 0, 0, 500)
 
-    -- VÒNG LẶP RENDER MÀU VIỀN / RAINBOW TOÀN DIỆN
+    -- VÒNG LẶP RENDER MÀU VIỀN / RAINBOW
     RunService.RenderStepped:Connect(function()
         if selectedBorderObj.Color == "Rainbow" then
             local rainbowBorder = Color3.fromHSV((tick() % 4) / 4, 1, 1)
