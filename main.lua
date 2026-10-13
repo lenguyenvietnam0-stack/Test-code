@@ -85,10 +85,11 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
+-- ĐÃ SỬA LẠI TỌA ĐỘ VÀ KÍCH THƯỚC ĐỂ KHÔNG BỊ MẤT VIỀN TRÁI
 local SidebarPanel = Instance.new("Frame")
 SidebarPanel.Name = "SidebarPanel"
 SidebarPanel.Size = UDim2.new(0, 140, 1, -34)
-SidebarPanel.Position = UDim2.new(0, 8, 0, 28)
+SidebarPanel.Position = UDim2.new(0, 6, 0, 30)
 SidebarPanel.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
 SidebarPanel.BorderSizePixel = 0
 SidebarPanel.Parent = MainFrame
@@ -147,8 +148,8 @@ end)
 
 local ContentContainer = Instance.new("Frame")
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size = UDim2.new(1, -156, 1, -34)
-ContentContainer.Position = UDim2.new(0, 154, 0, 28)
+ContentContainer.Size = UDim2.new(1, -154, 1, -34)
+ContentContainer.Position = UDim2.new(0, 150, 0, 30)
 ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
 ContentContainer.BorderSizePixel = 0
 ContentContainer.Parent = MainFrame
@@ -1106,7 +1107,6 @@ table.insert(AllUIStrokes, cnbStroke)
 
 configScroll.CanvasSize = UDim2.new(0, 0, 0, 500)
 
--- Main Loop cho viền màu
 RunService.RenderStepped:Connect(function()
     if isBorderApplied then
         if selectedBorderObj.Color == "Rainbow" then
