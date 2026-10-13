@@ -311,7 +311,7 @@ table.insert(AllUIStrokes, tabMiscStroke)
 
 local miscIndicator = Instance.new("Frame", tabMiscBtn)
 miscIndicator.Size, miscIndicator.Position, miscIndicator.BackgroundColor3, miscIndicator.BorderSizePixel, miscIndicator.Visible = UDim2.new(0, 3, 0, 14), UDim2.new(0, 0, 0.5, -7), Color3.fromRGB(255, 105, 180), 0, false
-Instance.new("UICorner", indicator or miscIndicator).CornerRadius = UDim.new(0, 2)
+Instance.new("UICorner", miscIndicator).CornerRadius = UDim.new(0, 2)
 
 local miscScroll = Instance.new("ScrollingFrame", ContentContainer)
 miscScroll.Name = "Container_MISC"
@@ -504,7 +504,7 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Mục: màu menu & chỉnh màu viền (Bổ sung tính năng đổi màu viền tab chức năng)
+-- 3. Mục: màu menu & chỉnh màu viền
 local colorToggleBtn = Instance.new("TextButton", miscScroll)
 colorToggleBtn.LayoutOrder = 5
 colorToggleBtn.Size, colorToggleBtn.BackgroundColor3, colorToggleBtn.Text, colorToggleBtn.TextColor3, colorToggleBtn.TextSize, colorToggleBtn.Font, colorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -554,7 +554,6 @@ end
 colorDropFrame.CanvasSize = UDim2.new(0, 0, 0, #colorList * 30)
 colorDropBtn.MouseButton1Click:Connect(function() colorDropFrame.Visible = not colorDropFrame.Visible end)
 
--- Dropdown chỉnh màu viền các tab chức năng riêng biệt
 local borderList = {
     {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 160, 255)},
     {Name = "🌈 Cầu Vồng (Rainbow)", Color = "Rainbow"},
@@ -621,7 +620,6 @@ RunService.RenderStepped:Connect(function()
         end
     end
     
-    -- Cập nhật màu viền cho toàn bộ UIStroke đã được lưu trong AllUIStrokes
     if selectedBorderObj.Color == "Rainbow" then
         local rainbowBorder = Color3.fromHSV((tick() % 4) / 4, 1, 1)
         for _, stroke in ipairs(AllUIStrokes) do
@@ -992,15 +990,23 @@ for i, scr in ipairs(RegisteredScripts) do
 end
 dropFrame.CanvasSize = UDim2.new(0, 0, 0, dh)
 
--- ĐÃ XÓA ẢNH THUMBNAIL TRONG NÚT MỞ/ĐÓNG (OPEN BUTTON)
+-- NÚT MỞ / ĐÓNG MENU (HÌNH TRÒN, VIỀN TRẮNG DÀY, DI CHUYỂN ĐƯỢC)
 local OpenButton = Instance.new("TextButton", ScreenGui)
-OpenButton.Name, OpenButton.Size, OpenButton.Position, OpenButton.BackgroundColor3, OpenButton.BorderSizePixel, OpenButton.Text, OpenButton.TextColor3, OpenButton.TextSize, OpenButton.Font, OpenButton.Active, OpenButton.Draggable = "VzNamOpenBtn", UDim2.new(0, 42, 0, 42), UDim2.new(0, 15, 0.2, 0), Color3.fromRGB(20, 22, 28), 0, "🌸", 14, Enum.Font.GothamBold, true, true
+OpenButton.Name = "VzNamOpenBtn"
+OpenButton.Size = UDim2.new(0, 42, 0, 42)
+OpenButton.Position = UDim2.new(0, 15, 0.2, 0)
+OpenButton.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
+OpenButton.BorderSizePixel = 0
+OpenButton.Text = "🌸"
+OpenButton.TextSize = 18
+OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.Active = true
+OpenButton.Draggable = true
 Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(1, 0)
-local OpenStroke = Instance.new("UIStroke", OpenButton) OpenStroke.Thickness = 3.5
 
-RunService.RenderStepped:Connect(function()
-    OpenStroke.Color = Color3.fromHSV((tick() % 4) / 4, 1, 1)
-end)
+local OpenStroke = Instance.new("UIStroke", OpenButton)
+OpenStroke.Thickness = 3.5
+OpenStroke.Color = Color3.fromRGB(255, 255, 255)
 
 OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
