@@ -528,7 +528,7 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Màu Menu & Viền Tab
+-- Màu Menu & Viền Tab (Không còn Rainbow)
 local colorToggleBtn = Instance.new("TextButton", miscScroll)
 colorToggleBtn.LayoutOrder = 5
 colorToggleBtn.Size, colorToggleBtn.BackgroundColor3, colorToggleBtn.Text, colorToggleBtn.TextColor3, colorToggleBtn.TextSize, colorToggleBtn.Font, colorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -554,7 +554,6 @@ end)
 
 local colorList = {
     {Name = "🖤 Xám Tối", Color = Color3.fromRGB(15, 16, 22)},
-    {Name = "🌈 Cầu Vồng", Color = "Rainbow"},
     {Name = "🌸 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
     {Name = "🔴 Đỏ Đậm", Color = Color3.fromRGB(220, 20, 60)},
     {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 191, 255)}
@@ -567,7 +566,7 @@ local cdbStroke = Instance.new("UIStroke", colorDropBtn) cdbStroke.Color, cdbStr
 table.insert(AllUIStrokes, cdbStroke)
 
 local colorDropFrame = Instance.new("ScrollingFrame", colorContainer)
-colorDropFrame.LayoutOrder = 2 colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible = UDim2.new(1, 0, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+colorDropFrame.LayoutOrder = 2 colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible = UDim2.new(1, 0, 0, 110), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", colorDropFrame).CornerRadius = UDim.new(0, 5)
 local cdfStroke = Instance.new("UIStroke", colorDropFrame) cdfStroke.Color, cdfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, cdfStroke)
@@ -615,7 +614,6 @@ end)
 
 local borderList = {
     {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 160, 255)},
-    {Name = "🌈 Cầu Vồng (Rainbow)", Color = "Rainbow"},
     {Name = "💖 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
     {Name = "🟢 Xanh Lá", Color = Color3.fromRGB(50, 205, 50)},
     {Name = "🟡 Vàng Nổi Bật", Color = Color3.fromRGB(255, 215, 0)}
@@ -629,7 +627,7 @@ local bdbStroke = Instance.new("UIStroke", borderDropBtn) bdbStroke.Color, bdbSt
 table.insert(AllUIStrokes, bdbStroke)
 
 local borderDropFrame = Instance.new("ScrollingFrame", colorContainer)
-borderDropFrame.LayoutOrder = 5 borderDropFrame.Size, borderDropFrame.BackgroundColor3, borderDropFrame.CanvasSize, borderDropFrame.ScrollBarThickness, borderDropFrame.Visible = UDim2.new(1, 0, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+borderDropFrame.LayoutOrder = 5 borderDropFrame.Size, borderDropFrame.BackgroundColor3, borderDropFrame.CanvasSize, borderDropFrame.ScrollBarThickness, borderDropFrame.Visible = UDim2.new(1, 0, 0, 110), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", borderDropFrame).CornerRadius = UDim.new(0, 5)
 local bdfStroke = Instance.new("UIStroke", borderDropFrame) bdfStroke.Color, bdfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, bdfStroke)
@@ -643,6 +641,9 @@ for i, bItem in ipairs(borderList) do
     table.insert(AllUIStrokes, bbs)
     bBtn.MouseButton1Click:Connect(function()
         selectedBorderObj = bItem borderDropBtn.Text = " 🖍️ Viền Tab: " .. bItem.Name borderDropFrame.Visible = false
+        for _, stroke in ipairs(AllUIStrokes) do
+            if stroke and stroke.Parent then stroke.Color = selectedBorderObj.Color end
+        end
     end)
 end
 borderDropFrame.CanvasSize = UDim2.new(0, 0, 0, #borderList * 30)
@@ -650,22 +651,8 @@ borderDropBtn.MouseButton1Click:Connect(function() borderDropFrame.Visible = not
 
 RunService.RenderStepped:Connect(function()
     if isColorApplied then
-        if selectedColorObj.Color == "Rainbow" then
-            local rainbowColor = Color3.fromHSV((tick() % 4) / 4, 1, 1)
-            SidebarPanel.BackgroundColor3 = rainbowColor ContentContainer.BackgroundColor3 = rainbowColor
-        elseif typeof(selectedColorObj.Color) == "Color3" then
+        if typeof(selectedColorObj.Color) == "Color3" then
             SidebarPanel.BackgroundColor3 = selectedColorObj.Color ContentContainer.BackgroundColor3 = selectedColorObj.Color
-        end
-    end
-    
-    if selectedBorderObj.Color == "Rainbow" then
-        local rainbowBorder = Color3.fromHSV((tick() % 4) / 4, 1, 1)
-        for _, stroke in ipairs(AllUIStrokes) do
-            if stroke and stroke.Parent then stroke.Color = rainbowBorder end
-        end
-    elseif typeof(selectedBorderObj.Color) == "Color3" then
-        for _, stroke in ipairs(AllUIStrokes) do
-            if stroke and stroke.Parent then stroke.Color = selectedBorderObj.Color end
         end
     end
 end)
