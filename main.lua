@@ -504,7 +504,7 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Mục: màu menu & chỉnh màu viền
+-- 3. Mục: màu menu & chỉnh màu viền (Đã đổi vị trí: Màu menu lên trên, Viền Tab xuống dưới)
 local colorToggleBtn = Instance.new("TextButton", miscScroll)
 colorToggleBtn.LayoutOrder = 5
 colorToggleBtn.Size, colorToggleBtn.BackgroundColor3, colorToggleBtn.Text, colorToggleBtn.TextColor3, colorToggleBtn.TextSize, colorToggleBtn.Font, colorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -554,37 +554,8 @@ end
 colorDropFrame.CanvasSize = UDim2.new(0, 0, 0, #colorList * 30)
 colorDropBtn.MouseButton1Click:Connect(function() colorDropFrame.Visible = not colorDropFrame.Visible end)
 
-local borderList = {
-    {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 160, 255)},
-    {Name = "🌈 Cầu Vồng (Rainbow)", Color = "Rainbow"},
-    {Name = "💖 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
-    {Name = "🟢 Xanh Lá", Color = Color3.fromRGB(50, 205, 50)},
-    {Name = "🟡 Vàng Nổi Bật", Color = Color3.fromRGB(255, 215, 0)}
-}
-local selectedBorderObj = borderList[1]
-
-local borderDropBtn = Instance.new("TextButton", colorContainer)
-borderDropBtn.LayoutOrder = 3 borderDropBtn.Size, borderDropBtn.BackgroundColor3, borderDropBtn.Text, borderDropBtn.TextColor3, borderDropBtn.TextSize, borderDropBtn.Font, borderDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 🖍️ Viền Tab: 🔵 Xanh Dương", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
-Instance.new("UICorner", borderDropBtn).CornerRadius = UDim.new(0, 5)
-
-local borderDropFrame = Instance.new("ScrollingFrame", colorContainer)
-borderDropFrame.LayoutOrder = 4 borderDropFrame.Size, borderDropFrame.BackgroundColor3, borderDropFrame.CanvasSize, borderDropFrame.ScrollBarThickness, borderDropFrame.Visible = UDim2.new(1, 0, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
-Instance.new("UICorner", borderDropFrame).CornerRadius = UDim.new(0, 5)
-local borderLayout = Instance.new("UIListLayout", borderDropFrame) borderLayout.Padding = UDim.new(0, 4)
-
-for i, bItem in ipairs(borderList) do
-    local bBtn = Instance.new("TextButton", borderDropFrame)
-    bBtn.LayoutOrder = i bBtn.Size, bBtn.BackgroundColor3, bBtn.Text, bBtn.TextColor3, bBtn.TextSize, bBtn.Font, bBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), " " .. bItem.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
-    Instance.new("UICorner", bBtn).CornerRadius = UDim.new(0, 4)
-    bBtn.MouseButton1Click:Connect(function()
-        selectedBorderObj = bItem borderDropBtn.Text = " 🖍️ Viền Tab: " .. bItem.Name borderDropFrame.Visible = false
-    end)
-end
-borderDropFrame.CanvasSize = UDim2.new(0, 0, 0, #borderList * 30)
-borderDropBtn.MouseButton1Click:Connect(function() borderDropFrame.Visible = not borderDropFrame.Visible end)
-
 local colorToggleFrame = Instance.new("Frame", colorContainer)
-colorToggleFrame.LayoutOrder = 5 colorToggleFrame.Size, colorToggleFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
+colorToggleFrame.LayoutOrder = 3 colorToggleFrame.Size, colorToggleFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", colorToggleFrame).CornerRadius = UDim.new(0, 5) 
 local ctfStroke = Instance.new("UIStroke", colorToggleFrame) ctfStroke.Color = Color3.fromRGB(40, 43, 52)
 table.insert(AllUIStrokes, ctfStroke)
@@ -609,6 +580,36 @@ toggleColorBtn.MouseButton1Click:Connect(function()
         SidebarPanel.BackgroundColor3 = Color3.fromRGB(15, 16, 22) ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
     end
 end)
+
+-- Chỉnh màu viền đặt xuống dưới nút bật tắt màu menu
+local borderList = {
+    {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 160, 255)},
+    {Name = "🌈 Cầu Vồng (Rainbow)", Color = "Rainbow"},
+    {Name = "💖 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
+    {Name = "🟢 Xanh Lá", Color = Color3.fromRGB(50, 205, 50)},
+    {Name = "🟡 Vàng Nổi Bật", Color = Color3.fromRGB(255, 215, 0)}
+}
+local selectedBorderObj = borderList[1]
+
+local borderDropBtn = Instance.new("TextButton", colorContainer)
+borderDropBtn.LayoutOrder = 4 borderDropBtn.Size, borderDropBtn.BackgroundColor3, borderDropBtn.Text, borderDropBtn.TextColor3, borderDropBtn.TextSize, borderDropBtn.Font, borderDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 🖍️ Viền Tab: 🔵 Xanh Dương", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
+Instance.new("UICorner", borderDropBtn).CornerRadius = UDim.new(0, 5)
+
+local borderDropFrame = Instance.new("ScrollingFrame", colorContainer)
+borderDropFrame.LayoutOrder = 5 borderDropFrame.Size, borderDropFrame.BackgroundColor3, borderDropFrame.CanvasSize, borderDropFrame.ScrollBarThickness, borderDropFrame.Visible = UDim2.new(1, 0, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+Instance.new("UICorner", borderDropFrame).CornerRadius = UDim.new(0, 5)
+local borderLayout = Instance.new("UIListLayout", borderDropFrame) borderLayout.Padding = UDim.new(0, 4)
+
+for i, bItem in ipairs(borderList) do
+    local bBtn = Instance.new("TextButton", borderDropFrame)
+    bBtn.LayoutOrder = i bBtn.Size, bBtn.BackgroundColor3, bBtn.Text, bBtn.TextColor3, bBtn.TextSize, bBtn.Font, bBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), " " .. bItem.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    Instance.new("UICorner", bBtn).CornerRadius = UDim.new(0, 4)
+    bBtn.MouseButton1Click:Connect(function()
+        selectedBorderObj = bItem borderDropBtn.Text = " 🖍️ Viền Tab: " .. bItem.Name borderDropFrame.Visible = false
+    end)
+end
+borderDropFrame.CanvasSize = UDim2.new(0, 0, 0, #borderList * 30)
+borderDropBtn.MouseButton1Click:Connect(function() borderDropFrame.Visible = not borderDropFrame.Visible end)
 
 RunService.RenderStepped:Connect(function()
     if isColorApplied then
@@ -985,27 +986,35 @@ for i, scr in ipairs(RegisteredScripts) do
     local item = Instance.new("TextButton", dropFrame)
     item.LayoutOrder = i item.Size, item.BackgroundColor3, item.Text, item.TextColor3, item.TextSize, item.Font, item.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), "  ▶ " .. scr.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 4)
-    item.MouseButton1Click:Connect(function() selScript = scr dropBtn.Text = " 📜 " .. scr.Name dropFrame.Visible = false end)
+    item.MouseButton1Click:Connect(function()
+        selScript = scr
+        dropBtn.Text = " 📜 " .. scr.Name
+        dropFrame.Visible = false
+        -- Nếu đang bật auto load thì thực thi ngay khi chọn script mới
+        if isAuto and selScript and selScript.Callback then
+            pcall(selScript.Callback)
+        end
+    end)
     dh = dh + 30
 end
 dropFrame.CanvasSize = UDim2.new(0, 0, 0, dh)
 
--- NÚT MỞ / ĐÓNG MENU (HÌNH TRÒN, VIỀN TRẮNG DÀY, DI CHUYỂN ĐƯỢC)
+-- SỬA LẠI NÚT MỞ/ĐÓNG MENU: TRÒN HOÀN TOÀN, VIỀN TRẮNG DÀY
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Name = "VzNamOpenBtn"
-OpenButton.Size = UDim2.new(0, 42, 0, 42)
+OpenButton.Size = UDim2.new(0, 45, 0, 45)
 OpenButton.Position = UDim2.new(0, 15, 0.2, 0)
 OpenButton.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
 OpenButton.BorderSizePixel = 0
 OpenButton.Text = "🌸"
-OpenButton.TextSize = 18
+OpenButton.TextSize = 20
 OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 OpenButton.Active = true
 OpenButton.Draggable = true
 Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(1, 0)
 
 local OpenStroke = Instance.new("UIStroke", OpenButton)
-OpenStroke.Thickness = 3.5
+OpenStroke.Thickness = 4
 OpenStroke.Color = Color3.fromRGB(255, 255, 255)
 
 OpenButton.MouseButton1Click:Connect(function()
