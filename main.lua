@@ -230,7 +230,7 @@ local HubSound = SoundService:FindFirstChild("VzNamHubSound") or Instance.new("S
 HubSound.Name, HubSound.Looped, HubSound.Volume = "VzNamHubSound", true, 0.5
 local currentSoundId = "1837879082"
 -- ============================================================================
--- TAB 6: MISC (Nhạc, Âm lượng, Màu sắc, Chọn script)
+-- TAB 6: MISC (Gập mở bằng mũi tên → / ↓)
 -- ============================================================================
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
 tabMiscBtn.Size, tabMiscBtn.BackgroundTransparency, tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment = UDim2.new(1, 0, 0, 28), 1, "   ⚙️ MISC", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
@@ -250,30 +250,47 @@ tabMiscBtn.MouseButton1Click:Connect(function()
 end)
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
+local miscToggleBtn = Instance.new("TextButton", miscScroll)
+miscToggleBtn.LayoutOrder = 1
+miscToggleBtn.Size, miscToggleBtn.BackgroundColor3, miscToggleBtn.Text, miscToggleBtn.TextColor3, miscToggleBtn.TextSize, miscToggleBtn.Font, miscToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 32), Color3.fromRGB(20, 22, 30), "  ↓ Misc", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+Instance.new("UICorner", miscToggleBtn).CornerRadius = UDim.new(0, 5)
+
+local miscContainer = Instance.new("Frame", miscScroll)
+miscContainer.LayoutOrder = 2
+miscContainer.Size, miscContainer.AutomaticSize = UDim2.new(1, -4, 0, 0), Enum.AutomaticSize.Y
+miscContainer.BackgroundTransparency = 1
+miscContainer.Visible = true
+local miscSubLayout = Instance.new("UIListLayout", miscContainer) miscSubLayout.SortOrder = Enum.SortOrder.LayoutOrder miscSubLayout.Padding = UDim.new(0, 5)
+
+miscToggleBtn.MouseButton1Click:Connect(function()
+    miscContainer.Visible = not miscContainer.Visible
+    miscToggleBtn.Text = miscContainer.Visible and "  ↓ Misc" or "  → Misc"
+end)
+
 local selScript, isAuto = nil, false
-local dropBtn = Instance.new("TextButton", miscScroll)
-dropBtn.LayoutOrder = 1 dropBtn.Size, dropBtn.BackgroundColor3, dropBtn.Text, dropBtn.TextColor3, dropBtn.TextSize, dropBtn.Font, dropBtn.TextXAlignment = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), " 📜 Chọn Script Auto Load...", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+local dropBtn = Instance.new("TextButton", miscContainer)
+dropBtn.LayoutOrder = 1 dropBtn.Size, dropBtn.BackgroundColor3, dropBtn.Text, dropBtn.TextColor3, dropBtn.TextSize, dropBtn.Font, dropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 📜 Chọn Script Auto Load...", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
 Instance.new("UICorner", dropBtn).CornerRadius = UDim.new(0, 5)
 
-local dropFrame = Instance.new("ScrollingFrame", miscScroll)
-dropFrame.LayoutOrder = 2 dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible = UDim2.new(1, -4, 0, 110), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+local dropFrame = Instance.new("ScrollingFrame", miscContainer)
+dropFrame.LayoutOrder = 2 dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible = UDim2.new(1, 0, 0, 110), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", dropFrame).CornerRadius = UDim.new(0, 5)
 local dropLayout = Instance.new("UIListLayout", dropFrame) dropLayout.Padding = UDim.new(0, 4)
 
-local toggleAuto = Instance.new("TextButton", miscScroll)
-toggleAuto.LayoutOrder = 3 toggleAuto.Size, toggleAuto.BackgroundColor3, toggleAuto.Text, toggleAuto.TextColor3, toggleAuto.TextSize, toggleAuto.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(200, 50, 50), "Auto Load Script Chạy: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
+local toggleAuto = Instance.new("TextButton", miscContainer)
+toggleAuto.LayoutOrder = 3 toggleAuto.Size, toggleAuto.BackgroundColor3, toggleAuto.Text, toggleAuto.TextColor3, toggleAuto.TextSize, toggleAuto.Font = UDim2.new(1, 0, 0, 32), Color3.fromRGB(200, 50, 50), "Auto Load Script Chạy: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
 Instance.new("UICorner", toggleAuto).CornerRadius = UDim.new(0, 5)
 
-local customIdBox = Instance.new("TextBox", miscScroll)
-customIdBox.LayoutOrder = 4 customIdBox.Size, customIdBox.BackgroundColor3, customIdBox.PlaceholderText, customIdBox.Text, customIdBox.TextColor3, customIdBox.TextSize, customIdBox.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), "🎶 Nhập Sound ID tùy chỉnh...", "", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
+local customIdBox = Instance.new("TextBox", miscContainer)
+customIdBox.LayoutOrder = 4 customIdBox.Size, customIdBox.BackgroundColor3, customIdBox.PlaceholderText, customIdBox.Text, customIdBox.TextColor3, customIdBox.TextSize, customIdBox.Font = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), "🎶 Nhập Sound ID tùy chỉnh...", "", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
 Instance.new("UICorner", customIdBox).CornerRadius = UDim.new(0, 5)
 
-local musicDropBtn = Instance.new("TextButton", miscScroll)
-musicDropBtn.LayoutOrder = 5 musicDropBtn.Size, musicDropBtn.BackgroundColor3, musicDropBtn.Text, musicDropBtn.TextColor3, musicDropBtn.TextSize, musicDropBtn.Font, musicDropBtn.TextXAlignment = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), " 🎵 Chọn Nhạc Nền...", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+local musicDropBtn = Instance.new("TextButton", miscContainer)
+musicDropBtn.LayoutOrder = 5 musicDropBtn.Size, musicDropBtn.BackgroundColor3, musicDropBtn.Text, musicDropBtn.TextColor3, musicDropBtn.TextSize, musicDropBtn.Font, musicDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 🎵 Chọn Nhạc Nền...", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
 Instance.new("UICorner", musicDropBtn).CornerRadius = UDim.new(0, 5)
 
-local musicDropFrame = Instance.new("ScrollingFrame", miscScroll)
-musicDropFrame.LayoutOrder = 6 musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible = UDim2.new(1, -4, 0, 120), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+local musicDropFrame = Instance.new("ScrollingFrame", miscContainer)
+musicDropFrame.LayoutOrder = 6 musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible = UDim2.new(1, 0, 0, 120), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", musicDropFrame).CornerRadius = UDim.new(0, 5)
 local musicLayout = Instance.new("UIListLayout", musicDropFrame) musicLayout.Padding = UDim.new(0, 4)
 
@@ -295,8 +312,8 @@ for i, m in ipairs(presetMusics) do
 end
 musicDropFrame.CanvasSize = UDim2.new(0, 0, 0, #presetMusics * 30)
 
-local volumeFrame = Instance.new("Frame", miscScroll)
-volumeFrame.LayoutOrder = 7 volumeFrame.Size, volumeFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34)
+local volumeFrame = Instance.new("Frame", miscContainer)
+volumeFrame.LayoutOrder = 7 volumeFrame.Size, volumeFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", volumeFrame).CornerRadius = UDim.new(0, 5)
 local volumeLabel = Instance.new("TextLabel", volumeFrame)
 volumeLabel.Size, volumeLabel.Position, volumeLabel.BackgroundTransparency, volumeLabel.Text, volumeLabel.TextColor3, volumeLabel.TextSize, volumeLabel.Font, volumeLabel.TextXAlignment = UDim2.new(1, -12, 1, 0), UDim2.new(0, 8, 0, 0), 1, "🔊 Âm lượng: 50%", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
@@ -327,8 +344,8 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 local isMusicPlaying = false
-local toggleMusicBtn = Instance.new("TextButton", miscScroll)
-toggleMusicBtn.LayoutOrder = 8 toggleMusicBtn.Size, toggleMusicBtn.BackgroundColor3, toggleMusicBtn.Text, toggleMusicBtn.TextColor3, toggleMusicBtn.TextSize, toggleMusicBtn.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(200, 50, 50), "Phát Nhạc Background: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
+local toggleMusicBtn = Instance.new("TextButton", miscContainer)
+toggleMusicBtn.LayoutOrder = 8 toggleMusicBtn.Size, toggleMusicBtn.BackgroundColor3, toggleMusicBtn.Text, toggleMusicBtn.TextColor3, toggleMusicBtn.TextSize, toggleMusicBtn.Font = UDim2.new(1, 0, 0, 32), Color3.fromRGB(200, 50, 50), "Phát Nhạc Background: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
 Instance.new("UICorner", toggleMusicBtn).CornerRadius = UDim.new(0, 5)
 toggleMusicBtn.MouseButton1Click:Connect(function()
     isMusicPlaying = not isMusicPlaying
@@ -349,12 +366,12 @@ local colorList = {
     {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 191, 255)}
 }
 local selectedColorObj = colorList[1]
-local colorDropBtn = Instance.new("TextButton", miscScroll)
-colorDropBtn.LayoutOrder = 9 colorDropBtn.Size, colorDropBtn.BackgroundColor3, colorDropBtn.Text, colorDropBtn.TextColor3, colorDropBtn.TextSize, colorDropBtn.Font, colorDropBtn.TextXAlignment = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), " 🎨 Đã chọn: 🖤 Xám Tối", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+local colorDropBtn = Instance.new("TextButton", miscContainer)
+colorDropBtn.LayoutOrder = 9 colorDropBtn.Size, colorDropBtn.BackgroundColor3, colorDropBtn.Text, colorDropBtn.TextColor3, colorDropBtn.TextSize, colorDropBtn.Font, colorDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 🎨 Đã chọn: 🖤 Xám Tối", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
 Instance.new("UICorner", colorDropBtn).CornerRadius = UDim.new(0, 5)
 
-local colorDropFrame = Instance.new("ScrollingFrame", miscScroll)
-colorDropFrame.LayoutOrder = 10 colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible = UDim2.new(1, -4, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+local colorDropFrame = Instance.new("ScrollingFrame", miscContainer)
+colorDropFrame.LayoutOrder = 10 colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible = UDim2.new(1, 0, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", colorDropFrame).CornerRadius = UDim.new(0, 5)
 local colorLayout = Instance.new("UIListLayout", colorDropFrame) colorLayout.Padding = UDim.new(0, 4)
 
@@ -378,8 +395,8 @@ musicDropBtn.MouseButton1Click:Connect(function() toggleMiscDropdown(musicDropFr
 colorDropBtn.MouseButton1Click:Connect(function() toggleMiscDropdown(colorDropFrame) end)
 
 local isColorApplied = false
-local toggleColorBtn = Instance.new("TextButton", miscScroll)
-toggleColorBtn.LayoutOrder = 11 toggleColorBtn.Size, toggleColorBtn.BackgroundColor3, toggleColorBtn.Text, toggleColorBtn.TextColor3, toggleColorBtn.TextSize, toggleColorBtn.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(200, 50, 50), "Màu Menu Tùy Chỉnh: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
+local toggleColorBtn = Instance.new("TextButton", miscContainer)
+toggleColorBtn.LayoutOrder = 11 toggleColorBtn.Size, toggleColorBtn.BackgroundColor3, toggleColorBtn.Text, toggleColorBtn.TextColor3, toggleColorBtn.TextSize, toggleColorBtn.Font = UDim2.new(1, 0, 0, 32), Color3.fromRGB(200, 50, 50), "Màu Menu Tùy Chỉnh: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
 Instance.new("UICorner", toggleColorBtn).CornerRadius = UDim.new(0, 5)
 toggleColorBtn.MouseButton1Click:Connect(function()
     isColorApplied = not isColorApplied
@@ -403,8 +420,9 @@ RunService.RenderStepped:Connect(function()
 end)
 miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1400)
 
+
 -- ============================================================================
--- TAB 7: CẤU HÌNH (Lưu cấu hình, Auto lưu/tải)
+-- TAB 7: CẤU HÌNH (PROFILES ĐẦY ĐỦ NHƯ ẢNH MẪU + GẶP MỞ MŨI TÊN)
 -- ============================================================================
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
 tabConfigBtn.Size, tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = UDim2.new(1, 0, 0, 28), 1, "   📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
@@ -427,55 +445,94 @@ table.insert(Tabs, {Container = configScroll, Indicator = configIndicator})
 local configFolder = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
 
-local startupFrame = Instance.new("Frame", configScroll)
-startupFrame.LayoutOrder = 1 startupFrame.Size, startupFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 34), Color3.fromRGB(22, 25, 34)
+local profilesToggleBtn = Instance.new("TextButton", configScroll)
+profilesToggleBtn.LayoutOrder = 1
+profilesToggleBtn.Size, profilesToggleBtn.BackgroundColor3, profilesToggleBtn.Text, profilesToggleBtn.TextColor3, profilesToggleBtn.TextSize, profilesToggleBtn.Font, profilesToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 32), Color3.fromRGB(20, 22, 30), "  ↓ Profiles", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+Instance.new("UICorner", profilesToggleBtn).CornerRadius = UDim.new(0, 5)
+
+local profilesContainer = Instance.new("Frame", configScroll)
+profilesContainer.LayoutOrder = 2
+profilesContainer.Size, profilesContainer.AutomaticSize = UDim2.new(1, -4, 0, 0), Enum.AutomaticSize.Y
+profilesContainer.BackgroundTransparency = 1
+profilesContainer.Visible = true
+local profilesSubLayout = Instance.new("UIListLayout", profilesContainer) profilesSubLayout.SortOrder = Enum.SortOrder.LayoutOrder profilesSubLayout.Padding = UDim.new(0, 5)
+
+profilesToggleBtn.MouseButton1Click:Connect(function()
+    profilesContainer.Visible = not profilesContainer.Visible
+    profilesToggleBtn.Text = profilesContainer.Visible and "  ↓ Profiles" or "  → Profiles"
+end)
+
+-- 1. New Cấu Hình Name
+local newConfigFrame = Instance.new("Frame", profilesContainer)
+newConfigFrame.LayoutOrder = 1 newConfigFrame.Size, newConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", newConfigFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", newConfigFrame).Color = Color3.fromRGB(40, 43, 52)
+local ncLabel = Instance.new("TextLabel", newConfigFrame)
+ncLabel.Size, ncLabel.Position, ncLabel.BackgroundTransparency, ncLabel.Text, ncLabel.TextColor3, ncLabel.TextSize, ncLabel.Font, ncLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "New Cấu Hình Name", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+
+local configNameBox = Instance.new("TextBox", newConfigFrame)
+configNameBox.Size, configNameBox.Position, configNameBox.BackgroundColor3, configNameBox.PlaceholderText, configNameBox.Text, configNameBox.TextColor3, configNameBox.TextSize, configNameBox.Font = UDim2.new(0.45, 0, 0, 24), UDim2.new(0.53, 0, 0.5, -12), Color3.fromRGB(15, 16, 22), "New config name...", "", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
+Instance.new("UICorner", configNameBox).CornerRadius = UDim.new(0, 4)
+
+-- 2. Create New Cấu Hình
+local createFrame = Instance.new("Frame", profilesContainer)
+createFrame.LayoutOrder = 2 createFrame.Size, createFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 42), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", createFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", createFrame).Color = Color3.fromRGB(40, 43, 52)
+local crTitle = Instance.new("TextLabel", createFrame)
+crTitle.Size, crTitle.Position, crTitle.BackgroundTransparency, crTitle.Text, crTitle.TextColor3, crTitle.TextSize, crTitle.Font, crTitle.TextXAlignment = UDim2.new(1, -110, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Create New Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+local crSub = Instance.new("TextLabel", createFrame)
+crSub.Size, crSub.Position, crSub.BackgroundTransparency, crSub.Text, crSub.TextColor3, crSub.TextSize, crSub.Font, crSub.TextXAlignment = UDim2.new(1, -110, 0, 16), UDim2.new(0, 8, 0, 21), 1, "New config copies current settings", Color3.fromRGB(140, 140, 150), 9, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+
+local createBtn = Instance.new("TextButton", createFrame)
+createBtn.Size, createBtn.Position, createBtn.BackgroundColor3, createBtn.Text, createBtn.TextColor3, createBtn.TextSize, createBtn.Font = UDim2.new(0, 95, 0, 26), UDim2.new(1, -103, 0.5, -13), Color3.fromRGB(220, 50, 50), "Create New", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
+Instance.new("UICorner", createBtn).CornerRadius = UDim.new(0, 4)
+
+-- 3. Delete Cấu Hình
+local delFrame = Instance.new("Frame", profilesContainer)
+delFrame.LayoutOrder = 3 delFrame.Size, delFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", delFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", delFrame).Color = Color3.fromRGB(40, 43, 52)
+local delLabel = Instance.new("TextLabel", delFrame)
+delLabel.Size, delLabel.Position, delLabel.BackgroundTransparency, delLabel.Text, delLabel.TextColor3, delLabel.TextSize, delLabel.Font, delLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Delete Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+
+local delBtn = Instance.new("TextButton", delFrame)
+delBtn.Size, delBtn.Position, delBtn.BackgroundColor3, delBtn.Text, delBtn.TextColor3, delBtn.TextSize, delBtn.Font, delBtn.TextXAlignment = UDim2.new(0, 95, 0, 24), UDim2.new(1, -103, 0.5, -12), Color3.fromRGB(15, 16, 22), " Không có ∨", Color3.fromRGB(50, 200, 50), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Center
+Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 4)
+
+-- 4. Cấu Hình Khởi Động
+local startupFrame = Instance.new("Frame", profilesContainer)
+startupFrame.LayoutOrder = 4 startupFrame.Size, startupFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", startupFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", startupFrame).Color = Color3.fromRGB(40, 43, 52)
-local startupLabel = Instance.new("TextLabel", startupFrame)
-startupLabel.Size, startupLabel.Position, startupLabel.BackgroundTransparency, startupLabel.Text, startupLabel.TextColor3, startupLabel.TextSize, startupLabel.Font, startupLabel.TextXAlignment = UDim2.new(1, -12, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Startup Cấu Hình: Default", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+local stLabel = Instance.new("TextLabel", startupFrame)
+stLabel.Size, stLabel.Position, stLabel.BackgroundTransparency, stLabel.Text, stLabel.TextColor3, stLabel.TextSize, stLabel.Font, stLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Cấu Hình Khởi Động", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
 
-local autoSaveFrame = Instance.new("Frame", configScroll)
-autoSaveFrame.LayoutOrder = 2 autoSaveFrame.Size, autoSaveFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 42), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", autoSaveFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", autoSaveFrame).Color = Color3.fromRGB(40, 43, 52)
-local asTitle = Instance.new("TextLabel", autoSaveFrame)
-asTitle.Size, asTitle.Position, asTitle.BackgroundTransparency, asTitle.Text, asTitle.TextColor3, asTitle.TextSize, asTitle.Font, asTitle.TextXAlignment = UDim2.new(1, -50, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Auto Lưu Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-local asSub = Instance.new("TextLabel", autoSaveFrame)
-asSub.Size, asSub.Position, asSub.BackgroundTransparency, asSub.Text, asSub.TextColor3, asSub.TextSize, asSub.Font, asSub.TextXAlignment = UDim2.new(1, -50, 0, 16), UDim2.new(0, 8, 0, 21), 1, "Auto save: Default", Color3.fromRGB(140, 140, 150), 9, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+local stBtn = Instance.new("TextButton", startupFrame)
+stBtn.Size, stBtn.Position, stBtn.BackgroundColor3, stBtn.Text, stBtn.TextColor3, stBtn.TextSize, stBtn.Font, stBtn.TextXAlignment = UDim2.new(0, 95, 0, 24), UDim2.new(1, -103, 0.5, -12), Color3.fromRGB(15, 16, 22), " Default ∨", Color3.fromRGB(50, 200, 50), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Center
+Instance.new("UICorner", stBtn).CornerRadius = UDim.new(0, 4)
 
-local autoSaveToggle = Instance.new("TextButton", autoSaveFrame)
-autoSaveToggle.Size, autoSaveToggle.Position, autoSaveToggle.BackgroundColor3, autoSaveToggle.Text = UDim2.new(0, 36, 0, 20), UDim2.new(1, -44, 0.5, -10), Color3.fromRGB(50, 200, 50), ""
-Instance.new("UICorner", autoSaveToggle).CornerRadius = UDim.new(1, 0)
-local asBox = Instance.new("Frame", autoSaveToggle)
-asBox.Size, asBox.Position, asBox.BackgroundColor3 = UDim2.new(0, 16, 0, 16), UDim2.new(1, -18, 0.5, -8), Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", asBox).CornerRadius = UDim.new(1, 0)
-local isAutoSave = true
-autoSaveToggle.MouseButton1Click:Connect(function()
-    isAutoSave = not isAutoSave
-    autoSaveToggle.BackgroundColor3 = isAutoSave and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(100, 100, 100)
-    asBox.Position = isAutoSave and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-end)
+-- 5. Tải Cấu Hình
+local loadFrame = Instance.new("Frame", profilesContainer)
+loadFrame.LayoutOrder = 5 loadFrame.Size, loadFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", loadFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", loadFrame).Color = Color3.fromRGB(40, 43, 52)
+local ldLabel = Instance.new("TextLabel", loadFrame)
+ldLabel.Size, ldLabel.Position, ldLabel.BackgroundTransparency, ldLabel.Text, ldLabel.TextColor3, ldLabel.TextSize, ldLabel.Font, ldLabel.TextXAlignment = UDim2.new(0.5, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Tải Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
 
-local autoLoadFrame = Instance.new("Frame", configScroll)
-autoLoadFrame.LayoutOrder = 3 autoLoadFrame.Size, autoLoadFrame.BackgroundColor3 = UDim2.new(1, -4, 0, 42), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", autoLoadFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", autoLoadFrame).Color = Color3.fromRGB(40, 43, 52)
-local alTitle = Instance.new("TextLabel", autoLoadFrame)
-alTitle.Size, alTitle.Position, alTitle.BackgroundTransparency, alTitle.Text, alTitle.TextColor3, alTitle.TextSize, alTitle.Font, alTitle.TextXAlignment = UDim2.new(1, -50, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Auto Tải Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-local alSub = Instance.new("TextLabel", autoLoadFrame)
-alSub.Size, alSub.Position, alSub.BackgroundTransparency, alSub.Text, alSub.TextColor3, alSub.TextSize, alSub.Font, alSub.TextXAlignment = UDim2.new(1, -50, 0, 16), UDim2.new(0, 8, 0, 21), 1, "Auto load: Default", Color3.fromRGB(140, 140, 150), 9, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+local ldBtn = Instance.new("TextButton", loadFrame)
+ldBtn.Size, ldBtn.Position, ldBtn.BackgroundColor3, ldBtn.Text, ldBtn.TextColor3, ldBtn.TextSize, ldBtn.Font, ldBtn.TextXAlignment = UDim2.new(0, 95, 0, 24), UDim2.new(1, -103, 0.5, -12), Color3.fromRGB(15, 16, 22), " Default ∨", Color3.fromRGB(50, 200, 50), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Center
+Instance.new("UICorner", ldBtn).CornerRadius = UDim.new(0, 4)
 
-local autoLoadToggle = Instance.new("TextButton", autoLoadFrame)
-autoLoadToggle.Size, autoLoadToggle.Position, autoLoadToggle.BackgroundColor3, autoLoadToggle.Text = UDim2.new(0, 36, 0, 20), UDim2.new(1, -44, 0.5, -10), Color3.fromRGB(50, 200, 50), ""
-Instance.new("UICorner", autoLoadToggle).CornerRadius = UDim.new(1, 0)
-local alBox = Instance.new("Frame", autoLoadToggle)
-alBox.Size, alBox.Position, alBox.BackgroundColor3 = UDim2.new(0, 16, 0, 16), UDim2.new(1, -18, 0.5, -8), Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", alBox).CornerRadius = UDim.new(1, 0)
-local isAutoLoad = true
-autoLoadToggle.MouseButton1Click:Connect(function()
-    isAutoLoad = not isAutoLoad
-    autoLoadToggle.BackgroundColor3 = isAutoLoad and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(100, 100, 100)
-    alBox.Position = isAutoLoad and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-end)
+-- 6. Lưu Cấu Hình (Save)
+local saveFrame = Instance.new("Frame", profilesContainer)
+saveFrame.LayoutOrder = 6 saveFrame.Size, saveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 42), Color3.fromRGB(22, 25, 34)
+Instance.new("UICorner", saveFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", saveFrame).Color = Color3.fromRGB(40, 43, 52)
+local svTitle = Instance.new("TextLabel", saveFrame)
+svTitle.Size, svTitle.Position, svTitle.BackgroundTransparency, svTitle.Text, svTitle.TextColor3, svTitle.TextSize, svTitle.Font, svTitle.TextXAlignment = UDim2.new(1, -110, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Lưu Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
+local svSub = Instance.new("TextLabel", saveFrame)
+svSub.Size, svSub.Position, svSub.BackgroundTransparency, svSub.Text, svSub.TextColor3, svSub.TextSize, svSub.Font, svSub.TextXAlignment = UDim2.new(1, -110, 0, 16), UDim2.new(0, 8, 0, 21), 1, "Save: Default", Color3.fromRGB(140, 140, 150), 9, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
 
-configScroll.CanvasSize = UDim2.new(0, 0, 0, 300)
+local saveBtn = Instance.new("TextButton", saveFrame)
+saveBtn.Size, saveBtn.Position, saveBtn.BackgroundColor3, saveBtn.Text, saveBtn.TextColor3, saveBtn.TextSize, saveBtn.Font = UDim2.new(0, 95, 0, 26), UDim2.new(1, -103, 0.5, -13), Color3.fromRGB(220, 50, 50), "Save", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
+Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 4)
+
+configScroll.CanvasSize = UDim2.new(0, 0, 0, 350)
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size, ResizeBtn.Position, ResizeBtn.BackgroundTransparency, ResizeBtn.Text, ResizeBtn.TextColor3, ResizeBtn.TextSize, ResizeBtn.Font = UDim2.new(0, 16, 0, 16), UDim2.new(1, -18, 1, -18), 1, "◢", Color3.fromRGB(180, 180, 190), 12, Enum.Font.FredokaOne
 
