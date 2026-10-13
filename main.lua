@@ -552,8 +552,11 @@ for i, cItem in ipairs(colorList) do
 end
 colorDropFrame.CanvasSize = UDim2.new(0, 0, 0, #colorList * 30)
 
-local function showDropdown(drop, btn)
-    drop.Position = UDim2.new(0, btn.AbsolutePosition.X, 0, btn.AbsolutePosition.Y + btn.AbsoluteSize.Y + 4)
+-- HÀM FIX TỌA ĐỘ DROPDOWN CHUẨN XÁC DỰA TRÊN MÀN HÌNH CHUNG
+local function showAbsoluteDropdown(drop, btn)
+    local absPos = btn.AbsolutePosition
+    local absSize = btn.AbsoluteSize
+    drop.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
     drop.Visible = not drop.Visible
     
     if drop ~= dropFrame then dropFrame.Visible = false end
@@ -564,12 +567,12 @@ local function showDropdown(drop, btn)
     if drop ~= loadDropScroll then loadDropScroll.Visible = false end
 end
 
-colorDropBtn.MouseButton1Click:Connect(function() showDropdown(colorDropFrame, colorDropBtn) end)
-musicDropBtn.MouseButton1Click:Connect(function() showDropdown(musicDropFrame, musicDropBtn) end)
-dropBtn.MouseButton1Click:Connect(function() showDropdown(dropFrame, dropBtn) end)
-delDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() showDropdown(delDropScroll, delDropBtn) end)
-startDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() showDropdown(startDropScroll, startDropBtn) end)
-loadDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() showDropdown(loadDropScroll, loadDropBtn) end)
+colorDropBtn.MouseButton1Click:Connect(function() showAbsoluteDropdown(colorDropFrame, colorDropBtn) end)
+musicDropBtn.MouseButton1Click:Connect(function() showAbsoluteDropdown(musicDropFrame, musicDropBtn) end)
+dropBtn.MouseButton1Click:Connect(function() showAbsoluteDropdown(dropFrame, dropBtn) end)
+delDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() showAbsoluteDropdown(delDropScroll, delDropBtn) end)
+startDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() showAbsoluteDropdown(startDropScroll, startDropBtn) end)
+loadDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() showAbsoluteDropdown(loadDropScroll, loadDropBtn) end)
 
 local toggleColorBtn = Instance.new("TextButton", t6Scroll)
 toggleColorBtn.LayoutOrder = 12
