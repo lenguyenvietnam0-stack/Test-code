@@ -1,10 +1,18 @@
-local CoreGui, Players, UserInputService, SoundService, HttpService, RunService = game:GetService("CoreGui"), game:GetService("Players"), game:GetService("UserInputService"), game:GetService("SoundService"), game:GetService("HttpService"), game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+
 local localPlayer = Players.LocalPlayer
 local PlayerGui = localPlayer:FindFirstChildOfClass("PlayerGui") or CoreGui
 
-if PlayerGui:FindFirstChild("VzNamHubV4UI") then PlayerGui.VzNamHubV4UI:Destroy() end
+if PlayerGui:FindFirstChild("VzNamHubV4UI") then 
+    PlayerGui.VzNamHubV4UI:Destroy() 
+end
 
-local LastSelectedScriptBtn, LastSelectedScriptStroke = nil, nil
+local LastSelectedScriptStroke = nil
 local RegisteredScripts = {}
 local AllUIStrokes = {}
 
@@ -14,8 +22,10 @@ ScreenGui.DisplayOrder = 99999
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
-local success, avatarThumbnail = pcall(function() return Players:GetUserThumbnailAsync(localPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420) end)
-local avatarUrl = success and avatarThumbnail or "rbxassetid://15298567397"
+local avatarUrl = "rbxassetid://15298567397"
+pcall(function()
+    avatarUrl = Players:GetUserThumbnailAsync(localPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+end)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
@@ -34,6 +44,7 @@ table.insert(AllUIStrokes, OuterStroke)
 
 local TopBar = Instance.new("Frame", MainFrame) 
 TopBar.Size, TopBar.BackgroundTransparency = UDim2.new(1, 0, 0, 28), 1
+TopBar.Parent = MainFrame
 
 local Logo = Instance.new("ImageLabel", TopBar) 
 Logo.Size, Logo.Position, Logo.BackgroundTransparency, Logo.Image = UDim2.new(0, 18, 0, 18), UDim2.new(0, 10, 0.5, -9), 1, avatarUrl
@@ -52,8 +63,10 @@ end)
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
 SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 140, 1, -34), UDim2.new(0, 8, 0, 28), Color3.fromRGB(15, 16, 22), 0, 0
+SidebarPanel.Parent = MainFrame
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
-local SidebarStroke = Instance.new("UIStroke", SidebarPanel) SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
+local SidebarStroke = Instance.new("UIStroke", SidebarPanel) 
+SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
 table.insert(AllUIStrokes, SidebarStroke)
 
 local SearchBoxTab = Instance.new("TextBox", SidebarPanel)
@@ -62,7 +75,8 @@ Instance.new("UICorner", SearchBoxTab).CornerRadius = UDim.new(0, 4)
 
 local SidebarScroll = Instance.new("ScrollingFrame", SidebarPanel)
 SidebarScroll.Size, SidebarScroll.Position, SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel, SidebarScroll.ScrollBarThickness = UDim2.new(1, -6, 1, -34), UDim2.new(0, 3, 0, 32), 1, 0, 2
-local SidebarLayout = Instance.new("UIListLayout", SidebarScroll) SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
+local SidebarLayout = Instance.new("UIListLayout", SidebarScroll) 
+SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 
 SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     local query = string.lower(SearchBoxTab.Text)
@@ -76,11 +90,14 @@ end)
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Name = "ContentContainer"
 ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -156, 1, -34), UDim2.new(0, 154, 0, 28), Color3.fromRGB(15, 16, 22), 0, 0
+ContentContainer.Parent = MainFrame
 Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
-local ContentStroke = Instance.new("UIStroke", ContentContainer) ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
+local ContentStroke = Instance.new("UIStroke", ContentContainer) 
+ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
 table.insert(AllUIStrokes, ContentStroke)
 
-local ContentHeader = Instance.new("Frame", ContentContainer) ContentHeader.Size, ContentHeader.BackgroundTransparency = UDim2.new(1, 0, 0, 30), 1
+local ContentHeader = Instance.new("Frame", ContentContainer) 
+ContentHeader.Size, ContentHeader.BackgroundTransparency = UDim2.new(1, 0, 0, 30), 1
 
 local ActiveTabTitle = Instance.new("TextLabel", ContentHeader)
 ActiveTabTitle.Size, ActiveTabTitle.Position, ActiveTabTitle.BackgroundTransparency, ActiveTabTitle.Text, ActiveTabTitle.TextColor3, ActiveTabTitle.TextSize, ActiveTabTitle.Font, ActiveTabTitle.TextXAlignment = UDim2.new(1, -40, 1, 0), UDim2.new(0, 12, 0, 0), 1, "", Color3.fromRGB(255, 255, 255), 12, Enum.Font.GothamBold, Enum.TextXAlignment.Left
@@ -100,17 +117,18 @@ SearchContentIcon.MouseButton1Click:Connect(function()
     if searching then SearchInputContent:CaptureFocus() else SearchInputContent.Text = "" end
 end)
 
-local HeaderDivider = Instance.new("Frame", ContentContainer) HeaderDivider.Size, HeaderDivider.Position, HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, 30), Color3.fromRGB(40, 43, 52), 0
+local HeaderDivider = Instance.new("Frame", ContentContainer) 
+HeaderDivider.Size, HeaderDivider.Position, HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, 30), Color3.fromRGB(40, 43, 52), 0
 
 local Tabs = {}
-local FirstTab = nil
 
 -- TAB 0: TRANG CHỦ
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
 tabHomeBtn.Size, tabHomeBtn.Position, tabHomeBtn.BackgroundColor3, tabHomeBtn.BackgroundTransparency, tabHomeBtn.Text, tabHomeBtn.TextColor3, tabHomeBtn.TextSize, tabHomeBtn.Font, tabHomeBtn.TextXAlignment = UDim2.new(1, -6, 0, 30), UDim2.new(0, 3, 0, 0), Color3.fromRGB(22, 25, 34), 0, "   🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabHomeBtn).CornerRadius = UDim.new(0, 5)
-local tabHomeStroke = Instance.new("UIStroke", tabHomeBtn) tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
+local tabHomeStroke = Instance.new("UIStroke", tabHomeBtn) 
+tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
 table.insert(AllUIStrokes, tabHomeStroke)
 
 local homeIndicator = Instance.new("Frame", tabHomeBtn)
@@ -120,17 +138,19 @@ Instance.new("UICorner", homeIndicator).CornerRadius = UDim.new(0, 2)
 local homeScroll = Instance.new("ScrollingFrame", ContentContainer)
 homeScroll.Name = "Container_HOME"
 homeScroll.Size, homeScroll.Position, homeScroll.BackgroundTransparency, homeScroll.BorderSizePixel, homeScroll.ScrollBarThickness, homeScroll.Visible, homeScroll.ClipsDescendants = UDim2.new(1, -12, 1, -38), UDim2.new(0, 6, 0, 34), 1, 0, 3, false, true
-local homeLayout = Instance.new("UIListLayout", homeScroll) homeLayout.SortOrder = Enum.SortOrder.LayoutOrder homeLayout.Padding = UDim.new(0, 5)
+local homeLayout = Instance.new("UIListLayout", homeScroll) 
+homeLayout.SortOrder = Enum.SortOrder.LayoutOrder 
+homeLayout.Padding = UDim.new(0, 5)
 
 tabHomeBtn.MouseButton1Click:Connect(function()
     for _, t in pairs(Tabs) do t.Container.Visible = false if t.Indicator then t.Indicator.Visible = false end end
-    homeScroll.Visible = true homeIndicator.Visible = true ActiveTabTitle.Text = "🏠 Trang Chủ"
+    homeScroll.Visible = true 
+    homeIndicator.Visible = true 
+    ActiveTabTitle.Text = "🏠 Trang Chủ"
     SearchInputContent.Text = ""
 end)
 
-local homeTabObj = { Container = homeScroll, Indicator = homeIndicator }
-table.insert(Tabs, homeTabObj)
-FirstTab = homeTabObj
+table.insert(Tabs, { Container = homeScroll, Indicator = homeIndicator })
 homeScroll.Visible, homeIndicator.Visible = true, true
 ActiveTabTitle.Text = "🏠 Trang Chủ"
 
@@ -140,7 +160,8 @@ local function CreateHomeCardWithIcon(parent, order, bgColor, titleText, mainTex
     card.Size, card.BackgroundColor3, card.BorderSizePixel = UDim2.new(1, -16, 0, 34), bgColor, 0
     card.Position = UDim2.new(0, 8, 0, 0)
     Instance.new("UICorner", card).CornerRadius = UDim.new(0, 5)
-    local stroke = Instance.new("UIStroke", card) stroke.Color, stroke.Thickness = borderColor, 1.5
+    local stroke = Instance.new("UIStroke", card) 
+    stroke.Color, stroke.Thickness = borderColor, 1.5
     table.insert(AllUIStrokes, stroke)
 
     local iconCircle = Instance.new("Frame", card)
@@ -184,7 +205,8 @@ local function CreateCategoryTab(tabName)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
     tabBtn.Size, tabBtn.Position, tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency, tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment = UDim2.new(1, -6, 0, 30), UDim2.new(0, 3, 0, 0), Color3.fromRGB(22, 25, 34), 0, "   " .. tabName, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 5)
-    local tabStroke = Instance.new("UIStroke", tabBtn) tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
+    local tabStroke = Instance.new("UIStroke", tabBtn) 
+    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
     table.insert(AllUIStrokes, tabStroke)
 
     local indicator = Instance.new("Frame", tabBtn)
@@ -195,24 +217,30 @@ local function CreateCategoryTab(tabName)
     containerFrame.Name = "Container_" .. tabName
     containerFrame.Size, containerFrame.Position, containerFrame.BackgroundTransparency, containerFrame.Visible = UDim2.new(1, -12, 1, -38), UDim2.new(0, 6, 0, 34), 1, false
 
-    local subBar = Instance.new("Frame", containerFrame) subBar.Size, subBar.Position, subBar.BackgroundTransparency = UDim2.new(1, -16, 0, 26), UDim2.new(0, 8, 0, 0), 1
-    local subLayout = Instance.new("UIListLayout", subBar) subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 6)
+    local subBar = Instance.new("Frame", containerFrame) 
+    subBar.Size, subBar.Position, subBar.BackgroundTransparency = UDim2.new(1, -16, 0, 26), UDim2.new(0, 8, 0, 0), 1
+    local subLayout = Instance.new("UIListLayout", subBar) 
+    subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 6)
 
     local noKeyBtn = Instance.new("TextButton", subBar)
     noKeyBtn.Size, noKeyBtn.BackgroundColor3, noKeyBtn.Text, noKeyBtn.TextColor3, noKeyBtn.TextSize, noKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(22, 25, 34), "no key", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold
     Instance.new("UICorner", noKeyBtn).CornerRadius = UDim.new(0, 5)
-    local nkStroke = Instance.new("UIStroke", noKeyBtn) nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2
+    local nkStroke = Instance.new("UIStroke", noKeyBtn) 
+    nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2
 
     local hasKeyBtn = Instance.new("TextButton", subBar)
     hasKeyBtn.Size, hasKeyBtn.BackgroundColor3, hasKeyBtn.Text, hasKeyBtn.TextColor3, hasKeyBtn.TextSize, hasKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(22, 25, 34), "có key", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold
     Instance.new("UICorner", hasKeyBtn).CornerRadius = UDim.new(0, 5)
-    local hkStroke = Instance.new("UIStroke", hasKeyBtn) hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
+    local hkStroke = Instance.new("UIStroke", hasKeyBtn) 
+    hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
     table.insert(AllUIStrokes, hkStroke)
 
-    local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) scrollNoKey.Position, scrollNoKey.Size, scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel, scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = UDim2.new(0, 0, 0, 32), UDim2.new(1, 0, 1, -32), 1, 0, 3, true, true
+    local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) 
+    scrollNoKey.Position, scrollNoKey.Size, scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel, scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = UDim2.new(0, 0, 0, 32), UDim2.new(1, 0, 1, -32), 1, 0, 3, true, true
     local l1 = Instance.new("UIListLayout", scrollNoKey) l1.Padding = UDim.new(0, 5)
 
-    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) scrollHasKey.Position, scrollHasKey.Size, scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel, scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = UDim2.new(0, 0, 0, 32), UDim2.new(1, 0, 1, -32), 1, 0, 3, false, true
+    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) 
+    scrollHasKey.Position, scrollHasKey.Size, scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel, scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = UDim2.new(0, 0, 0, 32), UDim2.new(1, 0, 1, -32), 1, 0, 3, false, true
     local l2 = Instance.new("UIListLayout", scrollHasKey) l2.Padding = UDim.new(0, 5)
 
     SearchInputContent:GetPropertyChangedSignal("Text"):Connect(function()
@@ -249,8 +277,7 @@ local function CreateCategoryTab(tabName)
         SearchInputContent.Text = ""
     end)
 
-    local tabObj = { Container = containerFrame, Indicator = indicator }
-    table.insert(Tabs, tabObj)
+    table.insert(Tabs, { Container = containerFrame, Indicator = indicator })
 
     local Elements = {}
     local function AddBtnTo(parent, name, callback)
@@ -258,7 +285,8 @@ local function CreateCategoryTab(tabName)
         Btn.Size, Btn.BackgroundColor3, Btn.Text, Btn.TextColor3, Btn.TextSize, Btn.Font, Btn.TextXAlignment = UDim2.new(1, -16, 0, 30), Color3.fromRGB(22, 25, 34), "  ▶ " .. name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
         Btn.Position = UDim2.new(0, 8, 0, 0)
         Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 5)
-        local btnStroke = Instance.new("UIStroke", Btn) btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
+        local btnStroke = Instance.new("UIStroke", Btn) 
+        btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(0, 160, 255), 1.5
         table.insert(AllUIStrokes, btnStroke)
         
         Btn.MouseButton1Click:Connect(function()
@@ -306,8 +334,8 @@ tab2:AddHasKey("6. BananaHub(có key)", function() repeat task.wait() until game
 local tab3 = CreateCategoryTab("🌸BREAK AN STEAL🌸")
 tab3:AddNoKey("1. break and steal an egg", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/joustingmatch/Ouroboros/main/loader.lua"))() end)
 
-local tab4 = CreateCategoryTab("Tab 4")
-local tab5 = CreateCategoryTab("Tab 5")
+CreateCategoryTab("Tab 4")
+CreateCategoryTab("Tab 5")
 
 -- TAB 6: MISC
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
