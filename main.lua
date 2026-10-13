@@ -268,7 +268,7 @@ table.insert(Tabs, {Container = t6Scroll, Indicator = t6Indicator})
 local configFolder = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
 
--- 📦 PHẦN PROFILES (THU GỌN CHUẨN)
+-- 📦 PHẦN PROFILES (SỬ DỤNG AUTOMATIC SIZE ĐỂ KHÔNG BAO GIỜ BỊ CHÈN ĐÈ)
 local profileDropdownOpen = false
 local profileToggleHeader = Instance.new("TextButton", t6Scroll)
 profileToggleHeader.LayoutOrder = 1
@@ -278,7 +278,10 @@ local pHeaderStroke = Instance.new("UIStroke", profileToggleHeader) pHeaderStrok
 
 local profileSubContainer = Instance.new("Frame", t6Scroll)
 profileSubContainer.LayoutOrder = 2
-profileSubContainer.Size, profileSubContainer.BackgroundTransparency, profileSubContainer.Visible = UDim2.new(1, -4, 0, 255), 1, false
+profileSubContainer.Size, profileSubContainer.AutomaticSize = UDim2.new(1, -4, 0, 0), Enum.AutomaticSize.Y
+profileSubContainer.BackgroundTransparency = 1
+profileSubContainer.Visible = false
+
 local subProfileLayout = Instance.new("UIListLayout", profileSubContainer)
 subProfileLayout.SortOrder = Enum.SortOrder.LayoutOrder
 subProfileLayout.Padding = UDim.new(0, 6)
@@ -338,7 +341,7 @@ delDropBtn.Size, delDropBtn.Position, delDropBtn.BackgroundColor3, delDropBtn.Te
 Instance.new("UICorner", delDropBtn).CornerRadius = UDim.new(0, 4)
 
 local delDropScroll = Instance.new("ScrollingFrame", delFrame)
-delDropScroll.Position, delDropScroll.Size, delDropScroll.BackgroundColor3, delDropScroll.CanvasSize, delDropScroll.ScrollBarThickness, delDropScroll.Visible, delDropScroll.ClipsDescendants = UDim2.new(0.52, -6, 0, 70), UDim2.new(0.48, 0, 1, 2), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, true
+delDropScroll.Position, delDropScroll.Size, delDropScroll.BackgroundColor3, delDropScroll.CanvasSize, delDropScroll.ScrollBarThickness, delDropScroll.Visible, delDropScroll.ZIndex = UDim2.new(0.48, 0, 1, 4), UDim2.new(0.52, -6, 0, 80), Color3.fromRGB(32, 36, 48), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", delDropScroll).CornerRadius = UDim.new(0, 4)
 Instance.new("UIListLayout", delDropScroll).Padding = UDim.new(0, 2)
 
@@ -357,7 +360,7 @@ startDropBtn.Size, startDropBtn.Position, startDropBtn.BackgroundColor3, startDr
 Instance.new("UICorner", startDropBtn).CornerRadius = UDim.new(0, 4)
 
 local startDropScroll = Instance.new("ScrollingFrame", startFrame)
-startDropScroll.Position, startDropScroll.Size, startDropScroll.BackgroundColor3, startDropScroll.CanvasSize, startDropScroll.ScrollBarThickness, startDropScroll.Visible, startDropScroll.ClipsDescendants = UDim2.new(0.52, -6, 0, 70), UDim2.new(0.48, 0, 1, 2), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, true
+startDropScroll.Position, startDropScroll.Size, startDropScroll.BackgroundColor3, startDropScroll.CanvasSize, startDropScroll.ScrollBarThickness, startDropScroll.Visible, startDropScroll.ZIndex = UDim2.new(0.48, 0, 1, 4), UDim2.new(0.52, -6, 0, 80), Color3.fromRGB(32, 36, 48), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", startDropScroll).CornerRadius = UDim.new(0, 4)
 Instance.new("UIListLayout", startDropScroll).Padding = UDim.new(0, 2)
 
@@ -376,7 +379,7 @@ loadDropBtn.Size, loadDropBtn.Position, loadDropBtn.BackgroundColor3, loadDropBt
 Instance.new("UICorner", loadDropBtn).CornerRadius = UDim.new(0, 4)
 
 local loadDropScroll = Instance.new("ScrollingFrame", loadFrame)
-loadDropScroll.Position, loadDropScroll.Size, loadDropScroll.BackgroundColor3, loadDropScroll.CanvasSize, loadDropScroll.ScrollBarThickness, loadDropScroll.Visible, loadDropScroll.ClipsDescendants = UDim2.new(0.52, -6, 0, 70), UDim2.new(0.48, 0, 1, 2), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, true
+loadDropScroll.Position, loadDropScroll.Size, loadDropScroll.BackgroundColor3, loadDropScroll.CanvasSize, loadDropScroll.ScrollBarThickness, loadDropScroll.Visible, loadDropScroll.ZIndex = UDim2.new(0.48, 0, 1, 4), UDim2.new(0.52, -6, 0, 80), Color3.fromRGB(32, 36, 48), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", loadDropScroll).CornerRadius = UDim.new(0, 4)
 Instance.new("UIListLayout", loadDropScroll).Padding = UDim.new(0, 2)
 
@@ -405,7 +408,7 @@ Instance.new("UICorner", dropBtn).CornerRadius = UDim.new(0, 5)
 
 local dropFrame = Instance.new("ScrollingFrame", t6Scroll)
 dropFrame.LayoutOrder = 4
-dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible, dropFrame.ClipsDescendants = UDim2.new(1, -4, 0, 80), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, true
+dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible, dropFrame.ZIndex = UDim2.new(1, -4, 0, 80), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", dropFrame).CornerRadius = UDim.new(0, 5)
 Instance.new("UIListLayout", dropFrame).Padding = UDim.new(0, 4)
 
@@ -429,7 +432,7 @@ Instance.new("UICorner", musicDropBtn).CornerRadius = UDim.new(0, 5)
 
 local musicDropFrame = Instance.new("ScrollingFrame", t6Scroll)
 musicDropFrame.LayoutOrder = 8
-musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible, musicDropFrame.ClipsDescendants = UDim2.new(1, -4, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, true
+musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible, musicDropFrame.ZIndex = UDim2.new(1, -4, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", musicDropFrame).CornerRadius = UDim.new(0, 5)
 Instance.new("UIListLayout", musicDropFrame).Padding = UDim.new(0, 4)
 
@@ -541,7 +544,7 @@ Instance.new("UICorner", colorDropBtn).CornerRadius = UDim.new(0, 5)
 
 local colorDropFrame = Instance.new("ScrollingFrame", t6Scroll)
 colorDropFrame.LayoutOrder = 12
-colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible, colorDropFrame.ClipsDescendants = UDim2.new(1, -4, 0, 100), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, true
+colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible, colorDropFrame.ZIndex = UDim2.new(1, -4, 0, 100), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 10
 Instance.new("UICorner", colorDropFrame).CornerRadius = UDim.new(0, 5)
 Instance.new("UIListLayout", colorDropFrame).Padding = UDim.new(0, 4)
 
@@ -615,7 +618,7 @@ toggleFpsBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-t6Scroll.CanvasSize = UDim2.new(0, 0, 0, 720)
+t6Scroll.CanvasSize = UDim2.new(0, 0, 0, 800)
 
 -- 📐 RESIZE GÓC PHẢI DƯỚI
 local ResizeBtn = Instance.new("TextButton", MainFrame)
@@ -653,7 +656,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- LOGIC CẤU HÌNH & TẢI DROPDOWNS
+-- LOGIC CẤU HÌNH & TẢI DROPDOWNS KHÔNG CHÈN ĐÈ
 local function refreshAllProfileDropdowns()
     for _, c in ipairs(delDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
     for _, c in ipairs(startDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
@@ -666,7 +669,7 @@ local function refreshAllProfileDropdowns()
         local idx = 0
         for _, file in ipairs(files) do
             idx = idx + 1
-            local fName = file:match("([^/]+)$"):gsub("\%.json$", "")
+            local fName = file:match("([^/]+)$"):gsub("%.json$", "")
             
             local b1 = Instance.new("TextButton", delDropScroll)
             b1.LayoutOrder = idx
@@ -834,4 +837,4 @@ pcall(function()
             loadConfigByName(defName)
         end
     end
-end)
+end) 
