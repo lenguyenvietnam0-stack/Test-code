@@ -35,7 +35,7 @@ local Logo = Instance.new("ImageLabel", TopBar) Logo.Size, Logo.Position, Logo.B
 Instance.new("UICorner", Logo).CornerRadius = UDim.new(1, 0)
 
 local Title = Instance.new("TextLabel", TopBar)
-Title.Size, Title.Position, Title.BackgroundTransparency, Title.Text, Title.TextColor3, Title.TextSize, Title.Font, Title.TextXAlignment = UDim2.new(1, -70, 1, 0), UDim2.new(0, 32, 0, 0), 1, "🌸 VzNam Hub v3 : Tổng Hợp 🌸", Color3.fromRGB(255, 105, 180), 12, Enum.Font.GothamBold, Enum.TextXAlignment.Center
+Title.Size, Title.Position, Title.BackgroundTransparency, Title.Text, Title.TextColor3, Title.TextSize, Title.Font, Title.TextXAlignment = UDim2.new(1, -70, 1, 0), UDim2.new(0, 32, 0, 0), 1, "🌸 VzNam Hub v4 🌸", Color3.fromRGB(255, 105, 180), 12, Enum.Font.GothamBold, Enum.TextXAlignment.Center
 
 local CloseBtn = Instance.new("TextButton", TopBar)
 CloseBtn.Size, CloseBtn.Position, CloseBtn.BackgroundTransparency, CloseBtn.Text, CloseBtn.TextColor3, CloseBtn.TextSize, CloseBtn.Font = UDim2.new(0, 26, 0, 26), UDim2.new(1, -28, 0.5, -13), 1, "✕", Color3.fromRGB(200, 200, 210), 11, Enum.Font.GothamBold
@@ -468,7 +468,7 @@ RunService.RenderStepped:Connect(function()
 end)
 miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1400)
 -- ============================================================================
--- TAB 7: CẤU HÌNH & PROFILES (Đồng bộ toàn bộ phụ đề và font Gotham chuẩn nét)
+-- TAB 7: CẤU HÌNH & PROFILES (Auto Lưu/Tải cố định Default)
 -- ============================================================================
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
 tabConfigBtn.Size, tabConfigBtn.BackgroundColor3, tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0, "   📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
@@ -514,61 +514,24 @@ configToggleBtn.MouseButton1Click:Connect(function()
     configSubLabel.Visible = configContainer.Visible
 end)
 
+local currentConfigName = "Default"
+
+-- 1. Startup Cấu Hình
 local startupFrame = Instance.new("Frame", configContainer)
 startupFrame.LayoutOrder = 1 startupFrame.Size, startupFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", startupFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", startupFrame).Color = Color3.fromRGB(40, 43, 52)
-local startupBtn = Instance.new("TextButton", startupFrame)
-startupBtn.Size, startupBtn.Position, startupBtn.BackgroundTransparency, startupBtn.Text, startupBtn.TextColor3, startupBtn.TextSize, startupBtn.Font, startupBtn.TextXAlignment = UDim2.new(1, -12, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Startup Cấu Hình: Default", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 
-local startupDropFrame = Instance.new("ScrollingFrame", configContainer)
-startupDropFrame.LayoutOrder = 2 startupDropFrame.Size, startupDropFrame.BackgroundColor3, startupDropFrame.CanvasSize, startupDropFrame.ScrollBarThickness, startupDropFrame.Visible = UDim2.new(1, 0, 0, 90), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
-Instance.new("UICorner", startupDropFrame).CornerRadius = UDim.new(0, 5)
-local stDropLayout = Instance.new("UIListLayout", startupDropFrame) stDropLayout.Padding = UDim.new(0, 4)
+local startupLabel = Instance.new("TextLabel", startupFrame)
+startupLabel.Size, startupLabel.Position, startupLabel.BackgroundTransparency, startupLabel.Text, startupLabel.TextColor3, startupLabel.TextSize, startupLabel.Font, startupLabel.TextXAlignment = UDim2.new(1, -12, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Startup Cấu Hình: " .. currentConfigName, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 
-local asSub, alSub
-local currentConfigName = "Default"
-
-local function updateStartupList()
-    for _, child in ipairs(startupDropFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
-    local count = 0
-    if typeof(listfiles) == "function" then
-        local success, files = pcall(listfiles, configFolder)
-        if success then
-            for _, file in ipairs(files) do
-                if string.sub(file, -5) == ".json" then
-                    count = count + 1
-                    local fileName = string.match(file, "[^/\\]+$")
-                    fileName = string.sub(fileName, 1, -6)
-                    local fileBtn = Instance.new("TextButton", startupDropFrame)
-                    fileBtn.LayoutOrder = count
-                    fileBtn.Size, fileBtn.BackgroundColor3, fileBtn.Text, fileBtn.TextColor3, fileBtn.TextSize, fileBtn.Font, fileBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), "  📁 " .. fileName, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
-                    Instance.new("UICorner", fileBtn).CornerRadius = UDim.new(0, 4)
-                    fileBtn.MouseButton1Click:Connect(function()
-                        startupBtn.Text = "Startup Cấu Hình: " .. fileName
-                        currentConfigName = fileName
-                        if asSub then asSub.Text = "Auto save: " .. fileName end
-                        if alSub then alSub.Text = "Auto load: " .. fileName end
-                        startupDropFrame.Visible = false
-                    end)
-                end
-            end
-        end
-    end
-    startupDropFrame.CanvasSize = UDim2.new(0, 0, 0, count * 30)
-end
-
-startupBtn.MouseButton1Click:Connect(function()
-    updateStartupList()
-    startupDropFrame.Visible = not startupDropFrame.Visible
-end)
-
+-- 2. Auto Lưu Cấu Hình (Cố định Default)
 local autoSaveFrame = Instance.new("Frame", configContainer)
-autoSaveFrame.LayoutOrder = 3 autoSaveFrame.Size, autoSaveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 44), Color3.fromRGB(22, 25, 34)
+autoSaveFrame.LayoutOrder = 2 autoSaveFrame.Size, autoSaveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 44), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", autoSaveFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", autoSaveFrame).Color = Color3.fromRGB(40, 43, 52)
 local asTitle = Instance.new("TextLabel", autoSaveFrame)
 asTitle.Size, asTitle.Position, asTitle.BackgroundTransparency, asTitle.Text, asTitle.TextColor3, asTitle.TextSize, asTitle.Font, asTitle.TextXAlignment = UDim2.new(1, -50, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Auto Lưu Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
-asSub = Instance.new("TextLabel", autoSaveFrame)
+local asSub = Instance.new("TextLabel", autoSaveFrame)
 asSub.Size, asSub.Position, asSub.BackgroundTransparency, asSub.Text, asSub.TextColor3, asSub.TextSize, asSub.Font, asSub.TextXAlignment = UDim2.new(1, -50, 0, 16), UDim2.new(0, 8, 0, 22), 1, "Auto save: Default", Color3.fromRGB(140, 140, 150), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
 
 local autoSaveToggle = Instance.new("TextButton", autoSaveFrame)
@@ -584,13 +547,14 @@ autoSaveToggle.MouseButton1Click:Connect(function()
     asBox.Position = isAutoSave and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
 end)
 
+-- 3. Auto Tải Cấu Hình (Cố định Default)
 local autoLoadFrame = Instance.new("Frame", configContainer)
-autoLoadFrame.LayoutOrder = 4 autoLoadFrame.Size, autoLoadFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 44), Color3.fromRGB(22, 25, 34)
+autoLoadFrame.LayoutOrder = 3 autoLoadFrame.Size, autoLoadFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 44), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", autoLoadFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", autoLoadFrame).Color = Color3.fromRGB(40, 43, 52)
 local alTitle = Instance.new("TextLabel", autoLoadFrame)
 alTitle.Size, alTitle.Position, alTitle.BackgroundTransparency, alTitle.Text, alTitle.TextColor3, alTitle.TextSize, alTitle.Font, alTitle.TextXAlignment = UDim2.new(1, -50, 0, 20), UDim2.new(0, 8, 0, 3), 1, "Auto Tải Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
-alSub = Instance.new("TextLabel", autoLoadFrame)
+local alSub = Instance.new("TextLabel", autoLoadFrame)
 alSub.Size, alSub.Position, alSub.BackgroundTransparency, alSub.Text, alSub.TextColor3, alSub.TextSize, alSub.Font, alSub.TextXAlignment = UDim2.new(1, -50, 0, 16), UDim2.new(0, 8, 0, 22), 1, "Auto load: Default", Color3.fromRGB(140, 140, 150), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
 
 local autoLoadToggle = Instance.new("TextButton", autoLoadFrame)
@@ -606,6 +570,7 @@ autoLoadToggle.MouseButton1Click:Connect(function()
     alBox.Position = isAutoLoad and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
 end)
 
+-- Nhóm Profiles
 local profilesToggleBtn = Instance.new("TextButton", configScroll)
 profilesToggleBtn.LayoutOrder = 5
 profilesToggleBtn.Size, profilesToggleBtn.BackgroundColor3, profilesToggleBtn.Text, profilesToggleBtn.TextColor3, profilesToggleBtn.TextSize, profilesToggleBtn.Font, profilesToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ Profiles", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -654,6 +619,7 @@ createBtn.MouseButton1Click:Connect(function()
     if name ~= "" and typeof(writefile) == "function" then
         pcall(writefile, configFolder .. "/" .. name .. ".json", HttpService:JSONEncode({SavedTime = os.time()}))
         currentConfigName = name
+        startupLabel.Text = "Startup Cấu Hình: " .. name
         configNameBox.Text = ""
     end
 end)
@@ -693,6 +659,10 @@ local function updateDeleteList()
                             pcall(delfile, configFolder .. "/" .. fileName .. ".json")
                         end
                         delBtn.Text = "Xoá: " .. fileName
+                        if currentConfigName == fileName then
+                            currentConfigName = "Default"
+                            startupLabel.Text = "Startup Cấu Hình: Default"
+                        end
                         delDropFrame.Visible = false
                     end)
                 end
