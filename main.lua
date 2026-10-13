@@ -4,7 +4,7 @@ local PlayerGui = localPlayer:FindFirstChildOfClass("PlayerGui") or CoreGui
 
 if PlayerGui:FindFirstChild("VzNamHubV4UI") then PlayerGui.VzNamHubV4UI:Destroy() end
 
-local LastSelectedScriptBtn, LastSelectedScriptStroke = nil, nil
+local LastSelectedScriptStroke = nil
 local RegisteredScripts = {}
 local AllUIStrokes = {}
 
@@ -102,7 +102,6 @@ end)
 
 local HeaderDivider = Instance.new("Frame", ContentContainer) HeaderDivider.Size, HeaderDivider.Position, HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = UDim2.new(1, 0, 0, 1), UDim2.new(0, 0, 0, 30), Color3.fromRGB(40, 43, 52), 0
 local Tabs = {}
-local FirstTab = nil
 
 -- TAB 0: TRANG CHỦ
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
@@ -127,9 +126,7 @@ tabHomeBtn.MouseButton1Click:Connect(function()
     SearchInputContent.Text = ""
 end)
 
-local homeTabObj = { Container = homeScroll, Indicator = homeIndicator }
-table.insert(Tabs, homeTabObj)
-FirstTab = homeTabObj
+table.insert(Tabs, { Container = homeScroll, Indicator = homeIndicator })
 homeScroll.Visible, homeIndicator.Visible = true, true
 ActiveTabTitle.Text = "🏠 Trang Chủ"
 
@@ -178,7 +175,6 @@ end
 CreateHomeCardWithIcon(homeScroll, 1, Color3.fromRGB(45, 25, 30), "ĐƯỢC TẠO BỞI", "VzNam ROBLOX", "", Color3.fromRGB(180, 50, 50), "👤")
 CreateHomeCardWithIcon(homeScroll, 2, Color3.fromRGB(30, 35, 55), "DISCORD SERVER", "https://discord.gg/6TG7krbsU", "https://discord.gg/6TG7krbsU", Color3.fromRGB(60, 100, 200), "💬")
 CreateHomeCardWithIcon(homeScroll, 3, Color3.fromRGB(35, 35, 45), "TIKTOK CHANNEL", "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y", "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y", Color3.fromRGB(100, 100, 120), "🎵")
-
 homeScroll.CanvasSize = UDim2.new(0, 0, 0, 160)
 
 local function CreateCategoryTab(tabName)
@@ -251,8 +247,7 @@ local function CreateCategoryTab(tabName)
         SearchInputContent.Text = ""
     end)
 
-    local tabObj = { Container = containerFrame, Indicator = indicator }
-    table.insert(Tabs, tabObj)
+    table.insert(Tabs, { Container = containerFrame, Indicator = indicator })
 
     local Elements = {}
     local function AddBtnTo(parent, name, callback)
@@ -276,7 +271,7 @@ local function CreateCategoryTab(tabName)
     return Elements
 end
 
--- TAB 1: STEAL AN EGG
+-- TẠO CÁC TAB CHỨC NĂNG
 local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸")
 tab1:AddNoKey("1. Hop sv1 người(nokey)", function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end)
 tab1:AddNoKey("2. FyyCommunity(lúc có key lúc no key)", function() loadstring(game:HttpGet("https://FyyCommunity.my.id"))() end)
@@ -292,7 +287,6 @@ tab1:AddHasKey("6. Neohub(có key)", function() loadstring(game:HttpGet("https:/
 tab1:AddHasKey("7. Real kid(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua"))() end)
 tab1:AddHasKey("8. Chilli v2(có key)", function() loadstring(game:HttpGet("https://gist.githubusercontent.com/ronnei/1fa67c56dd9af203b192d15e752928e5/raw/4e2d5105640e09a008b4ae6df23f9708cadfef06/chilliv2-stealanegg"))() end)
 
--- TAB 2: BLOX FRUIT
 local tab2 = CreateCategoryTab("🌸BLOX FRUIT🌸")
 tab2:AddNoKey("1. RedzHub v2 (no key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/UCT-hub/main/refs/heads/main/redz-v2"))() end)
 tab2:AddNoKey("2. Quantumx Hub(nokey)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua"))() end)
@@ -332,7 +326,7 @@ tabMiscBtn.MouseButton1Click:Connect(function()
 end)
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
--- 1. Mục: auto load script
+-- Auto Load Script
 local autoLoadToggleBtn = Instance.new("TextButton", miscScroll)
 autoLoadToggleBtn.LayoutOrder = 1
 autoLoadToggleBtn.Size, autoLoadToggleBtn.BackgroundColor3, autoLoadToggleBtn.Text, autoLoadToggleBtn.TextColor3, autoLoadToggleBtn.TextSize, autoLoadToggleBtn.Font, autoLoadToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ auto load script", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -375,7 +369,7 @@ dropBtn.MouseButton1Click:Connect(function() dropFrame.Visible = not dropFrame.V
 local autoLoadScriptFrame = Instance.new("Frame", autoLoadContainer)
 autoLoadScriptFrame.LayoutOrder = 3 autoLoadScriptFrame.Size, autoLoadScriptFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", autoLoadScriptFrame).CornerRadius = UDim.new(0, 5) 
-local alsStroke = Instance.new("UIStroke", autoLoadScriptFrame) alsStroke.Color = Color3.fromRGB(40, 43, 52)
+local alsStroke = Instance.new("UIStroke", autoLoadScriptFrame) alsStroke.Color, alsStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, alsStroke)
 
 local alsTitle = Instance.new("TextLabel", autoLoadScriptFrame)
@@ -399,7 +393,7 @@ toggleAutoBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2. Mục: âm nhạc
+-- Âm nhạc
 local musicToggleBtn = Instance.new("TextButton", miscScroll)
 musicToggleBtn.LayoutOrder = 3
 musicToggleBtn.Size, musicToggleBtn.BackgroundColor3, musicToggleBtn.Text, musicToggleBtn.TextColor3, musicToggleBtn.TextSize, musicToggleBtn.Font, musicToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ âm nhạc", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -444,7 +438,7 @@ musicDropFrame.LayoutOrder = 3 musicDropFrame.Size, musicDropFrame.BackgroundCol
 Instance.new("UICorner", musicDropFrame).CornerRadius = UDim.new(0, 5)
 local mdfStroke = Instance.new("UIStroke", musicDropFrame) mdfStroke.Color, mdfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, mdfStroke)
-local musicLayout = Instance.new("UIListLayout", musicDropFrame) musicLayout.Padding = UDim.new(0, 4)
+local musicListLayout = Instance.new("UIListLayout", musicDropFrame) musicListLayout.Padding = UDim.new(0, 4)
 
 local presetMusics = {
     {Name = "🎵 Chill Lofi Music", Id = "1837879082"},
@@ -457,6 +451,8 @@ for i, m in ipairs(presetMusics) do
     local mBtn = Instance.new("TextButton", musicDropFrame)
     mBtn.LayoutOrder = i mBtn.Size, mBtn.BackgroundColor3, mBtn.Text, mBtn.TextColor3, mBtn.TextSize, mBtn.Font, mBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), " " .. m.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", mBtn).CornerRadius = UDim.new(0, 4)
+    local mbs = Instance.new("UIStroke", mBtn) mbs.Color, mbs.Thickness = Color3.fromRGB(40, 43, 52), 1
+    table.insert(AllUIStrokes, mbs)
     mBtn.MouseButton1Click:Connect(function()
         currentSoundId = m.Id musicDropBtn.Text = " 🎵 " .. m.Name musicDropFrame.Visible = false
         if HubSound.IsPlaying then HubSound.SoundId = "rbxassetid://" .. currentSoundId HubSound:Play() end
@@ -505,7 +501,7 @@ end)
 local musicToggleFrame = Instance.new("Frame", musicContainer)
 musicToggleFrame.LayoutOrder = 5 musicToggleFrame.Size, musicToggleFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", musicToggleFrame).CornerRadius = UDim.new(0, 5) 
-local mtfStroke = Instance.new("UIStroke", musicToggleFrame) mtfStroke.Color = Color3.fromRGB(40, 43, 52)
+local mtfStroke = Instance.new("UIStroke", musicToggleFrame) mtfStroke.Color, mtfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, mtfStroke)
 
 local musicTitle = Instance.new("TextLabel", musicToggleFrame)
@@ -532,7 +528,7 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Mục: màu menu & chỉnh màu viền (Viền tab xếp dưới màu menu)
+-- Màu Menu & Viền Tab
 local colorToggleBtn = Instance.new("TextButton", miscScroll)
 colorToggleBtn.LayoutOrder = 5
 colorToggleBtn.Size, colorToggleBtn.BackgroundColor3, colorToggleBtn.Text, colorToggleBtn.TextColor3, colorToggleBtn.TextSize, colorToggleBtn.Font, colorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -581,6 +577,8 @@ for i, cItem in ipairs(colorList) do
     local cBtn = Instance.new("TextButton", colorDropFrame)
     cBtn.LayoutOrder = i cBtn.Size, cBtn.BackgroundColor3, cBtn.Text, cBtn.TextColor3, cBtn.TextSize, cBtn.Font, cBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), " " .. cItem.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 4)
+    local cbs = Instance.new("UIStroke", cBtn) cbs.Color, cbs.Thickness = Color3.fromRGB(40, 43, 52), 1
+    table.insert(AllUIStrokes, cbs)
     cBtn.MouseButton1Click:Connect(function()
         selectedColorObj = cItem colorDropBtn.Text = " 🎨 Đã chọn: " .. cItem.Name colorDropFrame.Visible = false
     end)
@@ -591,7 +589,7 @@ colorDropBtn.MouseButton1Click:Connect(function() colorDropFrame.Visible = not c
 local colorToggleFrame = Instance.new("Frame", colorContainer)
 colorToggleFrame.LayoutOrder = 3 colorToggleFrame.Size, colorToggleFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", colorToggleFrame).CornerRadius = UDim.new(0, 5) 
-local ctfStroke = Instance.new("UIStroke", colorToggleFrame) ctfStroke.Color = Color3.fromRGB(40, 43, 52)
+local ctfStroke = Instance.new("UIStroke", colorToggleFrame) ctfStroke.Color, ctfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, ctfStroke)
 
 local colorTitle = Instance.new("TextLabel", colorToggleFrame)
@@ -641,6 +639,8 @@ for i, bItem in ipairs(borderList) do
     local bBtn = Instance.new("TextButton", borderDropFrame)
     bBtn.LayoutOrder = i bBtn.Size, bBtn.BackgroundColor3, bBtn.Text, bBtn.TextColor3, bBtn.TextSize, bBtn.Font, bBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), " " .. bItem.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", bBtn).CornerRadius = UDim.new(0, 4)
+    local bbs = Instance.new("UIStroke", bBtn) bbs.Color, bbs.Thickness = Color3.fromRGB(40, 43, 52), 1
+    table.insert(AllUIStrokes, bbs)
     bBtn.MouseButton1Click:Connect(function()
         selectedBorderObj = bItem borderDropBtn.Text = " 🖍️ Viền Tab: " .. bItem.Name borderDropFrame.Visible = false
     end)
@@ -725,7 +725,7 @@ end)
 local startupFrame = Instance.new("Frame", mainConfigContainer)
 startupFrame.LayoutOrder = 1 startupFrame.Size, startupFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", startupFrame).CornerRadius = UDim.new(0, 5) 
-local stfStroke = Instance.new("UIStroke", startupFrame) stfStroke.Color = Color3.fromRGB(40, 43, 52)
+local stfStroke = Instance.new("UIStroke", startupFrame) stfStroke.Color, stfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, stfStroke)
 
 local startupLabel = Instance.new("TextLabel", startupFrame)
@@ -734,7 +734,7 @@ startupLabel.Size, startupLabel.Position, startupLabel.BackgroundTransparency, s
 local autoSaveFrame = Instance.new("Frame", mainConfigContainer)
 autoSaveFrame.LayoutOrder = 2 autoSaveFrame.Size, autoSaveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 44), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", autoSaveFrame).CornerRadius = UDim.new(0, 5) 
-local asfStroke = Instance.new("UIStroke", autoSaveFrame) asfStroke.Color = Color3.fromRGB(40, 43, 52)
+local asfStroke = Instance.new("UIStroke", autoSaveFrame) asfStroke.Color, asfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, asfStroke)
 
 local asTitle = Instance.new("TextLabel", autoSaveFrame)
@@ -758,7 +758,7 @@ end)
 local autoLoadFrame = Instance.new("Frame", mainConfigContainer)
 autoLoadFrame.LayoutOrder = 3 autoLoadFrame.Size, autoLoadFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 44), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", autoLoadFrame).CornerRadius = UDim.new(0, 5) 
-local alfStroke = Instance.new("UIStroke", autoLoadFrame) alfStroke.Color = Color3.fromRGB(40, 43, 52)
+local alfStroke = Instance.new("UIStroke", autoLoadFrame) alfStroke.Color, alfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, alfStroke)
 
 local alTitle = Instance.new("TextLabel", autoLoadFrame)
@@ -805,7 +805,7 @@ end)
 local newConfigFrame = Instance.new("Frame", profilesContainer)
 newConfigFrame.LayoutOrder = 1 newConfigFrame.Size, newConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", newConfigFrame).CornerRadius = UDim.new(0, 5) 
-local ncfStroke = Instance.new("UIStroke", newConfigFrame) ncfStroke.Color = Color3.fromRGB(40, 43, 52)
+local ncfStroke = Instance.new("UIStroke", newConfigFrame) ncfStroke.Color, ncfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, ncfStroke)
 
 local ncLabel = Instance.new("TextLabel", newConfigFrame)
@@ -820,7 +820,7 @@ table.insert(AllUIStrokes, cnbStroke)
 local createFrame = Instance.new("Frame", profilesContainer)
 createFrame.LayoutOrder = 2 createFrame.Size, createFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 42), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", createFrame).CornerRadius = UDim.new(0, 5) 
-local crfStroke = Instance.new("UIStroke", createFrame) crfStroke.Color = Color3.fromRGB(40, 43, 52)
+local crfStroke = Instance.new("UIStroke", createFrame) crfStroke.Color, crfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, crfStroke)
 
 local crTitle = Instance.new("TextLabel", createFrame)
@@ -837,7 +837,7 @@ table.insert(AllUIStrokes, cbStroke)
 local deleteFrame = Instance.new("Frame", profilesContainer)
 deleteFrame.LayoutOrder = 3 deleteFrame.Size, deleteFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", deleteFrame).CornerRadius = UDim.new(0, 5) 
-local dlfStroke = Instance.new("UIStroke", deleteFrame) dlfStroke.Color = Color3.fromRGB(40, 43, 52)
+local dlfStroke = Instance.new("UIStroke", deleteFrame) dlfStroke.Color, dlfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, dlfStroke)
 
 local delLabel = Instance.new("TextLabel", deleteFrame)
@@ -859,7 +859,7 @@ local delDropLayout = Instance.new("UIListLayout", delDropFrame) delDropLayout.P
 local startupProfileFrame = Instance.new("Frame", profilesContainer)
 startupProfileFrame.LayoutOrder = 5 startupProfileFrame.Size, startupProfileFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", startupProfileFrame).CornerRadius = UDim.new(0, 5) 
-local spfStroke = Instance.new("UIStroke", startupProfileFrame) spfStroke.Color = Color3.fromRGB(40, 43, 52)
+local spfStroke = Instance.new("UIStroke", startupProfileFrame) spfStroke.Color, spfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, spfStroke)
 
 local stProfileLabel = Instance.new("TextLabel", startupProfileFrame)
@@ -881,7 +881,7 @@ local stProfileLayout = Instance.new("UIListLayout", stProfileDrop) stProfileLay
 local loadConfigFrame = Instance.new("Frame", profilesContainer)
 loadConfigFrame.LayoutOrder = 7 loadConfigFrame.Size, loadConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", loadConfigFrame).CornerRadius = UDim.new(0, 5) 
-local lcfStroke = Instance.new("UIStroke", loadConfigFrame) lcfStroke.Color = Color3.fromRGB(40, 43, 52)
+local lcfStroke = Instance.new("UIStroke", loadConfigFrame) lcfStroke.Color, lcfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, lcfStroke)
 
 local ldLabel = Instance.new("TextLabel", loadConfigFrame)
@@ -903,7 +903,7 @@ local ldDropLayout = Instance.new("UIListLayout", ldDropFrame) ldDropLayout.Padd
 local saveFrame = Instance.new("Frame", profilesContainer)
 saveFrame.LayoutOrder = 9 saveFrame.Size, saveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 42), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", saveFrame).CornerRadius = UDim.new(0, 5) 
-local svfStroke = Instance.new("UIStroke", saveFrame) svfStroke.Color = Color3.fromRGB(40, 43, 52)
+local svfStroke = Instance.new("UIStroke", saveFrame) svfStroke.Color, svfStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 table.insert(AllUIStrokes, svfStroke)
 
 local svTitle = Instance.new("TextLabel", saveFrame)
@@ -1066,7 +1066,7 @@ for i, scr in ipairs(RegisteredScripts) do
 end
 dropFrame.CanvasSize = UDim2.new(0, 0, 0, dh)
 
--- NÚT MỞ/ĐÓNG MENU: TRÒN HOÀN TOÀN, VIỀN TRẮNG DÀY, CHỮ BÔNG HOA CÓ VIỀN TRẮNG DÀY
+-- NÚT MỞ/ĐÓNG MENU TRÒN & CÓ VIỀN TRẮNG DÀY
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Name = "VzNamOpenBtn"
 OpenButton.Size = UDim2.new(0, 45, 0, 45)
