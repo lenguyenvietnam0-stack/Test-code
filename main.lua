@@ -1,4 +1,4 @@
-local CoreGui, Players, TweenService, UserInputService, SoundService, HttpService, RunService = game:GetService("CoreGui"), game:GetService("Players"), game:GetService("TweenService"), game:GetService("UserInputService"), game:GetService("SoundService"), game:GetService("HttpService"), game:GetService("RunService")
+local CoreGui, Players, UserInputService, SoundService, HttpService = game:GetService("CoreGui"), game:GetService("Players"), game:GetService("UserInputService"), game:GetService("SoundService"), game:GetService("HttpService")
 local localPlayer = Players.LocalPlayer
 local PlayerGui = localPlayer:FindFirstChildOfClass("PlayerGui") or CoreGui
 
@@ -528,7 +528,7 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Màu Menu & Viền Tab (Không còn Rainbow)
+-- Màu Menu & Viền Tab
 local colorToggleBtn = Instance.new("TextButton", miscScroll)
 colorToggleBtn.LayoutOrder = 5
 colorToggleBtn.Size, colorToggleBtn.BackgroundColor3, colorToggleBtn.Text, colorToggleBtn.TextColor3, colorToggleBtn.TextSize, colorToggleBtn.Font, colorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -606,9 +606,12 @@ toggleColorBtn.MouseButton1Click:Connect(function()
     isColorApplied = not isColorApplied
     if isColorApplied then
         toggleColorBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50) colorDot.Position = UDim2.new(1, -18, 0.5, -8)
+        SidebarPanel.BackgroundColor3 = selectedColorObj.Color 
+        ContentContainer.BackgroundColor3 = selectedColorObj.Color
     else
         toggleColorBtn.BackgroundColor3 = Color3.fromRGB(60, 65, 75) colorDot.Position = UDim2.new(0, 2, 0.5, -8)
-        SidebarPanel.BackgroundColor3 = Color3.fromRGB(15, 16, 22) ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
+        SidebarPanel.BackgroundColor3 = Color3.fromRGB(15, 16, 22) 
+        ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
     end
 end)
 
@@ -640,7 +643,9 @@ for i, bItem in ipairs(borderList) do
     local bbs = Instance.new("UIStroke", bBtn) bbs.Color, bbs.Thickness = Color3.fromRGB(40, 43, 52), 1
     table.insert(AllUIStrokes, bbs)
     bBtn.MouseButton1Click:Connect(function()
-        selectedBorderObj = bItem borderDropBtn.Text = " 🖍️ Viền Tab: " .. bItem.Name borderDropFrame.Visible = false
+        selectedBorderObj = bItem 
+        borderDropBtn.Text = " 🖍️ Viền Tab: " .. bItem.Name 
+        borderDropFrame.Visible = false
         for _, stroke in ipairs(AllUIStrokes) do
             if stroke and stroke.Parent then stroke.Color = selectedBorderObj.Color end
         end
@@ -649,13 +654,6 @@ end
 borderDropFrame.CanvasSize = UDim2.new(0, 0, 0, #borderList * 30)
 borderDropBtn.MouseButton1Click:Connect(function() borderDropFrame.Visible = not borderDropFrame.Visible end)
 
-RunService.RenderStepped:Connect(function()
-    if isColorApplied then
-        if typeof(selectedColorObj.Color) == "Color3" then
-            SidebarPanel.BackgroundColor3 = selectedColorObj.Color ContentContainer.BackgroundColor3 = selectedColorObj.Color
-        end
-    end
-end)
 miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1400)
 
 -- TAB 7: CẤU HÌNH & PROFILES
