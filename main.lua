@@ -255,152 +255,50 @@ table.insert(Tabs, {Container = t6Scroll, Indicator = t6Indicator})
 local configFolder = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
 
--- 📦 PROFILES
-local profileDropdownOpen = false
-local profileToggleHeader = Instance.new("TextButton", t6Scroll)
-profileToggleHeader.LayoutOrder = 1
-profileToggleHeader.Size, profileToggleHeader.BackgroundColor3, profileToggleHeader.Text, profileToggleHeader.TextColor3, profileToggleHeader.TextSize, profileToggleHeader.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(20, 22, 30), "👉 Profiles", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
-Instance.new("UICorner", profileToggleHeader).CornerRadius = UDim.new(0, 5)
-local pHeaderStroke = Instance.new("UIStroke", profileToggleHeader) pHeaderStroke.Color, pHeaderStroke.Thickness = Color3.fromRGB(50, 150, 255), 1.5
+-- TIÊU ĐỀ PROFILES
+local profileHeader = Instance.new("TextButton", t6Scroll)
+profileHeader.LayoutOrder = 1
+profileHeader.Size, profileHeader.BackgroundColor3, profileHeader.Text, profileHeader.TextColor3, profileHeader.TextSize, profileHeader.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(20, 22, 30), "📦 Quản Lý Profiles", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
+Instance.new("UICorner", profileHeader).CornerRadius = UDim.new(0, 5)
 
-local profileSubContainer = Instance.new("Frame", t6Scroll)
-profileSubContainer.LayoutOrder = 2
-profileSubContainer.Size, profileSubContainer.AutomaticSize = UDim2.new(1, -4, 0, 0), Enum.AutomaticSize.Y
-profileSubContainer.BackgroundTransparency = 1
-profileSubContainer.Visible = false
+-- Ô NHẬP TÊN CẤU HÌNH MỚI
+local newConfigInput = Instance.new("TextBox", t6Scroll)
+newConfigInput.LayoutOrder = 2
+newConfigInput.Size, newConfigInput.BackgroundColor3, newConfigInput.TextColor3, newConfigInput.PlaceholderText, newConfigInput.PlaceholderColor3, newConfigInput.TextSize, newConfigInput.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(22, 25, 34), Color3.fromRGB(255, 255, 255), "Nhập tên cấu hình mới...", Color3.fromRGB(140, 140, 150), 10, Enum.Font.FredokaOne
+Instance.new("UICorner", newConfigInput).CornerRadius = UDim.new(0, 5)
 
-local subProfileLayout = Instance.new("UIListLayout", profileSubContainer)
-subProfileLayout.SortOrder = Enum.SortOrder.LayoutOrder
-subProfileLayout.Padding = UDim.new(0, 6)
+-- NÚT LƯU CẤU HÌNH
+local saveBtn = Instance.new("TextButton", t6Scroll)
+saveBtn.LayoutOrder = 3
+saveBtn.Size, saveBtn.BackgroundColor3, saveBtn.Text, saveBtn.TextColor3, saveBtn.TextSize, saveBtn.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(220, 50, 50), "💾 Lưu Cấu Hình (Default)", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
+Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 5)
 
-profileToggleHeader.MouseButton1Click:Connect(function()
-    profileDropdownOpen = not profileDropdownOpen
-    if profileDropdownOpen then
-        profileToggleHeader.Text = "👇 Profiles"
-        profileSubContainer.Visible = true
-    else
-        profileToggleHeader.Text = "👉 Profiles"
-        profileSubContainer.Visible = false
-    end
-end)
-
--- 1. New Cấu Hình Name
-local newConfigFrame = Instance.new("Frame", profileSubContainer)
-newConfigFrame.LayoutOrder = 1
-newConfigFrame.Size, newConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", newConfigFrame).CornerRadius = UDim.new(0, 5)
-
-local newConfigLabel = Instance.new("TextLabel", newConfigFrame)
-newConfigLabel.Size, newConfigLabel.Position, newConfigLabel.BackgroundTransparency, newConfigLabel.Text, newConfigLabel.TextColor3, newConfigLabel.TextSize, newConfigLabel.Font, newConfigLabel.TextXAlignment = UDim2.new(0.45, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "New Cấu Hình Name", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-local newConfigInput = Instance.new("TextBox", newConfigFrame)
-newConfigInput.Size, newConfigInput.Position, newConfigInput.BackgroundColor3, newConfigInput.TextColor3, newConfigInput.PlaceholderText, newConfigInput.PlaceholderColor3, newConfigInput.TextSize, newConfigInput.Font = UDim2.new(0.52, -6, 0, 24), UDim2.new(0.48, 0, 0.5, -12), Color3.fromRGB(28, 32, 42), Color3.fromRGB(255, 255, 255), "New config name...", Color3.fromRGB(140, 140, 150), 10, Enum.Font.FredokaOne
-Instance.new("UICorner", newConfigInput).CornerRadius = UDim.new(0, 4)
-
--- 2. Create New Cấu Hình
-local createFrame = Instance.new("Frame", profileSubContainer)
-createFrame.LayoutOrder = 2
-createFrame.Size, createFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", createFrame).CornerRadius = UDim.new(0, 5)
-
-local createTitle = Instance.new("TextLabel", createFrame)
-createTitle.Size, createTitle.Position, createTitle.BackgroundTransparency, createTitle.Text, createTitle.TextColor3, createTitle.TextSize, createTitle.Font, createTitle.TextXAlignment = UDim2.new(1, -100, 0, 20), UDim2.new(0, 8, 0, 2), 1, "Create New Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-local createSub = Instance.new("TextLabel", createFrame)
-createSub.Size, createSub.Position, createSub.BackgroundTransparency, createSub.Text, createSub.TextColor3, createSub.TextSize, createSub.Font, createSub.TextXAlignment = UDim2.new(1, -100, 0, 16), UDim2.new(0, 8, 0, 18), 1, "New config copies current settings", Color3.fromRGB(140, 140, 150), 9, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-local createBtn = Instance.new("TextButton", createFrame)
-createBtn.Size, createBtn.Position, createBtn.BackgroundColor3, createBtn.Text, createBtn.TextColor3, createBtn.TextSize, createBtn.Font = UDim2.new(0, 85, 0, 24), UDim2.new(1, -90, 0.5, -12), Color3.fromRGB(220, 50, 50), "Create New", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
-Instance.new("UICorner", createBtn).CornerRadius = UDim.new(0, 4)
-
--- 3. Delete Cấu Hình
-local delFrame = Instance.new("Frame", profileSubContainer)
-delFrame.LayoutOrder = 3
-delFrame.Size, delFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", delFrame).CornerRadius = UDim.new(0, 5)
-
-local delLabel = Instance.new("TextLabel", delFrame)
-delLabel.Size, delLabel.Position, delLabel.BackgroundTransparency, delLabel.Text, delLabel.TextColor3, delLabel.TextSize, delLabel.Font, delLabel.TextXAlignment = UDim2.new(0.45, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Delete Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-local selectedDeleteConfig = ""
-local delDropBtn = Instance.new("TextButton", delFrame)
-delDropBtn.Size, delDropBtn.Position, delDropBtn.BackgroundColor3, delDropBtn.Text, delDropBtn.TextColor3, delDropBtn.TextSize, delDropBtn.Font, delDropBtn.TextXAlignment = UDim2.new(0.52, -6, 0, 24), UDim2.new(0.48, 0, 0.5, -12), Color3.fromRGB(28, 32, 42), "Không có", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-Instance.new("UICorner", delDropBtn).CornerRadius = UDim.new(0, 4)
-
-local delDropScroll = Instance.new("ScrollingFrame", delFrame)
-delDropScroll.Size, delDropScroll.Position, delDropScroll.BackgroundColor3, delDropScroll.CanvasSize, delDropScroll.ScrollBarThickness, delDropScroll.Visible, delDropScroll.ZIndex = UDim2.new(0.52, -6, 0, 100), UDim2.new(0.48, 0, 1, 4), Color3.fromRGB(32, 36, 48), UDim2.new(0,0,0,0), 3, false, 50
-Instance.new("UICorner", delDropScroll).CornerRadius = UDim.new(0, 4)
-local delLayout = Instance.new("UIListLayout", delDropScroll) delLayout.Padding = UDim.new(0, 2)
-
--- 4. Cấu Hình Khởi Động
-local startFrame = Instance.new("Frame", profileSubContainer)
-startFrame.LayoutOrder = 4
-startFrame.Size, startFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", startFrame).CornerRadius = UDim.new(0, 5)
-
-local startLabel = Instance.new("TextLabel", startFrame)
-startLabel.Size, startLabel.Position, startLabel.BackgroundTransparency, startLabel.Text, startLabel.TextColor3, startLabel.TextSize, startLabel.Font, startLabel.TextXAlignment = UDim2.new(0.45, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Cấu Hình Khởi Động", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-local selectedStartConfig = "Default"
-local startDropBtn = Instance.new("TextButton", startFrame)
-startDropBtn.Size, startDropBtn.Position, startDropBtn.BackgroundColor3, startDropBtn.Text, startDropBtn.TextColor3, startDropBtn.TextSize, startDropBtn.Font, startDropBtn.TextXAlignment = UDim2.new(0.52, -6, 0, 24), UDim2.new(0.48, 0, 0.5, -12), Color3.fromRGB(28, 32, 42), "Default", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-Instance.new("UICorner", startDropBtn).CornerRadius = UDim.new(0, 4)
-
-local startDropScroll = Instance.new("ScrollingFrame", startFrame)
-startDropScroll.Size, startDropScroll.Position, startDropScroll.BackgroundColor3, startDropScroll.CanvasSize, startDropScroll.ScrollBarThickness, startDropScroll.Visible, startDropScroll.ZIndex = UDim2.new(0.52, -6, 0, 100), UDim2.new(0.48, 0, 1, 4), Color3.fromRGB(32, 36, 48), UDim2.new(0,0,0,0), 3, false, 50
-Instance.new("UICorner", startDropScroll).CornerRadius = UDim.new(0, 4)
-local startLayout = Instance.new("UIListLayout", startDropScroll) startLayout.Padding = UDim.new(0, 2)
-
--- 5. Tải Cấu Hình
-local loadFrame = Instance.new("Frame", profileSubContainer)
-loadFrame.LayoutOrder = 5
-loadFrame.Size, loadFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", loadFrame).CornerRadius = UDim.new(0, 5)
-
-local loadLabel = Instance.new("TextLabel", loadFrame)
-loadLabel.Size, loadLabel.Position, loadLabel.BackgroundTransparency, loadLabel.Text, loadLabel.TextColor3, loadLabel.TextSize, loadLabel.Font, loadLabel.TextXAlignment = UDim2.new(0.45, 0, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Tải Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-local selectedLoadConfig = "Default"
-local loadDropBtn = Instance.new("TextButton", loadFrame)
-loadDropBtn.Size, loadDropBtn.Position, loadDropBtn.BackgroundColor3, loadDropBtn.Text, loadDropBtn.TextColor3, loadDropBtn.TextSize, loadDropBtn.Font, loadDropBtn.TextXAlignment = UDim2.new(0.52, -6, 0, 24), UDim2.new(0.48, 0, 0.5, -12), Color3.fromRGB(28, 32, 42), "Default", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-Instance.new("UICorner", loadDropBtn).CornerRadius = UDim.new(0, 4)
-
-local loadDropScroll = Instance.new("ScrollingFrame", loadFrame)
-loadDropScroll.Size, loadDropScroll.Position, loadDropScroll.BackgroundColor3, loadDropScroll.CanvasSize, loadDropScroll.ScrollBarThickness, loadDropScroll.Visible, loadDropScroll.ZIndex = UDim2.new(0.52, -6, 0, 100), UDim2.new(0.48, 0, 1, 4), Color3.fromRGB(32, 36, 48), UDim2.new(0,0,0,0), 3, false, 50
-Instance.new("UICorner", loadDropScroll).CornerRadius = UDim.new(0, 4)
-local loadLayout = Instance.new("UIListLayout", loadDropScroll) loadLayout.Padding = UDim.new(0, 2)
-
--- 6. Lưu Cấu Hình
-local saveFrame = Instance.new("Frame", profileSubContainer)
-saveFrame.LayoutOrder = 6
-saveFrame.Size, saveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
-Instance.new("UICorner", saveFrame).CornerRadius = UDim.new(0, 5)
-
-local saveTitle = Instance.new("TextLabel", saveFrame)
-saveTitle.Size, saveTitle.Position, saveTitle.BackgroundTransparency, saveTitle.Text, saveTitle.TextColor3, saveTitle.TextSize, saveTitle.Font, saveTitle.TextXAlignment = UDim2.new(1, -100, 0, 20), UDim2.new(0, 8, 0, 2), 1, "Lưu Cấu Hình", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-local saveSub = Instance.new("TextLabel", saveFrame)
-saveSub.Size, saveSub.Position, saveSub.BackgroundTransparency, saveSub.Text, saveSub.TextColor3, saveSub.TextSize, saveSub.Font, saveSub.TextXAlignment = UDim2.new(1, -100, 0, 16), UDim2.new(0, 8, 0, 18), 1, "Save: Default", Color3.fromRGB(140, 140, 150), 9, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-local saveBtn = Instance.new("TextButton", saveFrame)
-saveBtn.Size, saveBtn.Position, saveBtn.BackgroundColor3, saveBtn.Text, saveBtn.TextColor3, saveBtn.TextSize, saveBtn.Font = UDim2.new(0, 85, 0, 24), UDim2.new(1, -90, 0.5, -12), Color3.fromRGB(220, 50, 50), "Save", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
-Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 4)
+-- NÚT TẢI CẤU HÌNH DEFAULT
+local loadDefaultBtn = Instance.new("TextButton", t6Scroll)
+loadDefaultBtn.LayoutOrder = 4
+loadDefaultBtn.Size, loadDefaultBtn.BackgroundColor3, loadDefaultBtn.Text, loadDefaultBtn.TextColor3, loadDefaultBtn.TextSize, loadDefaultBtn.Font = UDim2.new(1, -4, 0, 30), Color3.fromRGB(50, 120, 220), "📂 Tải Cấu Hình Default", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
+Instance.new("UICorner", loadDefaultBtn).CornerRadius = UDim.new(0, 5)
 
 -- SCRIPT AUTO LOAD
 local selScript, isAuto = nil, false
 local dropBtn = Instance.new("TextButton", t6Scroll)
-dropBtn.LayoutOrder = 3
+dropBtn.LayoutOrder = 5
 dropBtn.Size, dropBtn.BackgroundColor3, dropBtn.Text, dropBtn.TextColor3, dropBtn.TextSize, dropBtn.Font, dropBtn.TextXAlignment = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), " 📜 Chọn Script Auto Load...", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
 Instance.new("UICorner", dropBtn).CornerRadius = UDim.new(0, 5)
 
+-- DANH SÁCH SCRIPT HIỆN THẲNG TRONG TAB (KHÔNG BỊ LỆCH)
 local dropFrame = Instance.new("ScrollingFrame", t6Scroll)
-dropFrame.LayoutOrder = 4
-dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible, dropFrame.ZIndex = UDim2.new(1, -4, 0, 120), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 50
+dropFrame.LayoutOrder = 6
+dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible = UDim2.new(1, -4, 0, 110), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", dropFrame).CornerRadius = UDim.new(0, 5)
 local dropLayout = Instance.new("UIListLayout", dropFrame) dropLayout.Padding = UDim.new(0, 4)
 
+dropBtn.MouseButton1Click:Connect(function()
+    dropFrame.Visible = not dropFrame.Visible
+end)
+
 local toggleAuto = Instance.new("TextButton", t6Scroll)
-toggleAuto.LayoutOrder = 5
+toggleAuto.LayoutOrder = 7
 toggleAuto.Size, toggleAuto.BackgroundColor3, toggleAuto.Text, toggleAuto.TextColor3, toggleAuto.TextSize, toggleAuto.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(200, 50, 50), "Auto Load Script Chạy: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
 Instance.new("UICorner", toggleAuto).CornerRadius = UDim.new(0, 5)
 local HubSound = SoundService:FindFirstChild("VzNamHubSound") or Instance.new("Sound", SoundService)
@@ -408,50 +306,11 @@ HubSound.Name, HubSound.Looped, HubSound.Volume = "VzNamHubSound", true, 0.5
 local currentSoundId = "1837879082"
 
 local customIdBox = Instance.new("TextBox", t6Scroll)
-customIdBox.LayoutOrder = 6
+customIdBox.LayoutOrder = 8
 customIdBox.Size, customIdBox.BackgroundColor3, customIdBox.PlaceholderText, customIdBox.Text, customIdBox.TextColor3, customIdBox.TextSize, customIdBox.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), "🎶 Nhập Sound ID tùy chỉnh...", "", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
 Instance.new("UICorner", customIdBox).CornerRadius = UDim.new(0, 5)
 
-local musicDropBtn = Instance.new("TextButton", t6Scroll)
-musicDropBtn.LayoutOrder = 7
-musicDropBtn.Size, musicDropBtn.BackgroundColor3, musicDropBtn.Text, musicDropBtn.TextColor3, musicDropBtn.TextSize, musicDropBtn.Font, musicDropBtn.TextXAlignment = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), " 🎵 Chọn Nhạc Nền...", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-Instance.new("UICorner", musicDropBtn).CornerRadius = UDim.new(0, 5)
-
-local musicDropFrame = Instance.new("ScrollingFrame", t6Scroll)
-musicDropFrame.LayoutOrder = 8
-musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible, musicDropFrame.ZIndex = UDim2.new(1, -4, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 50
-Instance.new("UICorner", musicDropFrame).CornerRadius = UDim.new(0, 5)
-local musicLayout = Instance.new("UIListLayout", musicDropFrame) musicLayout.Padding = UDim.new(0, 4)
-
-local presetMusics = {
-    {Name = "🎵 Chill Lofi Music", Id = "1837879082"},
-    {Name = "🎶 Phonk Beat", Id = "1843404008"},
-    {Name = "🎵 Anime Relaxing", Id = "9043887091"},
-    {Name = "🎶 EDM Hype", Id = "1837871000"},
-    {Name = "🎶 Như Một Người Dưng", Id = "91897652967267"}
-}
-for i, m in ipairs(presetMusics) do
-    local mBtn = Instance.new("TextButton", musicDropFrame)
-    mBtn.LayoutOrder = i
-    mBtn.Size, mBtn.BackgroundColor3, mBtn.Text, mBtn.TextColor3, mBtn.TextSize, mBtn.Font, mBtn.TextXAlignment, mBtn.ZIndex = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), " " .. m.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left, 51
-    Instance.new("UICorner", mBtn).CornerRadius = UDim.new(0, 4)
-    mBtn.MouseButton1Click:Connect(function()
-        currentSoundId = m.Id
-        musicDropBtn.Text = " 🎵 " .. m.Name
-        musicDropFrame.Visible = false
-        if HubSound.IsPlaying then HubSound.SoundId = "rbxassetid://" .. currentSoundId HubSound:Play() end
-    end)
-end
-musicDropFrame.CanvasSize = UDim2.new(0, 0, 0, #presetMusics * 30)
-
-customIdBox.FocusLost:Connect(function()
-    if customIdBox.Text ~= "" and tonumber(customIdBox.Text) then
-        currentSoundId = customIdBox.Text
-        musicDropBtn.Text = " 🎵 ID Custom: " .. currentSoundId
-        if HubSound.IsPlaying then HubSound.SoundId = "rbxassetid://" .. currentSoundId HubSound:Play() end
-    end
-end)
-
+-- NÚT BẬT/TẮT NHẠC
 local isMusicPlaying = false
 local toggleMusicBtn = Instance.new("TextButton", t6Scroll)
 toggleMusicBtn.LayoutOrder = 9
@@ -467,7 +326,14 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
     else
         toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
         toggleMusicBtn.Text = "Phát Nhạc Background: TẮT ❌"
-        HubSound:Stop()
+        HubSound.Stop()
+    end
+end)
+
+customIdBox.FocusLost:Connect(function()
+    if customIdBox.Text ~= "" and tonumber(customIdBox.Text) then
+        currentSoundId = customIdBox.Text
+        if HubSound.IsPlaying then HubSound.SoundId = "rbxassetid://" .. currentSoundId HubSound:Play() end
     end
 end)
 
@@ -510,63 +376,32 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- CHỌN MÀU
+-- CHỌN MÀU GIAO DIỆN (NÚT CHUYỂN ĐỔI MÀU NHANH)
 local colorList = {
-    {Name = "🖤 Xám Tối Mặc Định", Color = Color3.fromRGB(15, 16, 22)},
-    {Name = "🌈 Màu Cầu Vồng (RGB)", Color = "Rainbow"},
-    {Name = "🌸 Hồng Kẹo Đắng", Color = Color3.fromRGB(255, 105, 180)},
+    {Name = "🖤 Xám Tối", Color = Color3.fromRGB(15, 16, 22)},
+    {Name = "🌈 Cầu Vồng", Color = "Rainbow"},
+    {Name = "🌸 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
     {Name = "🔴 Đỏ Đậm", Color = Color3.fromRGB(220, 20, 60)},
-    {Name = "🔵 Xanh Dương Neon", Color = Color3.fromRGB(0, 191, 255)},
-    {Name = "🟢 Xanh Lá Cây", Color = Color3.fromRGB(50, 205, 50)},
-    {Name = "🟡 Vàng Nổi Bật", Color = Color3.fromRGB(255, 215, 0)},
-    {Name = "🟣 Tím Mộng Mơ", Color = Color3.fromRGB(138, 43, 226)}
+    {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 191, 255)}
 }
+local currentColorIdx = 1
 local selectedColorObj = colorList[1]
+
+local colorBtn = Instance.new("TextButton", t6Scroll)
+colorBtn.LayoutOrder = 11
+colorBtn.Size, colorBtn.BackgroundColor3, colorBtn.Text, colorBtn.TextColor3, colorBtn.TextSize, colorBtn.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), "🎨 Đổi Màu: 🖤 Xám Tối", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
+Instance.new("UICorner", colorBtn).CornerRadius = UDim.new(0, 5)
+
+colorBtn.MouseButton1Click:Connect(function()
+    currentColorIdx = currentColorIdx + 1
+    if currentColorIdx > #colorList then currentColorIdx = 1 end
+    selectedColorObj = colorList[currentColorIdx]
+    colorBtn.Text = "🎨 Đổi Màu: " .. selectedColorObj.Name
+end)
+
 local isColorApplied = false
-
-local colorDropBtn = Instance.new("TextButton", t6Scroll)
-colorDropBtn.LayoutOrder = 11
-colorDropBtn.Size, colorDropBtn.BackgroundColor3, colorDropBtn.Text, colorDropBtn.TextColor3, colorDropBtn.TextSize, colorDropBtn.Font, colorDropBtn.TextXAlignment = UDim2.new(1, -4, 0, 32), Color3.fromRGB(22, 25, 34), " 🎨 Đã chọn: 🖤 Xám Tối Mặc Định", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-Instance.new("UICorner", colorDropBtn).CornerRadius = UDim.new(0, 5)
-
-local colorDropFrame = Instance.new("ScrollingFrame", t6Scroll)
-colorDropFrame.LayoutOrder = 12
-colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible, colorDropFrame.ZIndex = UDim2.new(1, -4, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false, 50
-Instance.new("UICorner", colorDropFrame).CornerRadius = UDim.new(0, 5)
-local colorLayout = Instance.new("UIListLayout", colorDropFrame) colorLayout.Padding = UDim.new(0, 4)
-
-for i, cItem in ipairs(colorList) do
-    local cBtn = Instance.new("TextButton", colorDropFrame)
-    cBtn.LayoutOrder = i
-    cBtn.Size, cBtn.BackgroundColor3, cBtn.Text, cBtn.TextColor3, cBtn.TextSize, cBtn.Font, cBtn.TextXAlignment, cBtn.ZIndex = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), " " .. cItem.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left, 51
-    Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 4)
-    cBtn.MouseButton1Click:Connect(function()
-        selectedColorObj = cItem
-        colorDropBtn.Text = " 🎨 Đã chọn: " .. cItem.Name
-        colorDropFrame.Visible = false
-    end)
-end
-colorDropFrame.CanvasSize = UDim2.new(0, 0, 0, #colorList * 30)
-
-local function toggleDropdown(drop)
-    drop.Visible = not drop.Visible
-    if drop ~= dropFrame then dropFrame.Visible = false end
-    if drop ~= musicDropFrame then musicDropFrame.Visible = false end
-    if drop ~= colorDropFrame then colorDropFrame.Visible = false end
-    if drop ~= delDropScroll then delDropScroll.Visible = false end
-    if drop ~= startDropScroll then startDropScroll.Visible = false end
-    if drop ~= loadDropScroll then loadDropScroll.Visible = false end
-end
-
-colorDropBtn.MouseButton1Click:Connect(function() toggleDropdown(colorDropFrame) end)
-musicDropBtn.MouseButton1Click:Connect(function() toggleDropdown(musicDropFrame) end)
-dropBtn.MouseButton1Click:Connect(function() toggleDropdown(dropFrame) end)
-delDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() toggleDropdown(delDropScroll) end)
-startDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() toggleDropdown(startDropScroll) end)
-loadDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() toggleDropdown(loadDropScroll) end)
-
 local toggleColorBtn = Instance.new("TextButton", t6Scroll)
-toggleColorBtn.LayoutOrder = 13
+toggleColorBtn.LayoutOrder = 12
 toggleColorBtn.Size, toggleColorBtn.BackgroundColor3, toggleColorBtn.Text, toggleColorBtn.TextColor3, toggleColorBtn.TextSize, toggleColorBtn.Font = UDim2.new(1, -4, 0, 32), Color3.fromRGB(200, 50, 50), "Màu Menu Tùy Chỉnh: TẮT ❌", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
 Instance.new("UICorner", toggleColorBtn).CornerRadius = UDim.new(0, 5)
 
@@ -596,7 +431,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-t6Scroll.CanvasSize = UDim2.new(0, 0, 0, 1150)
+t6Scroll.CanvasSize = UDim2.new(0, 0, 0, 950)
 -- RESIZE GÓC PHẢI DƯỚI
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size = UDim2.new(0, 16, 0, 16)
@@ -633,106 +468,26 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-local function refreshAllProfileDropdowns()
-    for _, c in ipairs(delDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
-    for _, c in ipairs(startDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
-    for _, c in ipairs(loadDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
-    
-    if typeof(listfiles) ~= "function" then return end
-    local success, files = pcall(listfiles, configFolder)
-    if success and files then
-        local hDel, hStart, hLoad = 0, 0, 0
-        local idx = 0
-        for _, file in ipairs(files) do
-            idx = idx + 1
-            local fName = file:match("([^/]+)$"):gsub("%.json$", "")
-            
-            local b1 = Instance.new("TextButton", delDropScroll)
-            b1.LayoutOrder = idx
-            b1.Size, b1.BackgroundColor3, b1.Text, b1.TextColor3, b1.TextSize, b1.Font, b1.TextXAlignment, b1.ZIndex = UDim2.new(1, 0, 0, 24), Color3.fromRGB(35, 40, 50), " " .. fName, Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left, 51
-            Instance.new("UICorner", b1).CornerRadius = UDim.new(0, 3)
-            b1.MouseButton1Click:Connect(function() selectedDeleteConfig = fName delDropBtn.Text = fName delDropScroll.Visible = false end)
-            hDel = hDel + 26
-
-            local b2 = Instance.new("TextButton", startDropScroll)
-            b2.LayoutOrder = idx
-            b2.Size, b2.BackgroundColor3, b2.Text, b2.TextColor3, b2.TextSize, b2.Font, b2.TextXAlignment, b2.ZIndex = UDim2.new(1, 0, 0, 24), Color3.fromRGB(35, 40, 50), " " .. fName, Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left, 51
-            Instance.new("UICorner", b2).CornerRadius = UDim.new(0, 3)
-            b2.MouseButton1Click:Connect(function() 
-                selectedStartConfig = fName 
-                startDropBtn.Text = fName 
-                startDropScroll.Visible = false 
-                if typeof(writefile) == "function" then pcall(writefile, configFolder .. "/autodefault.txt", fName) end
-            end)
-            hStart = hStart + 26
-
-            local b3 = Instance.new("TextButton", loadDropScroll)
-            b3.LayoutOrder = idx
-            b3.Size, b3.BackgroundColor3, b3.Text, b3.TextColor3, b3.TextSize, b3.Font, b3.TextXAlignment, b3.ZIndex = UDim2.new(1, 0, 0, 24), Color3.fromRGB(35, 40, 50), " " .. fName, Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left, 51
-            Instance.new("UICorner", b3).CornerRadius = UDim.new(0, 3)
-            b3.MouseButton1Click:Connect(function() selectedLoadConfig = fName loadDropBtn.Text = fName loadDropScroll.Visible = false end)
-            hLoad = hLoad + 26
-        end
-        delDropScroll.CanvasSize = UDim2.new(0, 0, 0, hDel)
-        startDropScroll.CanvasSize = UDim2.new(0, 0, 0, hStart)
-        loadDropScroll.CanvasSize = UDim2.new(0, 0, 0, hLoad)
-    end
-end
-
-createBtn.MouseButton1Click:Connect(function()
-    local cName = newConfigInput.Text
-    if cName ~= "" and typeof(writefile) == "function" then
-        pcall(writefile, configFolder .. "/" .. cName .. ".json", HttpService:JSONEncode({
-            Script = selScript and selScript.Name or "", 
-            SoundId = currentSoundId
-        }))
-        selectedLoadConfig = cName
-        loadDropBtn.Text = cName
-        saveSub.Text = "Save: " .. cName
-        createBtn.Text = "Created!"
-        task.wait(1.5)
-        createBtn.Text = "Create New"
-        newConfigInput.Text = ""
-        refreshAllProfileDropdowns()
-    end
-end)
-
-delDropBtn.MouseButton1Click:Connect(function()
-    if selectedDeleteConfig ~= "" and typeof(delfile) == "function" then
-        local target = configFolder .. "/" .. selectedDeleteConfig .. ".json"
-        if isfile(target) then
-            pcall(delfile, target)
-            delDropBtn.Text = "Không có"
-            selectedDeleteConfig = ""
-            refreshAllProfileDropdowns()
-        end
-    end
-end)
-
 saveBtn.MouseButton1Click:Connect(function()
-    local cName = selectedLoadConfig ~= "" and selectedLoadConfig or "Default"
+    local cName = newConfigInput.Text ~= "" and newConfigInput.Text or "Default"
+    if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
     if typeof(writefile) == "function" then
         pcall(writefile, configFolder .. "/" .. cName .. ".json", HttpService:JSONEncode({
             Script = selScript and selScript.Name or "", 
             SoundId = currentSoundId
         }))
-        saveSub.Text = "Save: " .. cName
-        saveBtn.Text = "Saved!"
+        saveBtn.Text = "Đã lưu: " .. cName
         task.wait(1.5)
-        saveBtn.Text = "Save"
-        refreshAllProfileDropdowns()
+        saveBtn.Text = "💾 Lưu Cấu Hình (" .. cName .. ")"
     end
 end)
 
-local function loadConfigByName(cName)
-    if cName ~= "" and typeof(readfile) == "function" and isfile(configFolder .. "/" .. cName .. ".json") then
+loadDefaultBtn.MouseButton1Click:Connect(function()
+    local cName = newConfigInput.Text ~= "" and newConfigInput.Text or "Default"
+    if typeof(readfile) == "function" and isfile(configFolder .. "/" .. cName .. ".json") then
         local success, data = pcall(function() return HttpService:JSONDecode(readfile(configFolder .. "/" .. cName .. ".json")) end)
         if success and data then
-            if data.SoundId then
-                currentSoundId = data.SoundId
-                musicDropBtn.Text = " 🎵 ID: " .. currentSoundId
-                if HubSound.IsPlaying then HubSound.SoundId = "rbxassetid://" .. currentSoundId HubSound:Play() end
-            end
+            if data.SoundId then currentSoundId = data.SoundId end
             if data.Script and data.Script ~= "" then
                 for _, scr in ipairs(RegisteredScripts) do
                     if scr.Name == data.Script then
@@ -742,18 +497,10 @@ local function loadConfigByName(cName)
                     end
                 end
             end
-            saveSub.Text = "Save: " .. cName
-            return true
+            loadDefaultBtn.Text = "Đã tải: " .. cName
+            task.wait(1.5)
+            loadDefaultBtn.Text = "📂 Tải Cấu Hình " .. cName
         end
-    end
-    return false
-end
-
-loadDropBtn.MouseButton1Click:Connect(function()
-    if loadConfigByName(selectedLoadConfig) then
-        loadDropBtn.Text = selectedLoadConfig .. " (Loaded)"
-        task.wait(1.5)
-        loadDropBtn.Text = selectedLoadConfig
     end
 end)
 
@@ -761,9 +508,13 @@ local dh = 0
 for i, scr in ipairs(RegisteredScripts) do
     local item = Instance.new("TextButton", dropFrame)
     item.LayoutOrder = i
-    item.Size, item.BackgroundColor3, item.Text, item.TextColor3, item.TextSize, item.Font, item.TextXAlignment, item.ZIndex = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), "  ▶ " .. scr.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left, 51
+    item.Size, item.BackgroundColor3, item.Text, item.TextColor3, item.TextSize, item.Font, item.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(35, 40, 50), "  ▶ " .. scr.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 4)
-    item.MouseButton1Click:Connect(function() selScript = scr dropBtn.Text = " 📜 " .. scr.Name dropFrame.Visible = false end)
+    item.MouseButton1Click:Connect(function() 
+        selScript = scr 
+        dropBtn.Text = " 📜 " .. scr.Name 
+        dropFrame.Visible = false 
+    end)
     dh = dh + 30
 end
 dropFrame.CanvasSize = UDim2.new(0, 0, 0, dh)
@@ -793,20 +544,4 @@ end)
 
 OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
-end)
-
-refreshAllProfileDropdowns()
-
--- TỰ ĐỘNG TẢI CẤU HÌNH STARTUP
-pcall(function()
-    if typeof(readfile) == "function" and isfile(configFolder .. "/autodefault.txt") then
-        local defName = readfile(configFolder .. "/autodefault.txt")
-        if defName and defName ~= "" then
-            selectedLoadConfig = defName
-            selectedStartConfig = defName
-            startDropBtn.Text = defName
-            loadDropBtn.Text = defName
-            loadConfigByName(defName)
-        end
-    end
 end)
