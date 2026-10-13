@@ -572,7 +572,7 @@ autoLoadToggle.MouseButton1Click:Connect(function()
     alBox.Position = isAutoLoad and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
 end)
 -- ============================================================================
--- TAB 7: CẤU HÌNH & PROFILES (Phần 2: Đã sửa lại chữ các tab về bình thường)
+-- TAB 7: CẤU HÌNH & PROFILES (Phần 2: Khôi phục nút tròn toggle & chữ chuẩn)
 -- ============================================================================
 -- Tải Cấu Hình
 local loadConfigFrame = Instance.new("Frame", profilesContainer)
@@ -706,8 +706,6 @@ saveBtn.MouseButton1Click:Connect(function()
 end)
 
 configScroll.CanvasSize = UDim2.new(0, 0, 0, 950)
-
--- Đã xóa bỏ vòng lặp ép font lỗi ở đây để chữ 7 tab giữ nguyên bình thường
 
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size, ResizeBtn.Position, ResizeBtn.BackgroundTransparency, ResizeBtn.Text, ResizeBtn.TextColor3, ResizeBtn.TextSize, ResizeBtn.Font = UDim2.new(0, 16, 0, 16), UDim2.new(1, -18, 1, -18), 1, "◢", Color3.fromRGB(180, 180, 190), 12, Enum.Font.GothamBold
