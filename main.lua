@@ -14,7 +14,6 @@ ScreenGui.DisplayOrder = 99999
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- Màn hình đen giảm FPS (Đúng màu đen tuyền chuẩn xác)
 local BlackScreenGui = Instance.new("ScreenGui", CoreGui)
 BlackScreenGui.Name = "VzNamBlackScreen"
 BlackScreenGui.DisplayOrder = 0
@@ -120,6 +119,7 @@ local function CreateCategoryTab(tabName)
     Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 2)
 
     local containerFrame = Instance.new("Frame", ContentContainer)
+    containerFrame.Name = "Container_" .. tabName
     containerFrame.Size, containerFrame.Position, containerFrame.BackgroundTransparency, containerFrame.Visible = UDim2.new(1, -12, 1, -38), UDim2.new(0, 6, 0, 34), 1, false
 
     local subBar = Instance.new("Frame", containerFrame) subBar.Size, subBar.BackgroundTransparency = UDim2.new(1, 0, 0, 26), 1
@@ -165,116 +165,12 @@ local function CreateCategoryTab(tabName)
     end)
 
     tabBtn.MouseButton1Click:Connect(function()
-        for _, t in pairs(Tabs) do t.Container.Visible, t.Indicator.Visible = false, false end
-        containerFrame.Visible, indicator.Visible = true, true
-        ActiveTabTitle.Text = tabName
-        SearchInputContent.Text = ""
-    end)
-
-    local tabObj = { Container = containerFrame, Indicator = indicator }
-    table.insert(Tabs, tabObj)
-
-    if not FirstTab then
-        FirstTab = tabObj
-        containerFrame.Visible, indicator.Visible = true, true
-        ActiveTabTitle.Text = tabName
-    end
-
-    local Elements = {}
-    local function AddBtnTo(parent, name, callback)
-        local Btn = Instance.new("TextButton", parent)
-        Btn.Size, Btn.BackgroundColor3, Btn.Text, Btn.TextColor3, Btn.TextSize, Btn.Font, Btn.TextXAlignment = UDim2.new(1, -4, 0, 30), Color3.fromRGB(22, 25, 34), "  ▶ " .. name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-        Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 5)
-        local btnStroke = Instance.new("UIStroke", Btn) btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
-        
-        Btn.MouseButton1Click:Connect(function()
-            if LastSelectedScriptStroke then LastSelectedScriptStroke.Color, LastSelectedScriptStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 end
-            btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(255, 50, 50), 2
-            LastSelectedScriptStroke = btnStroke
-            callback()
-        end)
-        table.insert(RegisteredScripts, {Name = name, Callback = callback})
-    end
-
-    function Elements:AddNoKey(name, callback) AddBtnTo(scrollNoKey, name, callback) end
-    function Elements:AddHasKey(name, callback) AddBtnTo(scrollHasKey, name, callback) end
-    return Elements
-end
-
--- TAB 1: STEAL AN EGG
-local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸")
-tab1:AddNoKey("1. Hop sv1 người(nokey)", function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end)
-tab1:AddNoKey("2. FyyCommunity(lúc có key lúc no key)", function() loadstring(game:HttpGet("https://FyyCommunity.my.id"))() end)
-tab1:AddNoKey("3. Chilli Hub V4(nokey)", function() loadstring(game:HttpGet("https://id.tomroblox.com/raw/kairoblox/chilli-hub-viet-hoa-v4"))() end)
-tab1:AddNoKey("4. Night hub(nokey)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))() end)
-
-tab1:AddHasKey("1. Lemon Hub v4(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/owenzeke99-tech/lennonhubv4/refs/heads/main/lennonhubkeyless.txt", true))() end)
-tab1:AddHasKey("2. Hoshi hub(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/napun87/stealanegg/refs/heads/main/hosi.lua"))() end)
-tab1:AddHasKey("3. Bigfroot(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/hanniii1/Loader/refs/heads/main/BFLoader.lua"))() end)
-tab1:AddHasKey("4. Chữ A(ajjans)|(có key)", function() loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/359e97f8618e9008afe5f496184ebb7c.lua"))() end)
-tab1:AddHasKey("5. Speed hub(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))() end)
-tab1:AddHasKey("6. Neohub(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/neohubdev/script/main/script"))() end)
-tab1:AddHasKey("7. Real kid(có key)", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua"))() end)
-tab1:AddHasKey("8. Chilli v2(có key)", function() loadstring(game:HttpGet("https://gist.githubusercontent.com/ronnei/1fa67c56dd9af203b192d15e752928e5/raw/4e2d5105640e09a008b4ae6df23f9708cadfef06/chilliv2-stealanegg"))() end)
-local Tabs = {}
-local FirstTab = nil
-
-local function CreateCategoryTab(tabName)
-    local tabBtn = Instance.new("TextButton", SidebarScroll)
-    tabBtn.Size, tabBtn.BackgroundTransparency, tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment = UDim2.new(1, 0, 0, 28), 1, "   " .. tabName, Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
-
-    local indicator = Instance.new("Frame", tabBtn)
-    indicator.Size, indicator.Position, indicator.BackgroundColor3, indicator.BorderSizePixel, indicator.Visible = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6), Color3.fromRGB(255, 105, 180), 0, false
-    Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 2)
-
-    local containerFrame = Instance.new("Frame", ContentContainer)
-    containerFrame.Size, containerFrame.Position, containerFrame.BackgroundTransparency, containerFrame.Visible = UDim2.new(1, -12, 1, -38), UDim2.new(0, 6, 0, 34), 1, false
-
-    local subBar = Instance.new("Frame", containerFrame) subBar.Size, subBar.BackgroundTransparency = UDim2.new(1, 0, 0, 26), 1
-    local subLayout = Instance.new("UIListLayout", subBar) subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 6)
-
-    local noKeyBtn = Instance.new("TextButton", subBar)
-    noKeyBtn.Size, noKeyBtn.BackgroundColor3, noKeyBtn.Text, noKeyBtn.TextColor3, noKeyBtn.TextSize, noKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(22, 25, 34), "no key", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
-    Instance.new("UICorner", noKeyBtn).CornerRadius = UDim.new(0, 5)
-    local nkStroke = Instance.new("UIStroke", noKeyBtn) nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2
-
-    local hasKeyBtn = Instance.new("TextButton", subBar)
-    hasKeyBtn.Size, hasKeyBtn.BackgroundColor3, hasKeyBtn.Text, hasKeyBtn.TextColor3, hasKeyBtn.TextSize, hasKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(22, 25, 34), "có key", Color3.fromRGB(255, 255, 255), 11, Enum.Font.FredokaOne
-    Instance.new("UICorner", hasKeyBtn).CornerRadius = UDim.new(0, 5)
-    local hkStroke = Instance.new("UIStroke", hasKeyBtn) hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
-
-    local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) scrollNoKey.Position, scrollNoKey.Size, scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel, scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = UDim2.new(0, 0, 0, 32), UDim2.new(1, 0, 1, -32), 1, 0, 3, true, true
-    local l1 = Instance.new("UIListLayout", scrollNoKey) l1.Padding = UDim.new(0, 5)
-
-    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) scrollHasKey.Position, scrollHasKey.Size, scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel, scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = UDim2.new(0, 0, 0, 32), UDim2.new(1, 0, 1, -32), 1, 0, 3, false, true
-    local l2 = Instance.new("UIListLayout", scrollHasKey) l2.Padding = UDim.new(0, 5)
-
-    SearchInputContent:GetPropertyChangedSignal("Text"):Connect(function()
-        if containerFrame.Visible then
-            local query = string.lower(SearchInputContent.Text)
-            local targetScroll = scrollNoKey.Visible and scrollNoKey or scrollHasKey
-            for _, item in ipairs(targetScroll:GetChildren()) do
-                if item:IsA("TextButton") then
-                    if query == "" or string.find(string.lower(item.Text), query) then item.Visible = true else item.Visible = false end
-                end
-            end
+        for _, t in pairs(Tabs) do 
+            t.Container.Visible = false 
+            if t.Indicator then t.Indicator.Visible = false end 
         end
-    end)
-
-    noKeyBtn.MouseButton1Click:Connect(function()
-        scrollNoKey.Visible, scrollHasKey.Visible = true, false
-        nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2
-        hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
-    end)
-    hasKeyBtn.MouseButton1Click:Connect(function()
-        scrollNoKey.Visible, scrollHasKey.Visible = false, true
-        hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2
-        nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
-    end)
-
-    tabBtn.MouseButton1Click:Connect(function()
-        for _, t in pairs(Tabs) do t.Container.Visible, t.Indicator.Visible = false, false end
-        containerFrame.Visible, indicator.Visible = true, true
+        containerFrame.Visible = true
+        indicator.Visible = true
         ActiveTabTitle.Text = tabName
         SearchInputContent.Text = ""
     end)
@@ -352,14 +248,19 @@ t6Indicator.Size, t6Indicator.Position, t6Indicator.BackgroundColor3, t6Indicato
 Instance.new("UICorner", t6Indicator).CornerRadius = UDim.new(0, 2)
 
 local t6Scroll = Instance.new("ScrollingFrame", ContentContainer)
+t6Scroll.Name = "Container_KHAC"
 t6Scroll.Size, t6Scroll.Position, t6Scroll.BackgroundTransparency, t6Scroll.BorderSizePixel, t6Scroll.ScrollBarThickness, t6Scroll.Visible, t6Scroll.ClipsDescendants = UDim2.new(1, -12, 1, -38), UDim2.new(0, 6, 0, 34), 1, 0, 3, false, true
 local t6Layout = Instance.new("UIListLayout", t6Scroll)
 t6Layout.SortOrder = Enum.SortOrder.LayoutOrder
 t6Layout.Padding = UDim.new(0, 6)
 
 tab6Btn.MouseButton1Click:Connect(function()
-    for _, t in pairs(Tabs) do t.Container.Visible, t.Indicator.Visible = false, false end
-    t6Scroll.Visible, t6Indicator.Visible = true, true
+    for _, t in pairs(Tabs) do 
+        t.Container.Visible = false 
+        if t.Indicator then t.Indicator.Visible = false end 
+    end
+    t6Scroll.Visible = true
+    t6Indicator.Visible = true
     ActiveTabTitle.Text = "👾KHÁC👾"
 end)
 table.insert(Tabs, {Container = t6Scroll, Indicator = t6Indicator})
@@ -367,7 +268,7 @@ table.insert(Tabs, {Container = t6Scroll, Indicator = t6Indicator})
 local configFolder = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, configFolder) end
 
--- 📦 PHẦN PROFILES (THU GỌN Y HỆT ẢNH MẪU)
+-- 📦 PHẦN PROFILES (THU GỌN CHUẨN)
 local profileDropdownOpen = false
 local profileToggleHeader = Instance.new("TextButton", t6Scroll)
 profileToggleHeader.LayoutOrder = 1
@@ -393,7 +294,7 @@ profileToggleHeader.MouseButton1Click:Connect(function()
     end
 end)
 
--- 1. New Cấu Hình Name (Ô nhập tên)
+-- 1. New Cấu Hình Name
 local newConfigFrame = Instance.new("Frame", profileSubContainer)
 newConfigFrame.LayoutOrder = 1
 newConfigFrame.Size, newConfigFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(22, 25, 34)
@@ -406,7 +307,7 @@ local newConfigInput = Instance.new("TextBox", newConfigFrame)
 newConfigInput.Size, newConfigInput.Position, newConfigInput.BackgroundColor3, newConfigInput.TextColor3, newConfigInput.PlaceholderText, newConfigInput.PlaceholderColor3, newConfigInput.TextSize, newConfigInput.Font = UDim2.new(0.52, -6, 0, 24), UDim2.new(0.48, 0, 0.5, -12), Color3.fromRGB(28, 32, 42), Color3.fromRGB(255, 255, 255), "New config name...", Color3.fromRGB(140, 140, 150), 10, Enum.Font.FredokaOne
 Instance.new("UICorner", newConfigInput).CornerRadius = UDim.new(0, 4)
 
--- 2. Create New Cấu Hình (Tạo mới sao chép cấu hình hiện tại)
+-- 2. Create New Cấu Hình
 local createFrame = Instance.new("Frame", profileSubContainer)
 createFrame.LayoutOrder = 2
 createFrame.Size, createFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
@@ -422,7 +323,7 @@ local createBtn = Instance.new("TextButton", createFrame)
 createBtn.Size, createBtn.Position, createBtn.BackgroundColor3, createBtn.Text, createBtn.TextColor3, createBtn.TextSize, createBtn.Font = UDim2.new(0, 85, 0, 24), UDim2.new(1, -90, 0.5, -12), Color3.fromRGB(220, 50, 50), "Create New", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
 Instance.new("UICorner", createBtn).CornerRadius = UDim.new(0, 4)
 
--- 3. Delete Cấu Hình (Xóa)
+-- 3. Delete Cấu Hình
 local delFrame = Instance.new("Frame", profileSubContainer)
 delFrame.LayoutOrder = 3
 delFrame.Size, delFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(22, 25, 34)
@@ -441,7 +342,7 @@ delDropScroll.Position, delDropScroll.Size, delDropScroll.BackgroundColor3, delD
 Instance.new("UICorner", delDropScroll).CornerRadius = UDim.new(0, 4)
 Instance.new("UIListLayout", delDropScroll).Padding = UDim.new(0, 2)
 
--- 4. Cấu Hình Khởi Động (Startup)
+-- 4. Cấu Hình Khởi Động
 local startFrame = Instance.new("Frame", profileSubContainer)
 startFrame.LayoutOrder = 4
 startFrame.Size, startFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(22, 25, 34)
@@ -479,7 +380,7 @@ loadDropScroll.Position, loadDropScroll.Size, loadDropScroll.BackgroundColor3, l
 Instance.new("UICorner", loadDropScroll).CornerRadius = UDim.new(0, 4)
 Instance.new("UIListLayout", loadDropScroll).Padding = UDim.new(0, 2)
 
--- 6. Lưu Cấu Hình (Save)
+-- 6. Lưu Cấu Hình
 local saveFrame = Instance.new("Frame", profileSubContainer)
 saveFrame.LayoutOrder = 6
 saveFrame.Size, saveFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
@@ -495,7 +396,7 @@ local saveBtn = Instance.new("TextButton", saveFrame)
 saveBtn.Size, saveBtn.Position, saveBtn.BackgroundColor3, saveBtn.Text, saveBtn.TextColor3, saveBtn.TextSize, saveBtn.Font = UDim2.new(0, 85, 0, 24), UDim2.new(1, -90, 0.5, -12), Color3.fromRGB(220, 50, 50), "Save", Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne
 Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 4)
 
--- SCRIPT AUTO LOAD CHỌN NHANH
+-- SCRIPT AUTO LOAD
 local selScript, isAuto = nil, false
 local dropBtn = Instance.new("TextButton", t6Scroll)
 dropBtn.LayoutOrder = 3
@@ -752,7 +653,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- HỆ THỐNG QUẢN LÝ PROFILES / CẤU HÌNH HOÀN CHỈNH
+-- LOGIC CẤU HÌNH & TẢI DROPDOWNS
 local function refreshAllProfileDropdowns()
     for _, c in ipairs(delDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
     for _, c in ipairs(startDropScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
@@ -765,9 +666,8 @@ local function refreshAllProfileDropdowns()
         local idx = 0
         for _, file in ipairs(files) do
             idx = idx + 1
-            local fName = file:match("([^/]+)$"):gsub("%.json$", "")
+            local fName = file:match("([^/]+)$"):gsub("\%.json$", "")
             
-            -- Dropdown Xóa
             local b1 = Instance.new("TextButton", delDropScroll)
             b1.LayoutOrder = idx
             b1.Size, b1.BackgroundColor3, b1.Text, b1.TextColor3, b1.TextSize, b1.Font, b1.TextXAlignment = UDim2.new(1, 0, 0, 24), Color3.fromRGB(35, 40, 50), " " .. fName, Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
@@ -775,7 +675,6 @@ local function refreshAllProfileDropdowns()
             b1.MouseButton1Click:Connect(function() selectedDeleteConfig = fName delDropBtn.Text = fName delDropScroll.Visible = false end)
             hDel = hDel + 26
 
-            -- Dropdown Khởi Động
             local b2 = Instance.new("TextButton", startDropScroll)
             b2.LayoutOrder = idx
             b2.Size, b2.BackgroundColor3, b2.Text, b2.TextColor3, b2.TextSize, b2.Font, b2.TextXAlignment = UDim2.new(1, 0, 0, 24), Color3.fromRGB(35, 40, 50), " " .. fName, Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
@@ -788,7 +687,6 @@ local function refreshAllProfileDropdowns()
             end)
             hStart = hStart + 26
 
-            -- Dropdown Tải
             local b3 = Instance.new("TextButton", loadDropScroll)
             b3.LayoutOrder = idx
             b3.Size, b3.BackgroundColor3, b3.Text, b3.TextColor3, b3.TextSize, b3.Font, b3.TextXAlignment = UDim2.new(1, 0, 0, 24), Color3.fromRGB(35, 40, 50), " " .. fName, Color3.fromRGB(255, 255, 255), 10, Enum.Font.FredokaOne, Enum.TextXAlignment.Left
@@ -806,7 +704,6 @@ delDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() del
 startDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() startDropScroll.Visible = not startDropScroll.Visible delDropScroll.Visible = false loadDropScroll.Visible = false end)
 loadDropBtn.MouseButton1Click:Connect(function() refreshAllProfileDropdowns() loadDropScroll.Visible = not loadDropScroll.Visible delDropScroll.Visible = false startDropScroll.Visible = false end)
 
--- 1. Create New Config
 createBtn.MouseButton1Click:Connect(function()
     local cName = newConfigInput.Text
     if cName ~= "" and typeof(writefile) == "function" then
@@ -825,7 +722,6 @@ createBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2. Delete Config
 delDropBtn.MouseButton1Click:Connect(function()
     if selectedDeleteConfig ~= "" and typeof(delfile) == "function" then
         local target = configFolder .. "/" .. selectedDeleteConfig .. ".json"
@@ -838,7 +734,6 @@ delDropBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Save Config hiện tại
 saveBtn.MouseButton1Click:Connect(function()
     local cName = selectedLoadConfig ~= "" and selectedLoadConfig or "Default"
     if typeof(writefile) == "function" then
@@ -854,7 +749,6 @@ saveBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 4. Load Config được chọn
 local function loadConfigByName(cName)
     if cName ~= "" and typeof(readfile) == "function" and isfile(configFolder .. "/" .. cName .. ".json") then
         local success, data = pcall(function() return HttpService:JSONDecode(readfile(configFolder .. "/" .. cName .. ".json")) end)
@@ -928,7 +822,7 @@ end)
 
 refreshAllProfileDropdowns()
 
--- TỰ ĐỘNG TẢI CẤU HÌNH KHỞI ĐỘNG (STARTUP) KHI VÀO GAME
+-- TỰ ĐỘNG TẢI CẤU HÌNH STARTUP
 pcall(function()
     if typeof(readfile) == "function" and isfile(configFolder .. "/autodefault.txt") then
         local defName = readfile(configFolder .. "/autodefault.txt")
