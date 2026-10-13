@@ -98,7 +98,7 @@ local Tabs = {}
 local FirstTab = nil
 
 -- ============================================================================
--- TAB 0: TRANG CHỦ (Nằm đầu tiên)
+-- TAB 0: TRANG CHỦ (Đã thu gọn kích thước & thêm các icon bên trái chuẩn mẫu)
 -- ============================================================================
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
@@ -113,7 +113,7 @@ Instance.new("UICorner", homeIndicator).CornerRadius = UDim.new(0, 2)
 local homeScroll = Instance.new("ScrollingFrame", ContentContainer)
 homeScroll.Name = "Container_HOME"
 homeScroll.Size, homeScroll.Position, homeScroll.BackgroundTransparency, homeScroll.BorderSizePixel, homeScroll.ScrollBarThickness, homeScroll.Visible, homeScroll.ClipsDescendants = UDim2.new(1, -12, 1, -38), UDim2.new(0, 6, 0, 34), 1, 0, 3, false, true
-local homeLayout = Instance.new("UIListLayout", homeScroll) homeLayout.SortOrder = Enum.SortOrder.LayoutOrder homeLayout.Padding = UDim.new(0, 8)
+local homeLayout = Instance.new("UIListLayout", homeScroll) homeLayout.SortOrder = Enum.SortOrder.LayoutOrder homeLayout.Padding = UDim.new(0, 6)
 
 tabHomeBtn.MouseButton1Click:Connect(function()
     for _, t in pairs(Tabs) do t.Container.Visible = false if t.Indicator then t.Indicator.Visible = false end end
@@ -127,23 +127,31 @@ FirstTab = homeTabObj
 homeScroll.Visible, homeIndicator.Visible = true, true
 ActiveTabTitle.Text = "🏠 Trang Chủ"
 
--- Hàm tạo các thẻ thông tin (Copy link khi bấm)
-local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyText, borderColor)
+-- Hàm tạo các thẻ thông tin gọn gàng kèm Icon bên trái
+local function CreateHomeCardWithIcon(parent, order, bgColor, titleText, mainText, copyText, borderColor, iconSymbol)
     local card = Instance.new("Frame", parent)
     card.LayoutOrder = order
-    card.Size, card.BackgroundColor3, card.BorderSizePixel = UDim2.new(1, -4, 0, 52), bgColor, 0
+    card.Size, card.BackgroundColor3, card.BorderSizePixel = UDim2.new(1, -4, 0, 42), bgColor, 0
     Instance.new("UICorner", card).CornerRadius = UDim.new(0, 6)
     local stroke = Instance.new("UIStroke", card) stroke.Color, stroke.Thickness = borderColor, 1
 
+    -- Icon Tròn bên trái
+    local iconCircle = Instance.new("Frame", card)
+    iconCircle.Size, iconCircle.Position, iconCircle.BackgroundColor3, iconCircle.BorderSizePixel = UDim2.new(0, 30, 0, 30), UDim2.new(0, 6, 0.5, -15), borderColor, 0
+    Instance.new("UICorner", iconCircle).CornerRadius = UDim.new(1, 0)
+    
+    local iconLbl = Instance.new("TextLabel", iconCircle)
+    iconLbl.Size, iconLbl.BackgroundTransparency, iconLbl.Text, iconLbl.TextColor3, iconLbl.TextSize, iconLbl.Font = UDim2.new(1, 0, 1, 0), 1, iconSymbol, Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold
+
     local tLbl = Instance.new("TextLabel", card)
-    tLbl.Size, tLbl.Position, tLbl.BackgroundTransparency, tLbl.Text, tLbl.TextColor3, tLbl.TextSize, tLbl.Font, tLbl.TextXAlignment = UDim2.new(1, -16, 0, 18), UDim2.new(0, 12, 0, 6), 1, titleText, Color3.fromRGB(255, 150, 100), 10, Enum.Font.GothamBold, Enum.TextXAlignment.Left
+    tLbl.Size, tLbl.Position, tLbl.BackgroundTransparency, tLbl.Text, tLbl.TextColor3, tLbl.TextSize, tLbl.Font, tLbl.TextXAlignment = UDim2.new(1, -120, 0, 14), UDim2.new(0, 44, 0, 4), 1, titleText, Color3.fromRGB(255, 150, 100), 9, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
     local mLbl = Instance.new("TextLabel", card)
-    mLbl.Size, mLbl.Position, mLbl.BackgroundTransparency, mLbl.Text, mLbl.TextColor3, mLbl.TextSize, mLbl.Font, mLbl.TextXAlignment = UDim2.new(1, -100, 0, 22), UDim2.new(0, 12, 0, 23), 1, mainText, Color3.fromRGB(255, 255, 255), 12, Enum.Font.GothamBold, Enum.TextXAlignment.Left
+    mLbl.Size, mLbl.Position, mLbl.BackgroundTransparency, mLbl.Text, mLbl.TextColor3, mLbl.TextSize, mLbl.Font, mLbl.TextXAlignment = UDim2.new(1, -120, 0, 18), UDim2.new(0, 44, 0, 18), 1, mainText, Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
     if copyText ~= "" then
         local copyBtn = Instance.new("TextButton", card)
-        copyBtn.Size, copyBtn.Position, copyBtn.BackgroundTransparency, copyBtn.Text, copyBtn.TextColor3, copyBtn.TextSize, copyBtn.Font = UDim2.new(0, 75, 0, 26), UDim2.new(1, -85, 0.5, -13), 1, "📋 COPY", Color3.fromRGB(200, 200, 210), 11, Enum.Font.GothamBold
+        copyBtn.Size, copyBtn.Position, copyBtn.BackgroundTransparency, copyBtn.Text, copyBtn.TextColor3, copyBtn.TextSize, copyBtn.Font = UDim2.new(0, 65, 0, 24), UDim2.new(1, -73, 0.5, -12), 1, "📋 COPY", Color3.fromRGB(200, 200, 210), 10, Enum.Font.GothamBold
         
         local function doCopy()
             if typeof(setclipboard) == "function" then
@@ -159,18 +167,18 @@ local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyT
     end
 end
 
--- 1. Thẻ: Được tạo bởi VzNam Roblox
-CreateHomeCard(homeScroll, 1, Color3.fromRGB(45, 25, 30), "ĐƯỢC TẠO BỞI", "VzNam ROBLOX", "", Color3.fromRGB(180, 50, 50))
+-- 1. Thẻ: Được tạo bởi VzNam Roblox (Icon người 👤)
+CreateHomeCardWithIcon(homeScroll, 1, Color3.fromRGB(45, 25, 30), "ĐƯỢC TẠO BỞI", "VzNam ROBLOX", "", Color3.fromRGB(180, 50, 50), "👤")
 
--- 2. Thẻ: Discord Server
-CreateHomeCard(homeScroll, 2, Color3.fromRGB(30, 35, 55), "DISCORD SERVER", "https://discord.gg/6TG7krbsU", "https://discord.gg/6TG7krbsU", Color3.fromRGB(60, 100, 200))
+-- 2. Thẻ: Discord Server (Icon chat 💬)
+CreateHomeCardWithIcon(homeScroll, 2, Color3.fromRGB(30, 35, 55), "DISCORD SERVER", "https://discord.gg/6TG7krbsU", "https://discord.gg/6TG7krbsU", Color3.fromRGB(60, 100, 200), "💬")
 
--- 3. Thẻ: TikTok Channel
-CreateHomeCard(homeScroll, 3, Color3.fromRGB(35, 35, 45), "TIKTOK CHANNEL", "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y", "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y", Color3.fromRGB(100, 100, 120))
+-- 3. Thẻ: TikTok Channel (Icon video 🎵)
+CreateHomeCardWithIcon(homeScroll, 3, Color3.fromRGB(35, 35, 45), "TIKTOK CHANNEL", "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y", "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y", Color3.fromRGB(100, 100, 120), "🎵")
 
-homeScroll.CanvasSize = UDim2.new(0, 0, 0, 200)
+homeScroll.CanvasSize = UDim2.new(0, 0, 0, 160)
 
--- Hàm tạo các Tab Chức Năng (Steal an egg, Blox Fruit, ...)
+-- Hàm tạo các Tab Chức Năng
 local function CreateCategoryTab(tabName)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
     tabBtn.Size, tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency, tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0, "   " .. tabName, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
