@@ -552,11 +552,11 @@ for i, cItem in ipairs(colorList) do
 end
 colorDropFrame.CanvasSize = UDim2.new(0, 0, 0, #colorList * 30)
 
--- HÀM FIX TỌA ĐỘ DROPDOWN CHUẨN XÁC DỰA TRÊN MÀN HÌNH CHUNG
+-- HÀM FIX TỌA ĐỘ DROPDOWN TRỰC TIẾP DỰA TRÊN MÀN HÌNH NỀN GỐC (SCREEN GUI) ĐỂ KHÔNG BAO GIỜ BỊ LỆCH KHI CUỘN
 local function showAbsoluteDropdown(drop, btn)
-    local absPos = btn.AbsolutePosition
-    local absSize = btn.AbsoluteSize
-    drop.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 4)
+    local screenPoint = btn.AbsolutePosition
+    local screenSize = btn.AbsoluteSize
+    drop.Position = UDim2.new(0, screenPoint.X, 0, screenPoint.Y + screenSize.Y + 4)
     drop.Visible = not drop.Visible
     
     if drop ~= dropFrame then dropFrame.Visible = false end
