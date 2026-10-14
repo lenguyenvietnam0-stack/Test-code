@@ -11,7 +11,7 @@ if PlayerGui:FindFirstChild("VzNamHubV4UI") then PlayerGui.VzNamHubV4UI:Destroy(
 --------------------------------------------------------------------------------
 -- HELPERS
 --------------------------------------------------------------------------------
-local LastSelectedScriptBtn, LastSelectedScriptStroke = nil, nil
+local LastSelectedScriptStroke = nil
 local RegisteredScripts = {}
 local AllUIStrokes = {}
 local ThemedElements = {}
@@ -48,9 +48,7 @@ local function SafeLoad(url)
         if not fn then error(compileErr) end
         fn()
     end)
-    if not ok then
-        warn("[VzNam Hub] Load lỗi: " .. tostring(err))
-    end
+    if not ok then warn("[VzNam Hub] Load lỗi: " .. tostring(err)) end
 end
 
 local function ResetStrokeStyle(stroke, isActive)
@@ -59,9 +57,7 @@ local function ResetStrokeStyle(stroke, isActive)
         stroke.Transparency = 1
     else
         stroke.Transparency = isActive and 0 or 0.4
-        if CurrentStrokeMode == "Color" then
-            stroke.Color = CurrentStrokeColor
-        end
+        if CurrentStrokeMode == "Color" then stroke.Color = CurrentStrokeColor end
     end
     stroke.Thickness = isActive and 2.5 or 1.5
 end
@@ -210,11 +206,14 @@ RegisterTheme(SearchBoxTab, "Input")
 
 local SidebarScroll = Instance.new("ScrollingFrame", SidebarPanel)
 SidebarScroll.Size, SidebarScroll.Position = UDim2.new(1, -4, 1, -26), UDim2.new(0, 2, 0, 25)
-SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel, SidebarScroll.ScrollBarThickness, SidebarScroll.ClipsDescendants = 1, 0, 2, true
+SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel = 1, 0
+SidebarScroll.ScrollBarThickness, SidebarScroll.ClipsDescendants = 2, false
 local SidebarLayout = Instance.new("UIListLayout", SidebarScroll)
-SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 3)
+SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 local SidebarPadding = Instance.new("UIPadding", SidebarScroll)
-SidebarPadding.PaddingLeft, SidebarPadding.PaddingRight = UDim.new(0, 2), UDim.new(0, 6)
+-- 🔥 TĂNG padding để chừa chỗ cho viền 4px vẽ ra ngoài
+SidebarPadding.PaddingLeft = UDim.new(0, 6)
+SidebarPadding.PaddingRight = UDim.new(0, 10)
 
 Connect(SearchBoxTab:GetPropertyChangedSignal("Text"), function()
     local query = string.lower(SearchBoxTab.Text)
@@ -276,13 +275,14 @@ local FirstTab = nil
 --------------------------------------------------------------------------------
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
-tabHomeBtn.Size = UDim2.new(1, 0, 0, 26)
+tabHomeBtn.Size = UDim2.new(1, 0, 0, 28)
 tabHomeBtn.BackgroundColor3, tabHomeBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
 tabHomeBtn.Text, tabHomeBtn.TextColor3, tabHomeBtn.TextSize, tabHomeBtn.Font, tabHomeBtn.TextXAlignment =
-    " 🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    " 🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabHomeBtn).CornerRadius = UDim.new(0, 5)
 local tabHomeStroke = TrackStroke(Instance.new("UIStroke", tabHomeBtn))
-tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(255, 255, 255), 2.5
+tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(255, 255, 255), 4
+tabHomeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 RegisterTheme(tabHomeBtn, "Primary")
 
 local homeIndicator = Instance.new("Frame", tabHomeBtn)
@@ -310,9 +310,7 @@ Connect(tabHomeBtn.MouseButton1Click, function()
     SearchInputContent.Text = ""
 end)
 
-local homeTabObj = { Container = homeScroll, Indicator = homeIndicator }
-table.insert(Tabs, homeTabObj)
-FirstTab = homeTabObj
+table.insert(Tabs, { Container = homeScroll, Indicator = homeIndicator })
 homeScroll.Visible, homeIndicator.Visible = true, true
 ActiveTabTitle.Text = "🏠 Trang Chủ"
 
@@ -361,24 +359,20 @@ local function CreateHomeCardWithIcon(parent, order, bgColor, titleText, mainTex
     TrackStroke(Instance.new("UIStroke", iconCircle)).Color = borderColor
     local iconLbl = Instance.new("TextLabel", iconCircle)
     iconLbl.Size, iconLbl.BackgroundTransparency = UDim2.new(1, 0, 1, 0), 1
-    iconLbl.Text, iconLbl.TextColor3, iconLbl.TextSize, iconLbl.Font =
-        iconSymbol, Color3.fromRGB(255, 255, 255), 7, Enum.Font.GothamBold
+    iconLbl.Text, iconLbl.TextColor3, iconLbl.TextSize, iconLbl.Font = iconSymbol, Color3.fromRGB(255, 255, 255), 7, Enum.Font.GothamBold
 
     local tLbl = Instance.new("TextLabel", card)
     tLbl.Size, tLbl.Position, tLbl.BackgroundTransparency = UDim2.new(1, -70, 0, 10), UDim2.new(0, 24, 0, 1), 1
-    tLbl.Text, tLbl.TextColor3, tLbl.TextSize, tLbl.Font, tLbl.TextXAlignment =
-        titleText, Color3.fromRGB(255, 150, 100), 7, Enum.Font.GothamBold, Enum.TextXAlignment.Left
+    tLbl.Text, tLbl.TextColor3, tLbl.TextSize, tLbl.Font, tLbl.TextXAlignment = titleText, Color3.fromRGB(255, 150, 100), 7, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
     local mLbl = Instance.new("TextLabel", card)
     mLbl.Size, mLbl.Position, mLbl.BackgroundTransparency = UDim2.new(1, -70, 0, 12), UDim2.new(0, 24, 0, 12), 1
-    mLbl.Text, mLbl.TextColor3, mLbl.TextSize, mLbl.Font, mLbl.TextXAlignment =
-        mainText, Color3.fromRGB(220, 220, 230), 7, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    mLbl.Text, mLbl.TextColor3, mLbl.TextSize, mLbl.Font, mLbl.TextXAlignment = mainText, Color3.fromRGB(220, 220, 230), 7, Enum.Font.Gotham, Enum.TextXAlignment.Left
 
     if copyText ~= "" then
         local copyBtn = Instance.new("TextButton", card)
         copyBtn.Size, copyBtn.Position, copyBtn.BackgroundTransparency = UDim2.new(0, 42, 0, 16), UDim2.new(1, -44, 0.5, -8), 1
-        copyBtn.Text, copyBtn.TextColor3, copyBtn.TextSize, copyBtn.Font =
-            "📋 COPY", Color3.fromRGB(200, 200, 210), 7, Enum.Font.GothamBold
+        copyBtn.Text, copyBtn.TextColor3, copyBtn.TextSize, copyBtn.Font = "📋 COPY", Color3.fromRGB(200, 200, 210), 7, Enum.Font.GothamBold
         local function doCopy()
             if typeof(setclipboard) == "function" then
                 pcall(setclipboard, copyText)
@@ -406,13 +400,15 @@ homeScroll.CanvasSize = UDim2.new(0, 0, 0, 120)
 --------------------------------------------------------------------------------
 local function CreateCategoryTab(tabName)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
-    tabBtn.Size = UDim2.new(1, 0, 0, 26)
+    tabBtn.Size = UDim2.new(1, 0, 0, 28)
     tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
     tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment =
-        " " .. tabName, Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
+        " " .. tabName, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 5)
     local tabStroke = TrackStroke(Instance.new("UIStroke", tabBtn))
-    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(255, 255, 255), 2.5
+    -- 🔥 VIỀN DÀY 4px + BORDER MODE để không bị clip
+    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(255, 255, 255), 4
+    tabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     RegisterTheme(tabBtn, "Primary")
 
     local indicator = Instance.new("Frame", tabBtn)
@@ -429,16 +425,14 @@ local function CreateCategoryTab(tabName)
     containerFrame.ClipsDescendants = true
 
     local subBar = Instance.new("Frame", containerFrame)
-    subBar.Size, subBar.Position, subBar.BackgroundTransparency, subBar.ZIndex =
-        UDim2.new(1, -12, 0, 22), UDim2.new(0, 6, 0, 0), 1, 5
+    subBar.Size, subBar.Position, subBar.BackgroundTransparency, subBar.ZIndex = UDim2.new(1, -12, 0, 22), UDim2.new(0, 6, 0, 0), 1, 5
     local subLayout = Instance.new("UIListLayout", subBar)
     subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 4)
 
     local noKeyBtn = Instance.new("TextButton", subBar)
     noKeyBtn.Size = UDim2.new(0.48, 0, 1, 0)
     noKeyBtn.BackgroundColor3, noKeyBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
-    noKeyBtn.Text, noKeyBtn.TextColor3, noKeyBtn.TextSize, noKeyBtn.Font =
-        "no key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold
+    noKeyBtn.Text, noKeyBtn.TextColor3, noKeyBtn.TextSize, noKeyBtn.Font = "no key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold
     noKeyBtn.ZIndex = 6
     Instance.new("UICorner", noKeyBtn).CornerRadius = UDim.new(0, 5)
     local nkStroke = TrackStroke(Instance.new("UIStroke", noKeyBtn))
@@ -448,8 +442,7 @@ local function CreateCategoryTab(tabName)
     local hasKeyBtn = Instance.new("TextButton", subBar)
     hasKeyBtn.Size = UDim2.new(0.48, 0, 1, 0)
     hasKeyBtn.BackgroundColor3, hasKeyBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
-    hasKeyBtn.Text, hasKeyBtn.TextColor3, hasKeyBtn.TextSize, hasKeyBtn.Font =
-        "có key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold
+    hasKeyBtn.Text, hasKeyBtn.TextColor3, hasKeyBtn.TextSize, hasKeyBtn.Font = "có key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold
     hasKeyBtn.ZIndex = 6
     Instance.new("UICorner", hasKeyBtn).CornerRadius = UDim.new(0, 5)
     local hkStroke = TrackStroke(Instance.new("UIStroke", hasKeyBtn))
@@ -462,8 +455,7 @@ local function CreateCategoryTab(tabName)
     scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = 3, true, true
     scrollNoKey.ZIndex = 1
     local snkPad = Instance.new("UIPadding", scrollNoKey)
-    snkPad.PaddingLeft, snkPad.PaddingRight, snkPad.PaddingTop =
-        UDim.new(0, 4), UDim.new(0, 10), UDim.new(0, 4)
+    snkPad.PaddingLeft, snkPad.PaddingRight, snkPad.PaddingTop = UDim.new(0, 4), UDim.new(0, 10), UDim.new(0, 4)
     local l1 = Instance.new("UIListLayout", scrollNoKey)
     l1.Padding, l1.HorizontalAlignment = UDim.new(0, 3), Enum.HorizontalAlignment.Center
 
@@ -473,8 +465,7 @@ local function CreateCategoryTab(tabName)
     scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = 3, false, true
     scrollHasKey.ZIndex = 1
     local shkPad = Instance.new("UIPadding", scrollHasKey)
-    shkPad.PaddingLeft, shkPad.PaddingRight, shkPad.PaddingTop =
-        UDim.new(0, 4), UDim.new(0, 10), UDim.new(0, 4)
+    shkPad.PaddingLeft, shkPad.PaddingRight, shkPad.PaddingTop = UDim.new(0, 4), UDim.new(0, 10), UDim.new(0, 4)
     local l2 = Instance.new("UIListLayout", scrollHasKey)
     l2.Padding, l2.HorizontalAlignment = UDim.new(0, 3), Enum.HorizontalAlignment.Center
 
@@ -520,15 +511,14 @@ local function CreateCategoryTab(tabName)
     table.insert(Tabs, { Container = containerFrame, Indicator = indicator })
 
     local Elements = {}
-
     local function AddBtnTo(parent, name, callback)
         local Btn = Instance.new("TextButton", parent)
         Btn.Size = UDim2.new(1, 0, 0, 26)
         Btn.BackgroundColor3, Btn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
-        Btn.Text, Btn.TextColor3, Btn.TextSize, Btn.Font, Btn.TextXAlignment =
-            " ▶ " .. name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+        Btn.Text, Btn.TextColor3, Btn.TextSize, Btn.Font, Btn.TextXAlignment = " ▶ " .. name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
         Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 5)
         local btnStroke = TrackStroke(Instance.new("UIStroke", Btn))
+        btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(255, 105, 180), 2
         RegisterTheme(Btn, "Primary")
 
         Connect(Btn.MouseButton1Click, function()
@@ -537,10 +527,8 @@ local function CreateCategoryTab(tabName)
                     LastSelectedScriptStroke.Transparency = 1
                 else
                     LastSelectedScriptStroke.Transparency = 0
-                    LastSelectedScriptStroke.Thickness = 1.5
-                    if CurrentStrokeMode == "Color" then
-                        LastSelectedScriptStroke.Color = CurrentStrokeColor
-                    end
+                    LastSelectedScriptStroke.Thickness = 2
+                    if CurrentStrokeMode == "Color" then LastSelectedScriptStroke.Color = CurrentStrokeColor end
                 end
             end
             btnStroke.Thickness = 2.5
@@ -600,13 +588,13 @@ local tab5 = CreateCategoryTab("Tab 5")
 -- TAB MISC
 --------------------------------------------------------------------------------
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
-tabMiscBtn.Size = UDim2.new(1, 0, 0, 26)
+tabMiscBtn.Size = UDim2.new(1, 0, 0, 28)
 tabMiscBtn.BackgroundColor3, tabMiscBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
-tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment =
-    " ⚙️ MISC", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
+tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment = " ⚙️ MISC", Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabMiscBtn).CornerRadius = UDim.new(0, 5)
 local tabMiscStroke = TrackStroke(Instance.new("UIStroke", tabMiscBtn))
-tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(255, 255, 255), 2.5
+tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(255, 255, 255), 4
+tabMiscStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 RegisterTheme(tabMiscBtn, "Primary")
 
 local miscIndicator = Instance.new("Frame", tabMiscBtn)
@@ -633,7 +621,6 @@ Connect(tabMiscBtn.MouseButton1Click, function()
 end)
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
--- 1. AUTO LOAD SCRIPT
 local autoLoadToggleBtn = Instance.new("TextButton", miscScroll)
 autoLoadToggleBtn.LayoutOrder = 1
 autoLoadToggleBtn.Size = UDim2.new(1, 0, 0, 34)
@@ -676,10 +663,8 @@ RegisterTheme(dropBtn, "Primary")
 
 local dropFrame = Instance.new("ScrollingFrame", autoLoadContainer)
 dropFrame.LayoutOrder = 2
-dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.BackgroundTransparency =
-    UDim2.new(1, 0, 0, 90), Color3.fromRGB(80, 20, 60), 0
-dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible =
-    UDim2.new(0, 0, 0, 0), 3, false
+dropFrame.Size, dropFrame.BackgroundColor3, dropFrame.BackgroundTransparency = UDim2.new(1, 0, 0, 90), Color3.fromRGB(80, 20, 60), 0
+dropFrame.CanvasSize, dropFrame.ScrollBarThickness, dropFrame.Visible = UDim2.new(0, 0, 0, 0), 3, false
 Instance.new("UICorner", dropFrame).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", dropFrame)).Color = Color3.fromRGB(40, 43, 52)
 local dropLayout = Instance.new("UIListLayout", dropFrame)
@@ -708,8 +693,7 @@ toggleAutoBtn.BackgroundColor3, toggleAutoBtn.Text = Color3.fromRGB(60, 65, 75),
 Instance.new("UICorner", toggleAutoBtn).CornerRadius = UDim.new(1, 0)
 TrackStroke(Instance.new("UIStroke", toggleAutoBtn)).Color = Color3.fromRGB(40, 43, 52)
 local autoDot = Instance.new("Frame", toggleAutoBtn)
-autoDot.Size, autoDot.Position, autoDot.BackgroundColor3 =
-    UDim2.new(0, 11, 0, 11), UDim2.new(0, 2, 0.5, -5.5), Color3.fromRGB(255, 255, 255)
+autoDot.Size, autoDot.Position, autoDot.BackgroundColor3 = UDim2.new(0, 11, 0, 11), UDim2.new(0, 2, 0.5, -5.5), Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", autoDot).CornerRadius = UDim.new(1, 0)
 
 Connect(toggleAutoBtn.MouseButton1Click, function()
@@ -725,7 +709,6 @@ Connect(toggleAutoBtn.MouseButton1Click, function()
     end
 end)
 
--- 2. ÂM NHẠC
 local musicToggleBtn = Instance.new("TextButton", miscScroll)
 musicToggleBtn.LayoutOrder = 3
 musicToggleBtn.Size = UDim2.new(1, 0, 0, 34)
@@ -781,10 +764,8 @@ RegisterTheme(musicDropBtn, "Primary")
 
 local musicDropFrame = Instance.new("ScrollingFrame", musicContainer)
 musicDropFrame.LayoutOrder = 3
-musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.BackgroundTransparency =
-    UDim2.new(1, 0, 0, 95), Color3.fromRGB(80, 20, 60), 0
-musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible =
-    UDim2.new(0, 0, 0, 0), 3, false
+musicDropFrame.Size, musicDropFrame.BackgroundColor3, musicDropFrame.BackgroundTransparency = UDim2.new(1, 0, 0, 95), Color3.fromRGB(80, 20, 60), 0
+musicDropFrame.CanvasSize, musicDropFrame.ScrollBarThickness, musicDropFrame.Visible = UDim2.new(0, 0, 0, 0), 3, false
 Instance.new("UICorner", musicDropFrame).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", musicDropFrame)).Color = Color3.fromRGB(40, 43, 52)
 local musicListLayout = Instance.new("UIListLayout", musicDropFrame)
@@ -805,8 +786,7 @@ for i, m in ipairs(presetMusics) do
     mBtn.LayoutOrder = i
     mBtn.Size = UDim2.new(1, 0, 0, 22)
     mBtn.BackgroundColor3, mBtn.BackgroundTransparency = Color3.fromRGB(90, 25, 65), 0
-    mBtn.Text, mBtn.TextColor3, mBtn.TextSize, mBtn.Font, mBtn.TextXAlignment =
-        " " .. m.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    mBtn.Text, mBtn.TextColor3, mBtn.TextSize, mBtn.Font, mBtn.TextXAlignment = " " .. m.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", mBtn).CornerRadius = UDim.new(0, 4)
     TrackStroke(Instance.new("UIStroke", mBtn)).Color = Color3.fromRGB(40, 43, 52)
     RegisterTheme(mBtn, "DropItem")
@@ -837,8 +817,7 @@ volumeLabel.Text, volumeLabel.TextColor3, volumeLabel.TextSize, volumeLabel.Font
     "🔊 Vol: 50%", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
 local volumeBarBg = Instance.new("Frame", volumeFrame)
-volumeBarBg.Size, volumeBarBg.Position, volumeBarBg.BackgroundColor3 =
-    UDim2.new(0, 80, 0, 8), UDim2.new(1, -86, 0.5, -4), Color3.fromRGB(90, 25, 65)
+volumeBarBg.Size, volumeBarBg.Position, volumeBarBg.BackgroundColor3 = UDim2.new(0, 80, 0, 8), UDim2.new(1, -86, 0.5, -4), Color3.fromRGB(90, 25, 65)
 Instance.new("UICorner", volumeBarBg).CornerRadius = UDim.new(1, 0)
 TrackStroke(Instance.new("UIStroke", volumeBarBg)).Color = Color3.fromRGB(40, 43, 52)
 RegisterTheme(volumeBarBg, "DropItem")
@@ -850,14 +829,10 @@ volumeBtn.Size, volumeBtn.BackgroundTransparency, volumeBtn.Text = UDim2.new(1, 
 
 local adjustingVol = false
 Connect(volumeBtn.InputBegan, function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        adjustingVol = true
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then adjustingVol = true end
 end)
 Connect(UserInputService.InputEnded, function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        adjustingVol = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then adjustingVol = false end
 end)
 Connect(UserInputService.InputChanged, function(input)
     if adjustingVol and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
@@ -887,8 +862,7 @@ toggleMusicBtn.BackgroundColor3, toggleMusicBtn.Text = Color3.fromRGB(60, 65, 75
 Instance.new("UICorner", toggleMusicBtn).CornerRadius = UDim.new(1, 0)
 TrackStroke(Instance.new("UIStroke", toggleMusicBtn)).Color = Color3.fromRGB(40, 43, 52)
 local musicDot = Instance.new("Frame", toggleMusicBtn)
-musicDot.Size, musicDot.Position, musicDot.BackgroundColor3 =
-    UDim2.new(0, 11, 0, 11), UDim2.new(0, 2, 0.5, -5.5), Color3.fromRGB(255, 255, 255)
+musicDot.Size, musicDot.Position, musicDot.BackgroundColor3 = UDim2.new(0, 11, 0, 11), UDim2.new(0, 2, 0.5, -5.5), Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", musicDot).CornerRadius = UDim.new(1, 0)
 
 local isMusicPlaying = false
@@ -907,7 +881,6 @@ Connect(toggleMusicBtn.MouseButton1Click, function()
     end
 end)
 
--- 3. MÀU MENU & VIỀN
 local menuColorToggleBtn = Instance.new("TextButton", miscScroll)
 menuColorToggleBtn.LayoutOrder = 5
 menuColorToggleBtn.Size = UDim2.new(1, 0, 0, 34)
@@ -955,10 +928,8 @@ RegisterTheme(themeDropBtn, "Primary")
 
 local themeDropFrame = Instance.new("ScrollingFrame", menuColorContainer)
 themeDropFrame.LayoutOrder = 2
-themeDropFrame.Size, themeDropFrame.BackgroundColor3, themeDropFrame.BackgroundTransparency =
-    UDim2.new(1, 0, 0, 95), Color3.fromRGB(80, 20, 60), 0
-themeDropFrame.CanvasSize, themeDropFrame.ScrollBarThickness, themeDropFrame.Visible =
-    UDim2.new(0, 0, 0, 0), 3, false
+themeDropFrame.Size, themeDropFrame.BackgroundColor3, themeDropFrame.BackgroundTransparency = UDim2.new(1, 0, 0, 95), Color3.fromRGB(80, 20, 60), 0
+themeDropFrame.CanvasSize, themeDropFrame.ScrollBarThickness, themeDropFrame.Visible = UDim2.new(0, 0, 0, 0), 3, false
 Instance.new("UICorner", themeDropFrame).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", themeDropFrame)).Color = Color3.fromRGB(40, 43, 52)
 local themeListLayout = Instance.new("UIListLayout", themeDropFrame)
@@ -973,10 +944,8 @@ local function ApplyTheme(newBaseColor)
     local dropFrameColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.2)
     local dropItemColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.3)
     local inputColor = newBaseColor:Lerp(Color3.new(0,0,0), 0.4)
-
     SidebarPanel.BackgroundColor3 = newBaseColor
     ContentContainer.BackgroundColor3 = newBaseColor
-
     for _, item in ipairs(ThemedElements) do
         local el = item.Element
         if el and el.Parent then
@@ -995,8 +964,7 @@ for i, th in ipairs(menuThemeList) do
     tBtn.LayoutOrder = i
     tBtn.Size = UDim2.new(1, 0, 0, 22)
     tBtn.BackgroundColor3, tBtn.BackgroundTransparency = Color3.fromRGB(90, 25, 65), 0
-    tBtn.Text, tBtn.TextColor3, tBtn.TextSize, tBtn.Font, tBtn.TextXAlignment =
-        " " .. th.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    tBtn.Text, tBtn.TextColor3, tBtn.TextSize, tBtn.Font, tBtn.TextXAlignment = " " .. th.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", tBtn).CornerRadius = UDim.new(0, 4)
     TrackStroke(Instance.new("UIStroke", tBtn)).Color = Color3.fromRGB(40, 43, 52)
     RegisterTheme(tBtn, "DropItem")
@@ -1023,8 +991,7 @@ transLabel.Text, transLabel.TextColor3, transLabel.TextSize, transLabel.Font, tr
     "✨ Trong suốt: 0%", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
 local transBarBg = Instance.new("Frame", transFrame)
-transBarBg.Size, transBarBg.Position, transBarBg.BackgroundColor3 =
-    UDim2.new(0, 80, 0, 8), UDim2.new(1, -86, 0.5, -4), Color3.fromRGB(90, 25, 65)
+transBarBg.Size, transBarBg.Position, transBarBg.BackgroundColor3 = UDim2.new(0, 80, 0, 8), UDim2.new(1, -86, 0.5, -4), Color3.fromRGB(90, 25, 65)
 Instance.new("UICorner", transBarBg).CornerRadius = UDim.new(1, 0)
 TrackStroke(Instance.new("UIStroke", transBarBg)).Color = Color3.fromRGB(40, 43, 52)
 RegisterTheme(transBarBg, "DropItem")
@@ -1036,14 +1003,10 @@ transBtn.Size, transBtn.BackgroundTransparency, transBtn.Text = UDim2.new(1, 10,
 
 local adjustingTrans = false
 Connect(transBtn.InputBegan, function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        adjustingTrans = true
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then adjustingTrans = true end
 end)
 Connect(UserInputService.InputEnded, function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        adjustingTrans = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then adjustingTrans = false end
 end)
 Connect(UserInputService.InputChanged, function(input)
     if adjustingTrans and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
@@ -1076,10 +1039,8 @@ RegisterTheme(colorDropBtn, "Primary")
 
 local colorDropFrame = Instance.new("ScrollingFrame", menuColorContainer)
 colorDropFrame.LayoutOrder = 5
-colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.BackgroundTransparency =
-    UDim2.new(1, 0, 0, 95), Color3.fromRGB(80, 20, 60), 0
-colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible =
-    UDim2.new(0, 0, 0, 0), 3, false
+colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.BackgroundTransparency = UDim2.new(1, 0, 0, 95), Color3.fromRGB(80, 20, 60), 0
+colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible = UDim2.new(0, 0, 0, 0), 3, false
 Instance.new("UICorner", colorDropFrame).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", colorDropFrame)).Color = Color3.fromRGB(40, 43, 52)
 local colorListLayout = Instance.new("UIListLayout", colorDropFrame)
@@ -1093,8 +1054,7 @@ for i, cItem in ipairs(colorList) do
     cBtn.LayoutOrder = i
     cBtn.Size = UDim2.new(1, 0, 0, 22)
     cBtn.BackgroundColor3, cBtn.BackgroundTransparency = Color3.fromRGB(90, 25, 65), 0
-    cBtn.Text, cBtn.TextColor3, cBtn.TextSize, cBtn.Font, cBtn.TextXAlignment =
-        " " .. cItem.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    cBtn.Text, cBtn.TextColor3, cBtn.TextSize, cBtn.Font, cBtn.TextXAlignment = " " .. cItem.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 4)
     TrackStroke(Instance.new("UIStroke", cBtn)).Color = Color3.fromRGB(40, 43, 52)
     RegisterTheme(cBtn, "DropItem")
@@ -1108,7 +1068,6 @@ end
 colorDropFrame.CanvasSize = UDim2.new(0, 0, 0, #colorList * 25)
 Connect(colorDropBtn.MouseButton1Click, function() colorDropFrame.Visible = not colorDropFrame.Visible end)
 
--- Rainbow throttle 30fps — chỉ đổi Color, KHÔNG đụng Transparency
 local rainbowAccum = 0
 Connect(RunService.RenderStepped, function(dt)
     if CurrentStrokeMode == "Rainbow" then
@@ -1130,13 +1089,13 @@ miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1300)
 -- TAB CẤU HÌNH
 --------------------------------------------------------------------------------
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
-tabConfigBtn.Size = UDim2.new(1, 0, 0, 26)
+tabConfigBtn.Size = UDim2.new(1, 0, 0, 28)
 tabConfigBtn.BackgroundColor3, tabConfigBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
-tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment =
-    " 📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
+tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = " 📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabConfigBtn).CornerRadius = UDim.new(0, 5)
 local tabConfigStroke = TrackStroke(Instance.new("UIStroke", tabConfigBtn))
-tabConfigStroke.Color, tabConfigStroke.Thickness = Color3.fromRGB(255, 255, 255), 2.5
+tabConfigStroke.Color, tabConfigStroke.Thickness = Color3.fromRGB(255, 255, 255), 4
+tabConfigStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 RegisterTheme(tabConfigBtn, "Primary")
 
 local configIndicator = Instance.new("Frame", tabConfigBtn)
@@ -1232,8 +1191,7 @@ autoSaveToggle.BackgroundColor3, autoSaveToggle.Text = Color3.fromRGB(50, 200, 5
 Instance.new("UICorner", autoSaveToggle).CornerRadius = UDim.new(1, 0)
 TrackStroke(Instance.new("UIStroke", autoSaveToggle)).Color = Color3.fromRGB(40, 43, 52)
 local asBox = Instance.new("Frame", autoSaveToggle)
-asBox.Size, asBox.Position, asBox.BackgroundColor3 =
-    UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5), Color3.fromRGB(255, 255, 255)
+asBox.Size, asBox.Position, asBox.BackgroundColor3 = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5), Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", asBox).CornerRadius = UDim.new(1, 0)
 local isAutoSave = true
 Connect(autoSaveToggle.MouseButton1Click, function()
@@ -1264,8 +1222,7 @@ autoLoadCfgToggle.BackgroundColor3, autoLoadCfgToggle.Text = Color3.fromRGB(50, 
 Instance.new("UICorner", autoLoadCfgToggle).CornerRadius = UDim.new(1, 0)
 TrackStroke(Instance.new("UIStroke", autoLoadCfgToggle)).Color = Color3.fromRGB(40, 43, 52)
 local alCfgBox = Instance.new("Frame", autoLoadCfgToggle)
-alCfgBox.Size, alCfgBox.Position, alCfgBox.BackgroundColor3 =
-    UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5), Color3.fromRGB(255, 255, 255)
+alCfgBox.Size, alCfgBox.Position, alCfgBox.BackgroundColor3 = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5), Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", alCfgBox).CornerRadius = UDim.new(1, 0)
 local isAutoLoadCfg = true
 Connect(autoLoadCfgToggle.MouseButton1Click, function()
@@ -1370,10 +1327,8 @@ RegisterTheme(delBtn, "Input")
 
 local delDropFrame = Instance.new("ScrollingFrame", profilesContainer)
 delDropFrame.LayoutOrder = 4
-delDropFrame.Size, delDropFrame.BackgroundColor3, delDropFrame.BackgroundTransparency =
-    UDim2.new(1, 0, 0, 80), Color3.fromRGB(80, 20, 60), 0
-delDropFrame.CanvasSize, delDropFrame.ScrollBarThickness, delDropFrame.Visible =
-    UDim2.new(0, 0, 0, 0), 3, false
+delDropFrame.Size, delDropFrame.BackgroundColor3, delDropFrame.BackgroundTransparency = UDim2.new(1, 0, 0, 80), Color3.fromRGB(80, 20, 60), 0
+delDropFrame.CanvasSize, delDropFrame.ScrollBarThickness, delDropFrame.Visible = UDim2.new(0, 0, 0, 0), 3, false
 Instance.new("UICorner", delDropFrame).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", delDropFrame)).Color = Color3.fromRGB(40, 43, 52)
 local delDropLayout = Instance.new("UIListLayout", delDropFrame)
@@ -1405,10 +1360,8 @@ RegisterTheme(stProfileBtn, "Input")
 
 local stProfileDrop = Instance.new("ScrollingFrame", profilesContainer)
 stProfileDrop.LayoutOrder = 6
-stProfileDrop.Size, stProfileDrop.BackgroundColor3, stProfileDrop.BackgroundTransparency =
-    UDim2.new(1, 0, 0, 80), Color3.fromRGB(80, 20, 60), 0
-stProfileDrop.CanvasSize, stProfileDrop.ScrollBarThickness, stProfileDrop.Visible =
-    UDim2.new(0, 0, 0, 0), 3, false
+stProfileDrop.Size, stProfileDrop.BackgroundColor3, stProfileDrop.BackgroundTransparency = UDim2.new(1, 0, 0, 80), Color3.fromRGB(80, 20, 60), 0
+stProfileDrop.CanvasSize, stProfileDrop.ScrollBarThickness, stProfileDrop.Visible = UDim2.new(0, 0, 0, 0), 3, false
 Instance.new("UICorner", stProfileDrop).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", stProfileDrop)).Color = Color3.fromRGB(40, 43, 52)
 local stProfileLayout = Instance.new("UIListLayout", stProfileDrop)
@@ -1440,10 +1393,8 @@ RegisterTheme(ldBtn, "Input")
 
 local ldDropFrame = Instance.new("ScrollingFrame", profilesContainer)
 ldDropFrame.LayoutOrder = 8
-ldDropFrame.Size, ldDropFrame.BackgroundColor3, ldDropFrame.BackgroundTransparency =
-    UDim2.new(1, 0, 0, 80), Color3.fromRGB(80, 20, 60), 0
-ldDropFrame.CanvasSize, ldDropFrame.ScrollBarThickness, ldDropFrame.Visible =
-    UDim2.new(0, 0, 0, 0), 3, false
+ldDropFrame.Size, ldDropFrame.BackgroundColor3, ldDropFrame.BackgroundTransparency = UDim2.new(1, 0, 0, 80), Color3.fromRGB(80, 20, 60), 0
+ldDropFrame.CanvasSize, ldDropFrame.ScrollBarThickness, ldDropFrame.Visible = UDim2.new(0, 0, 0, 0), 3, false
 Instance.new("UICorner", ldDropFrame).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", ldDropFrame)).Color = Color3.fromRGB(40, 43, 52)
 local ldDropLayout = Instance.new("UIListLayout", ldDropFrame)
@@ -1481,7 +1432,6 @@ local function refreshAllDropdowns()
             if child:IsA("TextButton") then child:Destroy() end
         end
     end
-
     local filesList = {}
     if typeof(listfiles) == "function" then
         local ok, files = pcall(listfiles, configFolder)
@@ -1496,13 +1446,11 @@ local function refreshAllDropdowns()
         end
     end
     if #filesList == 0 then delBtn.Text = "Không có ∨" end
-
     for _, name in ipairs(filesList) do
         local f1 = Instance.new("TextButton", delDropFrame)
         f1.Size = UDim2.new(1, 0, 0, 22)
         f1.BackgroundColor3, f1.BackgroundTransparency = Color3.fromRGB(90, 25, 65), 0
-        f1.Text, f1.TextColor3, f1.TextSize, f1.Font, f1.TextXAlignment =
-            " 🗑️ " .. name, Color3.fromRGB(255, 100, 100), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+        f1.Text, f1.TextColor3, f1.TextSize, f1.Font, f1.TextXAlignment = " 🗑️ " .. name, Color3.fromRGB(255, 100, 100), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
         Instance.new("UICorner", f1).CornerRadius = UDim.new(0, 4)
         TrackStroke(Instance.new("UIStroke", f1)).Color = Color3.fromRGB(40, 43, 52)
         RegisterTheme(f1, "DropItem")
@@ -1512,12 +1460,10 @@ local function refreshAllDropdowns()
             delDropFrame.Visible = false
             refreshAllDropdowns()
         end)
-
         local f2 = Instance.new("TextButton", stProfileDrop)
         f2.Size = UDim2.new(1, 0, 0, 22)
         f2.BackgroundColor3, f2.BackgroundTransparency = Color3.fromRGB(90, 25, 65), 0
-        f2.Text, f2.TextColor3, f2.TextSize, f2.Font, f2.TextXAlignment =
-            " 📁 " .. name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+        f2.Text, f2.TextColor3, f2.TextSize, f2.Font, f2.TextXAlignment = " 📁 " .. name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
         Instance.new("UICorner", f2).CornerRadius = UDim.new(0, 4)
         TrackStroke(Instance.new("UIStroke", f2)).Color = Color3.fromRGB(40, 43, 52)
         RegisterTheme(f2, "DropItem")
@@ -1527,12 +1473,10 @@ local function refreshAllDropdowns()
             startupLabel.Text = "Startup: " .. name
             stProfileDrop.Visible = false
         end)
-
         local f3 = Instance.new("TextButton", ldDropFrame)
         f3.Size = UDim2.new(1, 0, 0, 22)
         f3.BackgroundColor3, f3.BackgroundTransparency = Color3.fromRGB(90, 25, 65), 0
-        f3.Text, f3.TextColor3, f3.TextSize, f3.Font, f3.TextXAlignment =
-            " 📂 " .. name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+        f3.Text, f3.TextColor3, f3.TextSize, f3.Font, f3.TextXAlignment = " 📂 " .. name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
         Instance.new("UICorner", f3).CornerRadius = UDim.new(0, 4)
         TrackStroke(Instance.new("UIStroke", f3)).Color = Color3.fromRGB(40, 43, 52)
         RegisterTheme(f3, "DropItem")
@@ -1598,8 +1542,7 @@ for i, scr in ipairs(RegisteredScripts) do
     item.LayoutOrder = i
     item.Size = UDim2.new(1, 0, 0, 22)
     item.BackgroundColor3, item.BackgroundTransparency = Color3.fromRGB(90, 25, 65), 0
-    item.Text, item.TextColor3, item.TextSize, item.Font, item.TextXAlignment =
-        " ▶ " .. scr.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    item.Text, item.TextColor3, item.TextSize, item.Font, item.TextXAlignment = " ▶ " .. scr.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 4)
     TrackStroke(Instance.new("UIStroke", item)).Color = Color3.fromRGB(40, 43, 52)
     RegisterTheme(item, "DropItem")
@@ -1626,7 +1569,6 @@ OpenButton.TextSize = 20
 OpenButton.Active = true
 OpenButton.Draggable = true
 Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(1, 0)
-
 local OpenStroke = TrackStroke(Instance.new("UIStroke", OpenButton))
 OpenStroke.Thickness = 3
 OpenStroke.Color = Color3.fromRGB(255, 255, 255)
