@@ -1,7 +1,12 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 — FIXED VERSION (Music gốc, Config gốc)
+    VzNam Hub v4 — FIXED
     ═══════════════════════════════════════════════════════
+    • Nhạc: y bản gốc
+    • Startup label: động theo CurrentConfig
+    • Auto Save: tự lưu khi state thay đổi
+    • Auto Load: tự load khi khởi động
+    • Profiles: độc lập với Cấu Hình
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -18,7 +23,7 @@ local PlayerGui = localPlayer:FindFirstChildOfClass("PlayerGui") or CoreGui
 if PlayerGui:FindFirstChild("VzNamHubV4UI") then PlayerGui.VzNamHubV4UI:Destroy() end
 if SoundService:FindFirstChild("VzNamHubSound") then SoundService.VzNamHubSound:Destroy() end
 
--- ═════════════════ QUẢN LÝ CONNECTION ═════════════════
+-- ═════════════════ CONNECTION TRACKING ═════════════════
 local Connections = {}
 local function Track(conn)
     if conn then table.insert(Connections, conn) end
@@ -29,24 +34,28 @@ local function DisconnectAll()
     Connections = {}
 end
 
--- ═════════════════ GLOBAL STATE ═════════════════
+-- ═════════════════ STATE ═════════════════
 local State = {
-    ThemeBase     = Color3.fromRGB(15, 16, 22),
-    StrokeMode    = "Solid",
-    StrokeColor   = Color3.fromRGB(0, 191, 255),
-    Volume        = 0.5,
-    SoundId       = "1837879082",
-    IsMusicPlaying= false,
-    SelectedScript= nil,
-    IsAutoLoad    = false,
-    CurrentConfig = "Default",
-    StartupConfig = "Default",
-    AutoSave      = true,
-    AutoLoadConfig= true,
-    Transparent   = 0,
+    ThemeBase      = Color3.fromRGB(15, 16, 22),
+    StrokeMode     = "Solid",
+    StrokeColor    = Color3.fromRGB(0, 191, 255),
+    Volume         = 0.5,
+    SoundId        = "1837879082",
+    SelectedScript = nil,
+    IsAutoLoad     = false,
+    CurrentConfig  = "Default",
+    StartupConfig  = "Default",
+    AutoSave       = true,
+    AutoLoadConfig = true,
+    Transparent    = 0,
+    Initialized    = false,
 }
 
--- ═════════════════ HELPER BUILDERS ═════════════════
+-- Forward declarations (được gán thật ở phần Config)
+local AutoSaveHook        = function() end
+local RefreshStartupLabel = function() end
+
+-- ═════════════════ UI HELPERS ═════════════════
 local function Corner(parent, radius)
     local c = Instance.new("UICorner", parent)
     c.CornerRadius = radius or UDim.new(0, 5)
@@ -69,7 +78,7 @@ local function RegTheme(el, t)
     return el
 end
 
--- ═════════════════ WHITELIST DOMAIN ═════════════════
+-- ═════════════════ SAFE LOAD ═════════════════
 local ALLOWED_HOSTS = {
     "raw.githubusercontent.com",
     "gist.githubusercontent.com",
@@ -626,7 +635,7 @@ Track(tabMiscBtn.MouseButton1Click:Connect(function()
 end))
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
--- Auto Load Script
+-- ═════════════════ AUTO LOAD SCRIPT ═════════════════
 local autoLoadToggleBtn = Instance.new("TextButton", miscScroll)
 autoLoadToggleBtn.LayoutOrder = 1
 autoLoadToggleBtn.Size, autoLoadToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(55,12,40)
@@ -754,7 +763,7 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     end
 end))
 
--- ═════════════════ ÂM NHẠC (BẢN GỐC) ═════════════════
+-- ═════════════════ ÂM NHẠC (Y BẢN GỐC) ═════════════════
 local musicToggleBtn = Instance.new("TextButton", miscScroll)
 musicToggleBtn.LayoutOrder = 3
 musicToggleBtn.Size, musicToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(55,12,40)
@@ -821,7 +830,6 @@ RegTheme(musicDropFrame, "DropFrame")
 local musicPad = Instance.new("UIPadding", musicDropFrame)
 musicPad.PaddingRight = UDim.new(0, 8)
 
--- ✅ PRESET NHẠC GIỮ NGUYÊN BẢN GỐC
 local presetMusics = {
     {Name = "🎵 Chill Lofi",        Id = "1837879082"},
     {Name = "🎶 Phonk Beat",        Id = "1843404008"},
@@ -846,6 +854,7 @@ for i, m in ipairs(presetMusics) do
             HubSound.SoundId = "rbxassetid://" .. State.SoundId
             HubSound:Play()
         end
+        AutoSaveHook()
     end))
 end
 musicDropFrame.CanvasSize = UDim2.new(0, 0, 0, #presetMusics * 25)
@@ -887,7 +896,9 @@ Track(volumeBtn.InputBegan:Connect(function(input)
 end))
 Track(UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
-       or input.UserInputType == Enum.UserInputType.Touch then adjustingVol = false end
+       or input.UserInputType == Enum.UserInputType.Touch then
+        if adjustingVol then adjustingVol = false; AutoSaveHook() end
+    end
 end))
 Track(UserInputService.InputChanged:Connect(function(input)
     if adjustingVol and (input.UserInputType == Enum.UserInputType.MouseMovement
@@ -924,7 +935,6 @@ musicDot.Size, musicDot.Position = UDim2.new(0, 11, 0, 11), UDim2.new(0, 2, 0.5,
 musicDot.BackgroundColor3 = Color3.fromRGB(255,255,255)
 Corner(musicDot, UDim.new(1, 0))
 
--- ✅ NHẠC — Y BẢN GỐC
 local isMusicPlaying = false
 Track(toggleMusicBtn.MouseButton1Click:Connect(function()
     isMusicPlaying = not isMusicPlaying
@@ -1001,6 +1011,7 @@ local function ApplyTheme(newBaseColor)
             end
         end
     end
+    AutoSaveHook()
 end
 
 local themeDropBtn = Instance.new("TextButton", menuColorContainer)
@@ -1079,7 +1090,9 @@ Track(transBtn.InputBegan:Connect(function(input)
 end))
 Track(UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
-       or input.UserInputType == Enum.UserInputType.Touch then adjustingTrans = false end
+       or input.UserInputType == Enum.UserInputType.Touch then
+        if adjustingTrans then adjustingTrans = false; AutoSaveHook() end
+    end
 end))
 Track(UserInputService.InputChanged:Connect(function(input)
     if adjustingTrans and (input.UserInputType == Enum.UserInputType.MouseMovement
@@ -1137,6 +1150,7 @@ local function UpdateAllStrokes(target)
             if s then s.Transparency = 0; s.Color = target end
         end
     end
+    AutoSaveHook()
 end
 
 for i, cItem in ipairs(colorList) do
@@ -1220,6 +1234,7 @@ table.insert(Tabs, {Container = configScroll, Indicator = configIndicator})
 local CONFIG_FOLDER = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, CONFIG_FOLDER) end
 
+-- ─── Save / Load / Apply ───
 local function SerializeState(scriptName)
     return {
         Version        = 4,
@@ -1254,6 +1269,138 @@ local function SaveConfig(name)
     return ok
 end
 
+local function LoadConfig(name)
+    if typeof(readfile) ~= "function" then return false, "no readfile" end
+    local path = CONFIG_FOLDER .. "/" .. name .. ".json"
+    local ok, contents = pcall(readfile, path)
+    if not ok or not contents then return false, "read fail" end
+    local ok2, data = pcall(HttpService.JSONDecode, HttpService, contents)
+    if not ok2 then return false, "invalid JSON" end
+    if not ValidateConfig(data) then return false, "invalid schema" end
+    return true, data
+end
+
+-- ─── UI elements phần Cấu Hình ───
+local configToggleBtn = Instance.new("TextButton", configScroll)
+configToggleBtn.LayoutOrder, configToggleBtn.Size = 1, UDim2.new(1, 0, 0, 34)
+configToggleBtn.BackgroundColor3, configToggleBtn.BackgroundTransparency = Color3.fromRGB(55,12,40), 0
+configToggleBtn.Text, configToggleBtn.TextColor3 = " ↓ Cấu Hình", Color3.fromRGB(255,255,255)
+configToggleBtn.TextSize, configToggleBtn.Font = 10, Enum.Font.GothamBold
+configToggleBtn.TextXAlignment = Enum.TextXAlignment.Center
+Corner(configToggleBtn)
+Stroke(configToggleBtn)
+RegTheme(configToggleBtn, "Secondary")
+
+local configSubLabel = Instance.new("TextLabel", configToggleBtn)
+configSubLabel.Size, configSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
+configSubLabel.BackgroundTransparency, configSubLabel.Text = 1, "Quản lý cấu hình hệ thống"
+configSubLabel.TextColor3, configSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
+configSubLabel.Font, configSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
+
+local mainConfigContainer = Instance.new("Frame", configScroll)
+mainConfigContainer.LayoutOrder, mainConfigContainer.Size = 2, UDim2.new(1, 0, 0, 0)
+mainConfigContainer.AutomaticSize, mainConfigContainer.BackgroundTransparency = Enum.AutomaticSize.Y, 1
+mainConfigContainer.Visible = true
+local mainCfgLayout = Instance.new("UIListLayout", mainConfigContainer)
+mainCfgLayout.SortOrder, mainCfgLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
+mainCfgLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+Track(configToggleBtn.MouseButton1Click:Connect(function()
+    mainConfigContainer.Visible = not mainConfigContainer.Visible
+    configToggleBtn.Text = mainConfigContainer.Visible and " ↓ Cấu Hình" or " → Cấu Hình"
+    configSubLabel.Visible = mainConfigContainer.Visible
+end))
+
+-- Startup label — ĐỘNG theo CurrentConfig
+local startupFrame = Instance.new("Frame", mainConfigContainer)
+startupFrame.LayoutOrder, startupFrame.Size = 1, UDim2.new(1, 0, 0, 30)
+startupFrame.BackgroundColor3, startupFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
+Corner(startupFrame)
+Stroke(startupFrame)
+RegTheme(startupFrame, "Primary")
+
+local startupLabel = Instance.new("TextLabel", startupFrame)
+startupLabel.Size, startupLabel.Position = UDim2.new(1, -8, 1, 0), UDim2.new(0, 5, 0, 0)
+startupLabel.BackgroundTransparency = 1
+startupLabel.Text = "Startup: " .. State.CurrentConfig
+startupLabel.TextColor3, startupLabel.TextSize = Color3.fromRGB(255,255,255), 9
+startupLabel.Font, startupLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+
+-- Auto Save
+local autoSaveFrame = Instance.new("Frame", mainConfigContainer)
+autoSaveFrame.LayoutOrder, autoSaveFrame.Size = 2, UDim2.new(1, 0, 0, 34)
+autoSaveFrame.BackgroundColor3, autoSaveFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
+Corner(autoSaveFrame)
+Stroke(autoSaveFrame)
+RegTheme(autoSaveFrame, "Primary")
+
+local asTitle = Instance.new("TextLabel", autoSaveFrame)
+asTitle.Size, asTitle.Position = UDim2.new(1, -38, 0, 15), UDim2.new(0, 5, 0, 2)
+asTitle.BackgroundTransparency, asTitle.Text = 1, "Auto Lưu Cấu Hình"
+asTitle.TextColor3, asTitle.TextSize = Color3.fromRGB(255,255,255), 9
+asTitle.Font, asTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+
+local asSub = Instance.new("TextLabel", autoSaveFrame)
+asSub.Size, asSub.Position = UDim2.new(1, -38, 0, 14), UDim2.new(0, 5, 0, 17)
+asSub.BackgroundTransparency, asSub.Text = 1, "Save: " .. State.CurrentConfig
+asSub.TextColor3, asSub.TextSize = Color3.fromRGB(140,140,150), 7
+asSub.Font, asSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+
+local autoSaveToggle = Instance.new("TextButton", autoSaveFrame)
+autoSaveToggle.Size, autoSaveToggle.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
+autoSaveToggle.BackgroundColor3, autoSaveToggle.Text = Color3.fromRGB(50,200,50), ""
+Corner(autoSaveToggle, UDim.new(1, 0))
+Stroke(autoSaveToggle)
+
+local asBox = Instance.new("Frame", autoSaveToggle)
+asBox.Size, asBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5)
+asBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Corner(asBox, UDim.new(1, 0))
+
+-- Auto Load
+local autoLoadFrame = Instance.new("Frame", mainConfigContainer)
+autoLoadFrame.LayoutOrder, autoLoadFrame.Size = 3, UDim2.new(1, 0, 0, 34)
+autoLoadFrame.BackgroundColor3, autoLoadFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
+Corner(autoLoadFrame)
+Stroke(autoLoadFrame)
+RegTheme(autoLoadFrame, "Primary")
+
+local alTitle = Instance.new("TextLabel", autoLoadFrame)
+alTitle.Size, alTitle.Position = UDim2.new(1, -38, 0, 15), UDim2.new(0, 5, 0, 2)
+alTitle.BackgroundTransparency, alTitle.Text = 1, "Auto Tải Cấu Hình"
+alTitle.TextColor3, alTitle.TextSize = Color3.fromRGB(255,255,255), 9
+alTitle.Font, alTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+
+local alSub = Instance.new("TextLabel", autoLoadFrame)
+alSub.Size, alSub.Position = UDim2.new(1, -38, 0, 14), UDim2.new(0, 5, 0, 17)
+alSub.BackgroundTransparency, alSub.Text = 1, "Load: " .. State.CurrentConfig
+alSub.TextColor3, alSub.TextSize = Color3.fromRGB(140,140,150), 7
+alSub.Font, alSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+
+local autoLoadToggle = Instance.new("TextButton", autoLoadFrame)
+autoLoadToggle.Size, autoLoadToggle.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
+autoLoadToggle.BackgroundColor3, autoLoadToggle.Text = Color3.fromRGB(50,200,50), ""
+Corner(autoLoadToggle, UDim.new(1, 0))
+Stroke(autoLoadToggle)
+
+local alBox = Instance.new("Frame", autoLoadToggle)
+alBox.Size, alBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5)
+alBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Corner(alBox, UDim.new(1, 0))
+
+-- ─── Gán thật cho forward declarations ───
+AutoSaveHook = function()
+    if not State.Initialized then return end
+    if State.AutoSave then
+        SaveConfig(State.CurrentConfig)
+    end
+end
+
+RefreshStartupLabel = function()
+    startupLabel.Text = "Startup: " .. State.CurrentConfig
+end
+
+-- ApplyConfig — dùng cho LoadConfig
 local function ApplyConfig(data)
     if data.ThemeBase then
         local c = Color3.new(data.ThemeBase[1], data.ThemeBase[2], data.ThemeBase[3])
@@ -1309,134 +1456,39 @@ local function ApplyConfig(data)
     end
 end
 
-local function LoadConfig(name)
-    if typeof(readfile) ~= "function" then return false, "no readfile" end
-    local path = CONFIG_FOLDER .. "/" .. name .. ".json"
-    local ok, contents = pcall(readfile, path)
-    if not ok or not contents then return false, "read fail" end
-    local ok2, data = pcall(HttpService.JSONDecode, HttpService, contents)
-    if not ok2 then return false, "invalid JSON" end
-    if not ValidateConfig(data) then return false, "invalid schema" end
-    ApplyConfig(data)
+-- Ghi đè LoadConfig để áp dụng config
+local LoadConfigRaw = LoadConfig
+LoadConfig = function(name)
+    local ok, dataOrErr = LoadConfigRaw(name)
+    if not ok then return false, dataOrErr end
+    ApplyConfig(dataOrErr)
     return true
 end
 
-local configToggleBtn = Instance.new("TextButton", configScroll)
-configToggleBtn.LayoutOrder, configToggleBtn.Size = 1, UDim2.new(1, 0, 0, 34)
-configToggleBtn.BackgroundColor3, configToggleBtn.BackgroundTransparency = Color3.fromRGB(55,12,40), 0
-configToggleBtn.Text, configToggleBtn.TextColor3 = " ↓ Cấu Hình", Color3.fromRGB(255,255,255)
-configToggleBtn.TextSize, configToggleBtn.Font = 10, Enum.Font.GothamBold
-configToggleBtn.TextXAlignment = Enum.TextXAlignment.Center
-Corner(configToggleBtn)
-Stroke(configToggleBtn)
-RegTheme(configToggleBtn, "Secondary")
-
-local configSubLabel = Instance.new("TextLabel", configToggleBtn)
-configSubLabel.Size, configSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
-configSubLabel.BackgroundTransparency, configSubLabel.Text = 1, "Quản lý cấu hình hệ thống"
-configSubLabel.TextColor3, configSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
-configSubLabel.Font, configSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
-
-local mainConfigContainer = Instance.new("Frame", configScroll)
-mainConfigContainer.LayoutOrder, mainConfigContainer.Size = 2, UDim2.new(1, 0, 0, 0)
-mainConfigContainer.AutomaticSize, mainConfigContainer.BackgroundTransparency = Enum.AutomaticSize.Y, 1
-mainConfigContainer.Visible = true
-local mainCfgLayout = Instance.new("UIListLayout", mainConfigContainer)
-mainCfgLayout.SortOrder, mainCfgLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
-mainCfgLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
-Track(configToggleBtn.MouseButton1Click:Connect(function()
-    mainConfigContainer.Visible = not mainConfigContainer.Visible
-    configToggleBtn.Text = mainConfigContainer.Visible and " ↓ Cấu Hình" or " → Cấu Hình"
-    configSubLabel.Visible = mainConfigContainer.Visible
-end))
-
--- ✅ STARTUP LABEL GIỮ NGUYÊN "Default"
-local startupFrame = Instance.new("Frame", mainConfigContainer)
-startupFrame.LayoutOrder, startupFrame.Size = 1, UDim2.new(1, 0, 0, 30)
-startupFrame.BackgroundColor3, startupFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
-Corner(startupFrame)
-Stroke(startupFrame)
-RegTheme(startupFrame, "Primary")
-
-local startupLabel = Instance.new("TextLabel", startupFrame)
-startupLabel.Size, startupLabel.Position = UDim2.new(1, -8, 1, 0), UDim2.new(0, 5, 0, 0)
-startupLabel.BackgroundTransparency, startupLabel.Text = 1, "Startup: Default"
-startupLabel.TextColor3, startupLabel.TextSize = Color3.fromRGB(255,255,255), 9
-startupLabel.Font, startupLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-
-local autoSaveFrame = Instance.new("Frame", mainConfigContainer)
-autoSaveFrame.LayoutOrder, autoSaveFrame.Size = 2, UDim2.new(1, 0, 0, 34)
-autoSaveFrame.BackgroundColor3, autoSaveFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
-Corner(autoSaveFrame)
-Stroke(autoSaveFrame)
-RegTheme(autoSaveFrame, "Primary")
-
-local asTitle = Instance.new("TextLabel", autoSaveFrame)
-asTitle.Size, asTitle.Position = UDim2.new(1, -38, 0, 15), UDim2.new(0, 5, 0, 2)
-asTitle.BackgroundTransparency, asTitle.Text = 1, "Auto Lưu Cấu Hình"
-asTitle.TextColor3, asTitle.TextSize = Color3.fromRGB(255,255,255), 9
-asTitle.Font, asTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-
-local asSub = Instance.new("TextLabel", autoSaveFrame)
-asSub.Size, asSub.Position = UDim2.new(1, -38, 0, 14), UDim2.new(0, 5, 0, 17)
-asSub.BackgroundTransparency, asSub.Text = 1, "Save: " .. State.CurrentConfig
-asSub.TextColor3, asSub.TextSize = Color3.fromRGB(140,140,150), 7
-asSub.Font, asSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-
-local autoSaveToggle = Instance.new("TextButton", autoSaveFrame)
-autoSaveToggle.Size, autoSaveToggle.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
-autoSaveToggle.BackgroundColor3, autoSaveToggle.Text = Color3.fromRGB(50,200,50), ""
-Corner(autoSaveToggle, UDim.new(1, 0))
-Stroke(autoSaveToggle)
-
-local asBox = Instance.new("Frame", autoSaveToggle)
-asBox.Size, asBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5)
-asBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
-Corner(asBox, UDim.new(1, 0))
-
+-- ─── Toggle handlers ───
 Track(autoSaveToggle.MouseButton1Click:Connect(function()
     State.AutoSave = not State.AutoSave
     autoSaveToggle.BackgroundColor3 = State.AutoSave and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
     asBox.Position = State.AutoSave and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
+    -- Bật → save ngay 1 lần
+    if State.AutoSave then
+        SaveConfig(State.CurrentConfig)
+        svSub.Text = "Save: " .. State.CurrentConfig
+    end
 end))
-
-local autoLoadFrame = Instance.new("Frame", mainConfigContainer)
-autoLoadFrame.LayoutOrder, autoLoadFrame.Size = 3, UDim2.new(1, 0, 0, 34)
-autoLoadFrame.BackgroundColor3, autoLoadFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
-Corner(autoLoadFrame)
-Stroke(autoLoadFrame)
-RegTheme(autoLoadFrame, "Primary")
-
-local alTitle = Instance.new("TextLabel", autoLoadFrame)
-alTitle.Size, alTitle.Position = UDim2.new(1, -38, 0, 15), UDim2.new(0, 5, 0, 2)
-alTitle.BackgroundTransparency, alTitle.Text = 1, "Auto Tải Cấu Hình"
-alTitle.TextColor3, alTitle.TextSize = Color3.fromRGB(255,255,255), 9
-alTitle.Font, alTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-
-local alSub = Instance.new("TextLabel", autoLoadFrame)
-alSub.Size, alSub.Position = UDim2.new(1, -38, 0, 14), UDim2.new(0, 5, 0, 17)
-alSub.BackgroundTransparency, alSub.Text = 1, "Load: " .. State.CurrentConfig
-alSub.TextColor3, alSub.TextSize = Color3.fromRGB(140,140,150), 7
-alSub.Font, alSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-
-local autoLoadToggle = Instance.new("TextButton", autoLoadFrame)
-autoLoadToggle.Size, autoLoadToggle.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
-autoLoadToggle.BackgroundColor3, autoLoadToggle.Text = Color3.fromRGB(50,200,50), ""
-Corner(autoLoadToggle, UDim.new(1, 0))
-Stroke(autoLoadToggle)
-
-local alBox = Instance.new("Frame", autoLoadToggle)
-alBox.Size, alBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5)
-alBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
-Corner(alBox, UDim.new(1, 0))
 
 Track(autoLoadToggle.MouseButton1Click:Connect(function()
     State.AutoLoadConfig = not State.AutoLoadConfig
     autoLoadToggle.BackgroundColor3 = State.AutoLoadConfig and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
     alBox.Position = State.AutoLoadConfig and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
+    -- Bật → load ngay 1 lần
+    if State.AutoLoadConfig then
+        local ok, err = LoadConfig(State.CurrentConfig)
+        if not ok then warn("[VzNam] Auto Load fail: " .. tostring(err)) end
+    end
 end))
 
+-- ═════════════════ PROFILES ═════════════════
 local profilesToggleBtn = Instance.new("TextButton", configScroll)
 profilesToggleBtn.LayoutOrder, profilesToggleBtn.Size = 3, UDim2.new(1, 0, 0, 34)
 profilesToggleBtn.BackgroundColor3, profilesToggleBtn.BackgroundTransparency = Color3.fromRGB(55,12,40), 0
@@ -1697,8 +1749,8 @@ local function refreshAllDropdowns()
         Track(f2.MouseButton1Click:Connect(function()
             State.StartupConfig = name
             stProfileBtn.Text = name .. " ∨"
-            -- ✅ KHÔNG đổi startupLabel, giữ nguyên "Startup: Default"
             stProfileDrop.Visible = false
+            -- KHÔNG đổi startupLabel — label theo CurrentConfig
         end))
 
         local f3 = Instance.new("TextButton", ldDropFrame)
@@ -1715,6 +1767,7 @@ local function refreshAllDropdowns()
             asSub.Text = "Save: " .. name
             alSub.Text = "Load: " .. name
             ldDropFrame.Visible = false
+            RefreshStartupLabel()
             local ok, err = LoadConfig(name)
             if not ok then warn("[VzNam] Load config fail: " .. tostring(err)) end
         end))
@@ -1755,6 +1808,7 @@ Track(createBtn.MouseButton1Click:Connect(function()
         asSub.Text = "Save: " .. name
         alSub.Text = "Load: " .. name
         configNameBox.Text = ""
+        RefreshStartupLabel()
         refreshAllDropdowns()
     end
 end))
@@ -1764,8 +1818,6 @@ Track(saveBtn.MouseButton1Click:Connect(function()
         svSub.Text = "Save: " .. State.CurrentConfig
     end
 end))
-
--- ✅ KHÔNG auto-load config khi khởi động (giữ hành vi gốc)
 
 -- ═════════════════ NÚT MỞ HUB ═════════════════
 local OpenButton = Instance.new("TextButton", ScreenGui)
@@ -1782,8 +1834,29 @@ Track(OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end))
 
--- ═════════════════ KHỞI TẠO MẶC ĐỊNH ═════════════════
+-- ═════════════════ KHỞI TẠO ═════════════════
 ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
+
+-- Auto load config khi khởi động (nếu toggle bật)
+if State.AutoLoadConfig and typeof(isfile) == "function" then
+    local path = CONFIG_FOLDER .. "/" .. State.CurrentConfig .. ".json"
+    local ok, exists = pcall(isfile, path)
+    if ok and exists then
+        task.spawn(function()
+            task.wait(0.1)
+            LoadConfig(State.CurrentConfig)
+        end)
+    end
+end
+
+RefreshStartupLabel()
+
+-- Bật cờ Initialized SAU khi mọi thứ đã setup
+-- (tránh AutoSaveHook ghi đè config ngay khi khởi động)
+task.spawn(function()
+    task.wait(0.5)
+    State.Initialized = true
+end)
 
 print("[VzNam Hub v4] ✅ Loaded. Config folder: " .. CONFIG_FOLDER)
