@@ -108,7 +108,7 @@ local SidebarLayout = Instance.new("UIListLayout", SidebarScroll) SidebarLayout.
 
 local SidebarPadding = Instance.new("UIPadding", SidebarScroll)
 SidebarPadding.PaddingLeft = UDim.new(0, 2)
-SidebarPadding.PaddingRight = UDim.new(0, 6) -- Thêm lề phải để tránh thanh cuộn
+SidebarPadding.PaddingRight = UDim.new(0, 6)
 
 SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     local query = string.lower(SearchBoxTab.Text)
@@ -169,7 +169,6 @@ homeScroll.Size, homeScroll.Position, homeScroll.BackgroundTransparency, homeScr
 local homeLayout = Instance.new("UIListLayout", homeScroll) homeLayout.SortOrder = Enum.SortOrder.LayoutOrder homeLayout.Padding = UDim.new(0, 5)
 homeLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- Thêm UIPadding cho homeScroll
 local homePad = Instance.new("UIPadding", homeScroll)
 homePad.PaddingLeft = UDim.new(0, 4)
 homePad.PaddingRight = UDim.new(0, 10)
@@ -228,6 +227,7 @@ CreateHomeCardWithIcon(infoContainer, 3, Color3.fromRGB(45, 45, 65), "TIKTOK CHA
 
 homeScroll.CanvasSize = UDim2.new(0, 0, 0, 120)
 
+-- ============ ĐÃ SỬA LỖI SUB-BAR ============
 local function CreateCategoryTab(tabName)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
     tabBtn.Size, tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency, tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " " .. tabName, Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -235,9 +235,48 @@ local function CreateCategoryTab(tabName)
     local tabStroke = TrackStroke(Instance.new("UIStroke", tabBtn))
     tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 
-    local indicator = Instance.new("Frame", tabBtn) indicator.Size, indicator.Position, indicator.BackgroundColor3, indicator.BorderSizePixel, indicator.Visible = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6), Color3.fromRGB(255, 105, 180), 0, false Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 2) local containerFrame = Instance.new("Frame", ContentContainer) containerFrame.Name = "Container_" .. tabName containerFrame.Size, containerFrame.Position, containerFrame.BackgroundTransparency, containerFrame.Visible = UDim2.new(1, 0, 1, -27), UDim2.new(0, 0, 0, 27), 1, false local subBar = Instance.new("Frame", containerFrame) subBar.Size, subBar.BackgroundTransparency = UDim2.new(1, -12, 0, 22), UDim2.new(0, 6, 0, 0) local subLayout = Instance.new("UIListLayout", subBar) subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 4) local noKeyBtn = Instance.new("TextButton", subBar) noKeyBtn.Size, noKeyBtn.BackgroundColor3, noKeyBtn.BackgroundTransparency, noKeyBtn.Text, noKeyBtn.TextColor3, noKeyBtn.TextSize, noKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(70, 15, 50), 0, "no key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold Instance.new("UICorner", noKeyBtn).CornerRadius = UDim.new(0, 5) local nkStroke = TrackStroke(Instance.new("UIStroke", noKeyBtn)) nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 local hasKeyBtn = Instance.new("TextButton", subBar) hasKeyBtn.Size, hasKeyBtn.BackgroundColor3, hasKeyBtn.BackgroundTransparency, hasKeyBtn.Text, hasKeyBtn.TextColor3, hasKeyBtn.TextSize, hasKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(70, 15, 50), 0, "có key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold Instance.new("UICorner", hasKeyBtn).CornerRadius = UDim.new(0, 5) local hkStroke = TrackStroke(Instance.new("UIStroke", hasKeyBtn)) hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) scrollNoKey.Position, scrollNoKey.Size, scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel, scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26), 1, 0, 3, true, true 
+    local indicator = Instance.new("Frame", tabBtn) 
+    indicator.Size, indicator.Position, indicator.BackgroundColor3, indicator.BorderSizePixel, indicator.Visible = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6), Color3.fromRGB(255, 105, 180), 0, false 
+    Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 2) 
     
-    -- Thêm UIPadding cho scrollNoKey
+    local containerFrame = Instance.new("Frame", ContentContainer) 
+    containerFrame.Name = "Container_" .. tabName 
+    containerFrame.Size = UDim2.new(1, 0, 1, -27)
+    containerFrame.Position = UDim2.new(0, 0, 0, 27)
+    containerFrame.BackgroundTransparency = 1
+    containerFrame.Visible = false
+    containerFrame.ClipsDescendants = true -- [ĐÃ SỬA] Ngăn không cho phần tử con trôi ra ngoài
+    
+    -- [ĐÃ SỬA] subBar được sửa lại hoàn chỉnh
+    local subBar = Instance.new("Frame", containerFrame) 
+    subBar.Size = UDim2.new(1, -12, 0, 22)
+    subBar.Position = UDim2.new(0, 6, 0, 0)
+    subBar.BackgroundTransparency = 1 -- [ĐÃ SỬA] Đổi từ UDim2 thành số 1 (trong suốt hoàn toàn)
+    subBar.ZIndex = 5 -- [ĐÃ SỬA] Đảm bảo luôn nổi lên trên các ScrollingFrame
+    
+    local subLayout = Instance.new("UIListLayout", subBar) 
+    subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 4) 
+    
+    local noKeyBtn = Instance.new("TextButton", subBar) 
+    noKeyBtn.Size, noKeyBtn.BackgroundColor3, noKeyBtn.BackgroundTransparency, noKeyBtn.Text, noKeyBtn.TextColor3, noKeyBtn.TextSize, noKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(70, 15, 50), 0, "no key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold 
+    noKeyBtn.ZIndex = 6 -- [ĐÃ SỬA] Cao hơn subBar
+    Instance.new("UICorner", noKeyBtn).CornerRadius = UDim.new(0, 5) 
+    local nkStroke = TrackStroke(Instance.new("UIStroke", noKeyBtn)) 
+    nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 
+    
+    local hasKeyBtn = Instance.new("TextButton", subBar) 
+    hasKeyBtn.Size, hasKeyBtn.BackgroundColor3, hasKeyBtn.BackgroundTransparency, hasKeyBtn.Text, hasKeyBtn.TextColor3, hasKeyBtn.TextSize, hasKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(70, 15, 50), 0, "có key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold 
+    hasKeyBtn.ZIndex = 6 -- [ĐÃ SỬA]
+    Instance.new("UICorner", hasKeyBtn).CornerRadius = UDim.new(0, 5) 
+    local hkStroke = TrackStroke(Instance.new("UIStroke", hasKeyBtn)) 
+    hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 
+    
+    local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) 
+    scrollNoKey.Position, scrollNoKey.Size = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26)
+    scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel = 1, 0
+    scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = 3, true, true
+    scrollNoKey.ZIndex = 1 -- [ĐÃ SỬA] Thấp hơn subBar
+    
     local snkPad = Instance.new("UIPadding", scrollNoKey) 
     snkPad.PaddingLeft = UDim.new(0, 4)
     snkPad.PaddingRight = UDim.new(0, 10)
@@ -246,9 +285,12 @@ local function CreateCategoryTab(tabName)
     local l1 = Instance.new("UIListLayout", scrollNoKey) l1.Padding = UDim.new(0, 3) 
     l1.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) scrollHasKey.Position, scrollHasKey.Size, scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel, scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26), 1, 0, 3, false, true 
+    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) 
+    scrollHasKey.Position, scrollHasKey.Size = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26)
+    scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel = 1, 0
+    scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = 3, false, true
+    scrollHasKey.ZIndex = 1 -- [ĐÃ SỬA] Thấp hơn subBar
     
-    -- Thêm UIPadding cho scrollHasKey
     local shkPad = Instance.new("UIPadding", scrollHasKey) 
     shkPad.PaddingLeft = UDim.new(0, 4)
     shkPad.PaddingRight = UDim.new(0, 10)
@@ -257,8 +299,71 @@ local function CreateCategoryTab(tabName)
     local l2 = Instance.new("UIListLayout", scrollHasKey) l2.Padding = UDim.new(0, 3) 
     l2.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    SearchInputContent:GetPropertyChangedSignal("Text"):Connect(function() if containerFrame.Visible then local query = string.lower(SearchInputContent.Text) local targetScroll = scrollNoKey.Visible and scrollNoKey or scrollHasKey for _, item in ipairs(targetScroll:GetChildren()) do if item:IsA("TextButton") then if query == "" or string.find(string.lower(item.Text), query) then item.Visible = true else item.Visible = false end end end end end) noKeyBtn.MouseButton1Click:Connect(function() scrollNoKey.Visible, scrollHasKey.Visible = true, false nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 end) hasKeyBtn.MouseButton1Click:Connect(function() scrollNoKey.Visible, scrollHasKey.Visible = false, true hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 end) tabBtn.MouseButton1Click:Connect(function() for _, t in pairs(Tabs) do t.Container.Visible = false if t.Indicator then t.Indicator.Visible = false end end containerFrame.Visible = true indicator.Visible = true ActiveTabTitle.Text = tabName SearchInputContent.Text = "" end) local tabObj = { Container = containerFrame, Indicator = indicator } table.insert(Tabs, tabObj) local Elements = {} local function AddBtnTo(parent, name, callback) local Btn = Instance.new("TextButton", parent) Btn.Size, Btn.BackgroundColor3, Btn.BackgroundTransparency, Btn.Text, Btn.TextColor3, Btn.TextSize, Btn.Font, Btn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " ▶ " .. name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 5) local btnStroke = TrackStroke(Instance.new("UIStroke", Btn)) btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 Btn.MouseButton1Click:Connect(function() if LastSelectedScriptStroke then LastSelectedScriptStroke.Color, LastSelectedScriptStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 end btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 LastSelectedScriptStroke = btnStroke callback() end) table.insert(RegisteredScripts, {Name = name, Callback = callback}) end function Elements:AddNoKey(name, callback) AddBtnTo(scrollNoKey, name, callback) end function Elements:AddHasKey(name, callback) AddBtnTo(scrollHasKey, name, callback) end return Elements 
+    SearchInputContent:GetPropertyChangedSignal("Text"):Connect(function() 
+        if containerFrame.Visible then 
+            local query = string.lower(SearchInputContent.Text) 
+            local targetScroll = scrollNoKey.Visible and scrollNoKey or scrollHasKey 
+            for _, item in ipairs(targetScroll:GetChildren()) do 
+                if item:IsA("TextButton") then 
+                    if query == "" or string.find(string.lower(item.Text), query) then 
+                        item.Visible = true 
+                    else 
+                        item.Visible = false 
+                    end 
+                end 
+            end 
+        end 
+    end) 
+    
+    noKeyBtn.MouseButton1Click:Connect(function() 
+        scrollNoKey.Visible, scrollHasKey.Visible = true, false 
+        nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 
+        hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 
+    end) 
+    
+    hasKeyBtn.MouseButton1Click:Connect(function() 
+        scrollNoKey.Visible, scrollHasKey.Visible = false, true 
+        hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 
+        nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 
+    end) 
+    
+    tabBtn.MouseButton1Click:Connect(function() 
+        for _, t in pairs(Tabs) do 
+            t.Container.Visible = false 
+            if t.Indicator then t.Indicator.Visible = false end 
+        end 
+        containerFrame.Visible = true 
+        indicator.Visible = true 
+        ActiveTabTitle.Text = tabName 
+        SearchInputContent.Text = "" 
+    end) 
+    
+    local tabObj = { Container = containerFrame, Indicator = indicator } 
+    table.insert(Tabs, tabObj) 
+    
+    local Elements = {} 
+    local function AddBtnTo(parent, name, callback) 
+        local Btn = Instance.new("TextButton", parent) 
+        Btn.Size, Btn.BackgroundColor3, Btn.BackgroundTransparency, Btn.Text, Btn.TextColor3, Btn.TextSize, Btn.Font, Btn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " ▶ " .. name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left 
+        Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 5) 
+        local btnStroke = TrackStroke(Instance.new("UIStroke", Btn)) 
+        btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 
+        Btn.MouseButton1Click:Connect(function() 
+            if LastSelectedScriptStroke then 
+                LastSelectedScriptStroke.Color, LastSelectedScriptStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 
+            end 
+            btnStroke.Color, btnStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 
+            LastSelectedScriptStroke = btnStroke 
+            callback() 
+        end) 
+        table.insert(RegisteredScripts, {Name = name, Callback = callback}) 
+    end 
+    
+    function Elements:AddNoKey(name, callback) AddBtnTo(scrollNoKey, name, callback) end 
+    function Elements:AddHasKey(name, callback) AddBtnTo(scrollHasKey, name, callback) end 
+    return Elements 
 end
+-- ============ KẾT THÚC SỬA ============
 
 -- TAB 1: STEAL AN EGG
 local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸")
@@ -311,7 +416,6 @@ miscScroll.Size, miscScroll.Position, miscScroll.BackgroundTransparency, miscScr
 local miscLayout = Instance.new("UIListLayout", miscScroll) miscLayout.SortOrder = Enum.SortOrder.LayoutOrder miscLayout.Padding = UDim.new(0, 5)
 miscLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- Thêm UIPadding cho miscScroll
 local miscPad = Instance.new("UIPadding", miscScroll)
 miscPad.PaddingLeft = UDim.new(0, 4)
 miscPad.PaddingRight = UDim.new(0, 10)
@@ -683,7 +787,6 @@ configScroll.Size, configScroll.Position, configScroll.BackgroundTransparency, c
 local configLayout = Instance.new("UIListLayout", configScroll) configLayout.SortOrder = Enum.SortOrder.LayoutOrder configLayout.Padding = UDim.new(0, 5)
 configLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- Thêm UIPadding cho configScroll
 local cfgPad = Instance.new("UIPadding", configScroll)
 cfgPad.PaddingLeft = UDim.new(0, 4)
 cfgPad.PaddingRight = UDim.new(0, 10)
@@ -800,7 +903,6 @@ profilesToggleBtn.MouseButton1Click:Connect(function()
     profilesSubLabel.Visible = profilesContainer.Visible
 end)
 
--- Sửa lỗi TextBox bị lẹm chữ: Dùng tỷ lệ cố định (Offset) thay vì Scale
 local newConfigFrame = Instance.new("Frame", profilesContainer)
 newConfigFrame.LayoutOrder = 1 newConfigFrame.Size, newConfigFrame.BackgroundColor3, newConfigFrame.BackgroundTransparency = UDim2.new(1, 0, 0, 30), Color3.fromRGB(70, 15, 50), 0
 Instance.new("UICorner", newConfigFrame).CornerRadius = UDim.new(0, 5)
