@@ -21,7 +21,7 @@ ScreenGui.DisplayOrder = 99999
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- Khung ngoài chính chuẩn tuyệt đối
+-- Khung ngoài chính: Luôn cố định đặc, không bị trong suốt hoàn toàn
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 520, 0, 320)
@@ -58,10 +58,10 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- SidebarPanel: Đã căn chỉnh lùi vào trong (Position X = 8) để không bị mất viền trái
+-- SidebarPanel: Đã dịch vào trong (Position X = 10, width = 138) chống lẹm viền trái
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
-SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 142, 1, -36), UDim2.new(0, 8, 0, 30), Color3.fromRGB(55, 12, 40), 0, 0
+SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 138, 1, -36), UDim2.new(0, 10, 0, 30), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
 local SidebarStroke = TrackStroke(Instance.new("UIStroke", SidebarPanel))
 SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -84,10 +84,10 @@ SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
--- ContentContainer: Căn chuẩn bên phải
+-- ContentContainer: Căn chỉnh chuẩn bên phải
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -155, 1, -36), UDim2.new(0, 154, 0, 30), Color3.fromRGB(55, 12, 40), 0, 0
+ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -154, 1, -36), UDim2.new(0, 152, 0, 30), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
 local ContentStroke = TrackStroke(Instance.new("UIStroke", ContentContainer))
 ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -556,7 +556,7 @@ end)
 
 local menuThemeList = {
     {Name = "🌸 Hồng Pastel Siêu Đậm", Bg = Color3.fromRGB(70, 15, 50)},
-    {Name = "🌙 Đêm Đen Sâu Tuyệt Đối", Bg = Color3.fromRGB(12, 12, 20)},
+    {Name = "🌙 Đêm Đen Sâu Tuyệt Đối", Bg = Color3.fromRGB(15, 16, 22)},
     {Name = "🔥 Đỏ Lửa Cực Cháy", Bg = Color3.fromRGB(70, 10, 15)},
     {Name = "🌊 Xanh Đại Dương Sâu Thẳm", Bg = Color3.fromRGB(10, 22, 50)}
 }
@@ -571,6 +571,7 @@ Instance.new("UICorner", themeDropFrame).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", themeDropFrame)).Color = Color3.fromRGB(40, 43, 52)
 local themeListLayout = Instance.new("UIListLayout", themeDropFrame) themeListLayout.Padding = UDim.new(0, 4)
 
+local currentThemeColor = Color3.fromRGB(55, 12, 40)
 for i, th in ipairs(menuThemeList) do
     local tBtn = Instance.new("TextButton", themeDropFrame)
     tBtn.LayoutOrder = i tBtn.Size, tBtn.BackgroundColor3, tBtn.BackgroundTransparency, tBtn.Text, tBtn.TextColor3, tBtn.TextSize, tBtn.Font, tBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(90, 25, 65), 0, " " .. th.Name, Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -579,6 +580,7 @@ for i, th in ipairs(menuThemeList) do
     tBtn.MouseButton1Click:Connect(function()
         themeDropBtn.Text = " 🎨 Đã chọn: " .. th.Name
         themeDropFrame.Visible = false
+        currentThemeColor = th.Bg
         SidebarPanel.BackgroundColor3 = th.Bg
         ContentContainer.BackgroundColor3 = th.Bg
     end)
@@ -614,8 +616,9 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if adjustingTrans and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local absPos = transBarBg.AbsolutePosition.X local absSize = transBarBg.AbsoluteSize.X local mouseX = input.Position.X
-        local percent = math.clamp((mouseX - absPos) / absSize, 0, 1) -- Đã cho phép kéo tối đa lên 100% (1.0)
+        local percent = math.clamp((mouseX - absPos) / absSize, 0, 1)
         transBarFill.Size = UDim2.new(percent, 0, 1, 0)
+        -- MainFrame luôn được giữ nguyên không trong suốt hoàn toàn, chỉ đổi mờ bên trong menu
         SidebarPanel.BackgroundTransparency = percent
         ContentContainer.BackgroundTransparency = percent
         transLabel.Text = "✨ Trong suốt: " .. math.floor(percent * 100) .. "%"
@@ -1004,7 +1007,7 @@ for i, scr in ipairs(RegisteredScripts) do
 end
 dropFrame.CanvasSize = UDim2.new(0, 0, 0, dh)
 
--- NÚT MỞ HUB GÓC TRÁI MÀN HÌNH: Hình bông hoa 🌸, nền tối cực đẹp, viền tròn màu trắng dày (3px) chuẩn xác
+-- NÚT MỞ HUB GÓC TRÁI MÀN HÌNH
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Name = "VzNamOpenBtn"
 OpenButton.Size = UDim2.new(0, 42, 0, 42)
