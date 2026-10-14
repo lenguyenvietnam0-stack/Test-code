@@ -8,9 +8,6 @@ local PlayerGui = localPlayer:FindFirstChildOfClass("PlayerGui") or CoreGui
 
 if PlayerGui:FindFirstChild("VzNamHubV4UI") then PlayerGui.VzNamHubV4UI:Destroy() end
 
---------------------------------------------------------------------------------
--- HELPERS
---------------------------------------------------------------------------------
 local LastSelectedScriptStroke = nil
 local RegisteredScripts = {}
 local AllUIStrokes = {}
@@ -115,6 +112,7 @@ MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
@@ -153,9 +151,6 @@ Connect(UserInputService.InputChanged, function(input)
     end
 end)
 
---------------------------------------------------------------------------------
--- TOP BAR
---------------------------------------------------------------------------------
 local TopBar = Instance.new("Frame", MainFrame)
 TopBar.Size, TopBar.BackgroundTransparency = UDim2.new(1, 0, 0, 26), 1
 
@@ -191,6 +186,7 @@ local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
 SidebarPanel.Size, SidebarPanel.Position = UDim2.new(0.3, -4, 1, -34), UDim2.new(0, 6, 0, 28)
 SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = Color3.fromRGB(15, 16, 22), 0, 0
+SidebarPanel.ClipsDescendants = true
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
 local SidebarStroke = TrackStroke(Instance.new("UIStroke", SidebarPanel))
 SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -207,7 +203,10 @@ RegisterTheme(SearchBoxTab, "Input")
 local SidebarScroll = Instance.new("ScrollingFrame", SidebarPanel)
 SidebarScroll.Size, SidebarScroll.Position = UDim2.new(1, -4, 1, -26), UDim2.new(0, 2, 0, 25)
 SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel = 1, 0
-SidebarScroll.ScrollBarThickness, SidebarScroll.ClipsDescendants = 2, true
+SidebarScroll.ScrollBarThickness = 2
+SidebarScroll.ClipsDescendants = true
+SidebarScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 local SidebarLayout = Instance.new("UIListLayout", SidebarScroll)
 SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 local SidebarPadding = Instance.new("UIPadding", SidebarScroll)
@@ -276,14 +275,14 @@ local FirstTab = nil
 --------------------------------------------------------------------------------
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
-tabHomeBtn.Size = UDim2.new(1, -2, 0, 28)
+tabHomeBtn.Size = UDim2.new(1, -4, 0, 26)
 tabHomeBtn.BackgroundColor3, tabHomeBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
 tabHomeBtn.Text, tabHomeBtn.TextColor3, tabHomeBtn.TextSize, tabHomeBtn.Font, tabHomeBtn.TextXAlignment =
     " 🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+tabHomeBtn.ClipsDescendants = true
 Instance.new("UICorner", tabHomeBtn).CornerRadius = UDim.new(0, 5)
 local tabHomeStroke = TrackStroke(Instance.new("UIStroke", tabHomeBtn))
-tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(255, 255, 255), 3
-tabHomeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(255, 255, 255), 2
 RegisterTheme(tabHomeBtn, "Primary")
 
 local homeIndicator = Instance.new("Frame", tabHomeBtn)
@@ -401,14 +400,14 @@ homeScroll.CanvasSize = UDim2.new(0, 0, 0, 120)
 --------------------------------------------------------------------------------
 local function CreateCategoryTab(tabName)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
-    tabBtn.Size = UDim2.new(1, -2, 0, 28)
+    tabBtn.Size = UDim2.new(1, -4, 0, 26)
     tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
     tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment =
         " " .. tabName, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    tabBtn.ClipsDescendants = true
     Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 5)
     local tabStroke = TrackStroke(Instance.new("UIStroke", tabBtn))
-    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(255, 255, 255), 3
-    tabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(255, 255, 255), 2
     RegisterTheme(tabBtn, "Primary")
 
     local indicator = Instance.new("Frame", tabBtn)
@@ -588,13 +587,13 @@ local tab5 = CreateCategoryTab("Tab 5")
 -- TAB MISC
 --------------------------------------------------------------------------------
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
-tabMiscBtn.Size = UDim2.new(1, -2, 0, 28)
+tabMiscBtn.Size = UDim2.new(1, -4, 0, 26)
 tabMiscBtn.BackgroundColor3, tabMiscBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
 tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment = " ⚙️ MISC", Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+tabMiscBtn.ClipsDescendants = true
 Instance.new("UICorner", tabMiscBtn).CornerRadius = UDim.new(0, 5)
 local tabMiscStroke = TrackStroke(Instance.new("UIStroke", tabMiscBtn))
-tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(255, 255, 255), 3
-tabMiscStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(255, 255, 255), 2
 RegisterTheme(tabMiscBtn, "Primary")
 
 local miscIndicator = Instance.new("Frame", tabMiscBtn)
@@ -1089,13 +1088,13 @@ miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1300)
 -- TAB CẤU HÌNH
 --------------------------------------------------------------------------------
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
-tabConfigBtn.Size = UDim2.new(1, -2, 0, 28)
+tabConfigBtn.Size = UDim2.new(1, -4, 0, 26)
 tabConfigBtn.BackgroundColor3, tabConfigBtn.BackgroundTransparency = Color3.fromRGB(70, 15, 50), 0
 tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = " 📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
+tabConfigBtn.ClipsDescendants = true
 Instance.new("UICorner", tabConfigBtn).CornerRadius = UDim.new(0, 5)
 local tabConfigStroke = TrackStroke(Instance.new("UIStroke", tabConfigBtn))
-tabConfigStroke.Color, tabConfigStroke.Thickness = Color3.fromRGB(255, 255, 255), 3
-tabConfigStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+tabConfigStroke.Color, tabConfigStroke.Thickness = Color3.fromRGB(255, 255, 255), 2
 RegisterTheme(tabConfigBtn, "Primary")
 
 local configIndicator = Instance.new("Frame", tabConfigBtn)
@@ -1555,9 +1554,6 @@ for i, scr in ipairs(RegisteredScripts) do
 end
 dropFrame.CanvasSize = UDim2.new(0, 0, 0, dh)
 
---------------------------------------------------------------------------------
--- NÚT MỞ HUB 🌸
---------------------------------------------------------------------------------
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Name = "VzNamOpenBtn"
 OpenButton.Size = UDim2.new(0, 40, 0, 40)
@@ -1577,8 +1573,5 @@ Connect(OpenButton.MouseButton1Click, function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
---------------------------------------------------------------------------------
--- KHỞI TẠO
---------------------------------------------------------------------------------
 ApplyTheme(Color3.fromRGB(15, 16, 22))
 ApplyStrokeColor("Rainbow")
