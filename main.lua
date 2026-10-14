@@ -4,14 +4,14 @@ local PlayerGui = localPlayer:FindFirstChildOfClass("PlayerGui") or CoreGui
 
 if PlayerGui:FindFirstChild("VzNamHubV4UI") then PlayerGui.VzNamHubV4UI:Destroy() end
 
-local LastSelectedScriptBtn, LastSelectedScriptStroke = nil, nil
+local LastSelectedScriptStroke = nil
 local RegisteredScripts = {}
 local AllUIStrokes = {}
 local ThemedElements = {} 
 
 local function TrackStroke(stroke)
     if stroke and not table.find(AllUIStrokes, stroke) then
-        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- Ép viền nằm hoàn toàn bên trong để không bị khung cuộn cắt mất
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
         table.insert(AllUIStrokes, stroke)
     end
     return stroke
@@ -160,13 +160,11 @@ local HeaderDivider = Instance.new("Frame", ContentContainer) HeaderDivider.Size
 local Tabs = {}
 local FirstTab = nil
 
--- TAB 0: TRANG CHỦ
+-- TAB 0: TRANG CHỦ (Không có viền cột trái)
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
 tabHomeBtn.Size, tabHomeBtn.BackgroundColor3, tabHomeBtn.BackgroundTransparency, tabHomeBtn.Text, tabHomeBtn.TextColor3, tabHomeBtn.TextSize, tabHomeBtn.Font, tabHomeBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " 🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabHomeBtn).CornerRadius = UDim.new(0, 5)
-local tabHomeStroke = TrackStroke(Instance.new("UIStroke", tabHomeBtn))
-tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(0, 191, 255), 1
 RegisterTheme(tabHomeBtn, "Primary")
 
 local homeIndicator = Instance.new("Frame", tabHomeBtn)
@@ -242,8 +240,6 @@ local function CreateCategoryTab(tabName)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
     tabBtn.Size, tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency, tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " " .. tabName, Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 5)
-    local tabStroke = TrackStroke(Instance.new("UIStroke", tabBtn))
-    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(0, 191, 255), 1
     RegisterTheme(tabBtn, "Primary")
 
     local indicator = Instance.new("Frame", tabBtn) 
@@ -411,12 +407,10 @@ tab3:AddNoKey("1. break and steal an egg", function() loadstring(game:HttpGet("h
 local tab4 = CreateCategoryTab("Tab 4")
 local tab5 = CreateCategoryTab("Tab 5")
 
--- TAB 6: MISC
+-- TAB 6: MISC (Không có viền cột trái)
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
 tabMiscBtn.Size, tabMiscBtn.BackgroundColor3, tabMiscBtn.BackgroundTransparency, tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " ⚙️ MISC", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabMiscBtn).CornerRadius = UDim.new(0, 5)
-local tabMiscStroke = TrackStroke(Instance.new("UIStroke", tabMiscBtn))
-tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(0, 191, 255), 1
 RegisterTheme(tabMiscBtn, "Primary")
 
 local miscIndicator = Instance.new("Frame", tabMiscBtn)
@@ -845,12 +839,10 @@ RunService.RenderStepped:Connect(function()
 end)
 miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1300)
 
--- TAB 7: CẤU HÌNH & PROFILES
+-- TAB 7: CẤU HÌNH & PROFILES (Không có viền cột trái)
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
 tabConfigBtn.Size, tabConfigBtn.BackgroundColor3, tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " 📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabConfigBtn).CornerRadius = UDim.new(0, 5)
-local tabConfigStroke = TrackStroke(Instance.new("UIStroke", tabConfigBtn))
-tabConfigStroke.Color, tabConfigStroke.Thickness = Color3.fromRGB(0, 191, 255), 1
 RegisterTheme(tabConfigBtn, "Primary")
 
 local configIndicator = Instance.new("Frame", tabConfigBtn)
