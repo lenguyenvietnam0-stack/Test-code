@@ -11,6 +11,7 @@ local ThemedElements = {}
 
 local function TrackStroke(stroke)
     if stroke and not table.find(AllUIStrokes, stroke) then
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- Ép viền nằm hoàn toàn bên trong để không bị khung cuộn cắt mất
         table.insert(AllUIStrokes, stroke)
     end
     return stroke
