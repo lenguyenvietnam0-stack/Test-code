@@ -21,16 +21,13 @@ ScreenGui.DisplayOrder = 99999
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
-local success, avatarThumbnail = pcall(function() return Players:GetUserThumbnailAsync(localPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420) end)
-local avatarUrl = success and avatarThumbnail or "rbxassetid://15298567397"
-
--- Khung chính với Transparency trong suốt
+-- Khung ngoài chính: Luôn luôn trong suốt cố định
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 520, 0, 320)
 MainFrame.Position = UDim2.new(0.5, -260, 0.5, -160)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
-MainFrame.BackgroundTransparency = 0.2
+MainFrame.BackgroundTransparency = 0.5 -- Luôn luôn trong suốt
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -42,7 +39,9 @@ OuterStroke.Color, OuterStroke.Thickness = Color3.fromRGB(255, 105, 180), 1.5
 
 local TopBar = Instance.new("Frame", MainFrame) TopBar.Size, TopBar.BackgroundTransparency = UDim2.new(1, 0, 0, 28), 1
 
-local Logo = Instance.new("ImageLabel", TopBar) Logo.Size, Logo.Position, Logo.BackgroundTransparency, Logo.Image = UDim2.new(0, 18, 0, 18), UDim2.new(0, 10, 0.5, -9), 1, avatarUrl
+local Logo = Instance.new("ImageLabel", TopBar) 
+Logo.Size, Logo.Position, Logo.BackgroundTransparency = UDim2.new(0, 18, 0, 18), UDim2.new(0, 10, 0.5, -9), 1
+Logo.Image = "rbxassetid://15298567397" -- Sử dụng ID ảnh cố định, không dùng avatar thumbnail nữa
 Instance.new("UICorner", Logo).CornerRadius = UDim.new(1, 0)
 
 local Title = Instance.new("TextLabel", TopBar)
@@ -55,9 +54,10 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
+-- Khung bên trong (Sidebar và Content)
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
-SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 145, 1, -34), UDim2.new(0, 6, 0, 28), Color3.fromRGB(15, 16, 22), 0.3, 0
+SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 145, 1, -34), UDim2.new(0, 6, 0, 28), Color3.fromRGB(15, 16, 22), 0.2, 0
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
 local SidebarStroke = TrackStroke(Instance.new("UIStroke", SidebarPanel))
 SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -82,7 +82,7 @@ end)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -158, 1, -34), UDim2.new(0, 153, 0, 28), Color3.fromRGB(15, 16, 22), 0.3, 0
+ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -158, 1, -34), UDim2.new(0, 153, 0, 28), Color3.fromRGB(15, 16, 22), 0.2, 0
 Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
 local ContentStroke = TrackStroke(Instance.new("UIStroke", ContentContainer))
 ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -316,7 +316,7 @@ tab3:AddNoKey("1. break and steal an egg", function() loadstring(game:HttpGet("h
 local tab4 = CreateCategoryTab("Tab 4")
 local tab5 = CreateCategoryTab("Tab 5")
 
--- TAB 6: MISC (TÍCH HỢP AUTO LOAD SCRIPT, NHẠC, MÀU MENU & VIỀN)
+-- TAB 6: MISC
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
 tabMiscBtn.Size, tabMiscBtn.BackgroundColor3, tabMiscBtn.BackgroundTransparency, tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0.2, "   ⚙️ MISC", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabMiscBtn).CornerRadius = UDim.new(0, 5)
@@ -338,7 +338,7 @@ tabMiscBtn.MouseButton1Click:Connect(function()
 end)
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
--- 1. AUTO LOAD SCRIPT TRONG MISC
+-- 1. AUTO LOAD SCRIPT
 local autoLoadToggleBtn = Instance.new("TextButton", miscScroll)
 autoLoadToggleBtn.LayoutOrder = 1
 autoLoadToggleBtn.Size, autoLoadToggleBtn.BackgroundColor3, autoLoadToggleBtn.BackgroundTransparency, autoLoadToggleBtn.Text, autoLoadToggleBtn.TextColor3, autoLoadToggleBtn.TextSize, autoLoadToggleBtn.Font, autoLoadToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), 0.2, "  ↓ auto load script", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -401,7 +401,7 @@ toggleAutoBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2. ÂM NHẠC TRONG MISC
+-- 2. ÂM NHẠC
 local musicToggleBtn = Instance.new("TextButton", miscScroll)
 musicToggleBtn.LayoutOrder = 3
 musicToggleBtn.Size, musicToggleBtn.BackgroundColor3, musicToggleBtn.BackgroundTransparency, musicToggleBtn.Text, musicToggleBtn.TextColor3, musicToggleBtn.TextSize, musicToggleBtn.Font, musicToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), 0.2, "  ↓ âm nhạc", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -550,12 +550,11 @@ menuColorToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 local menuThemeList = {
-    {Name = "🌸 Hồng Pastel Nhẹ Nhàng", Bg = Color3.fromRGB(15, 16, 22)},
-    {Name = "🌙 Đêm Đen Sâu", Bg = Color3.fromRGB(10, 10, 15)},
-    {Name = "🔥 Đỏ Lửa Đậm", Bg = Color3.fromRGB(20, 12, 14)},
-    {Name = "🌊 Xanh Đại Dương", Bg = Color3.fromRGB(12, 18, 24)}
+    {Name = "🌸 Hồng Pastel Nhẹ Nhàng", Bg = Color3.fromRGB(35, 20, 28)},
+    {Name = "🌙 Đêm Đen Sâu", Bg = Color3.fromRGB(12, 12, 18)},
+    {Name = "🔥 Đỏ Lửa Đậm", Bg = Color3.fromRGB(35, 12, 15)},
+    {Name = "🌊 Xanh Đại Dương", Bg = Color3.fromRGB(12, 22, 35)}
 }
-local selectedTheme = menuThemeList[1]
 local themeDropBtn = Instance.new("TextButton", menuColorContainer)
 themeDropBtn.LayoutOrder = 1 themeDropBtn.Size, themeDropBtn.BackgroundColor3, themeDropBtn.BackgroundTransparency, themeDropBtn.Text, themeDropBtn.TextColor3, themeDropBtn.TextSize, themeDropBtn.Font, themeDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0.2, " 🎨 Đã chọn: 🌸 Hồng Pastel Nhẹ Nhàng", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", themeDropBtn).CornerRadius = UDim.new(0, 5)
@@ -573,8 +572,8 @@ for i, th in ipairs(menuThemeList) do
     Instance.new("UICorner", tBtn).CornerRadius = UDim.new(0, 4)
     TrackStroke(Instance.new("UIStroke", tBtn)).Color = Color3.fromRGB(40, 43, 52)
     tBtn.MouseButton1Click:Connect(function()
-        selectedTheme = th themeDropBtn.Text = " 🎨 Đã chọn: " .. th.Name themeDropFrame.Visible = false
-        MainFrame.BackgroundColor3 = th.Bg
+        themeDropBtn.Text = " 🎨 Đã chọn: " .. th.Name
+        themeDropFrame.Visible = false
         SidebarPanel.BackgroundColor3 = th.Bg
         ContentContainer.BackgroundColor3 = th.Bg
     end)
@@ -582,7 +581,7 @@ end
 themeDropFrame.CanvasSize = UDim2.new(0, 0, 0, #menuThemeList * 30)
 themeDropBtn.MouseButton1Click:Connect(function() themeDropFrame.Visible = not themeDropFrame.Visible end)
 
--- Thanh Chỉnh Trong Suốt (Transparency Slider)
+-- Thanh Chỉnh Trong Suốt (Slider) chỉ chỉnh bên trong SidebarPanel và ContentContainer
 local transFrame = Instance.new("Frame", menuColorContainer)
 transFrame.LayoutOrder = 3 transFrame.Size, transFrame.BackgroundColor3, transFrame.BackgroundTransparency = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0.2
 Instance.new("UICorner", transFrame).CornerRadius = UDim.new(0, 5)
@@ -613,9 +612,8 @@ UserInputService.InputChanged:Connect(function(input)
         local absPos = transBarBg.AbsolutePosition.X local absSize = transBarBg.AbsoluteSize.X local mouseX = input.Position.X
         local percent = math.clamp((mouseX - absPos) / absSize, 0, 1)
         transBarFill.Size = UDim2.new(percent, 0, 1, 0)
-        MainFrame.BackgroundTransparency = percent
-        SidebarPanel.BackgroundTransparency = percent + 0.1
-        ContentContainer.BackgroundTransparency = percent + 0.1
+        SidebarPanel.BackgroundTransparency = percent
+        ContentContainer.BackgroundTransparency = percent
         transLabel.Text = "✨ Trong suốt: " .. math.floor(percent * 100) .. "%"
     end
 end)
