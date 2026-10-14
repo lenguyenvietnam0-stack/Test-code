@@ -2,11 +2,11 @@
     ═══════════════════════════════════════════════════════
     VzNam Hub v4 — FIXED
     ═══════════════════════════════════════════════════════
+    • Xóa tính năng "Khởi Động" trong Profiles
+    • Thêm tab "main" ngay dưới "Trang Chủ"
     • Nhạc: y bản gốc
-    • Startup label: động theo CurrentConfig
-    • Auto Save: tự lưu khi state thay đổi
-    • Auto Load: tự load khi khởi động
-    • Profiles: độc lập với Cấu Hình
+    • Startup label (Cấu Hình): động theo CurrentConfig
+    • Auto Save + Auto Load: theo Cấu Hình
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -44,14 +44,12 @@ local State = {
     SelectedScript = nil,
     IsAutoLoad     = false,
     CurrentConfig  = "Default",
-    StartupConfig  = "Default",
     AutoSave       = true,
     AutoLoadConfig = true,
     Transparent    = 0,
     Initialized    = false,
 }
 
--- Forward declarations (được gán thật ở phần Config)
 local AutoSaveHook        = function() end
 local RefreshStartupLabel = function() end
 
@@ -420,12 +418,56 @@ CreateHomeCard(infoContainer, 3, Color3.fromRGB(45,45,65), "TIKTOK CHANNEL",
     "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y",
     Color3.fromRGB(100,100,120), "🎵")
 
+-- ═════════════════ TAB: MAIN (ngay dưới Trang Chủ) ═════════════════
+local tabMainBtn = Instance.new("TextButton", SidebarScroll)
+tabMainBtn.LayoutOrder = 1
+tabMainBtn.Size, tabMainBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
+tabMainBtn.BackgroundTransparency, tabMainBtn.Text = 0, " 📌 Main"
+tabMainBtn.TextColor3, tabMainBtn.TextSize = Color3.fromRGB(255,255,255), 8
+tabMainBtn.Font, tabMainBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+Corner(tabMainBtn)
+RegTheme(tabMainBtn, "Primary")
+
+local mainIndicator = Instance.new("Frame", tabMainBtn)
+mainIndicator.Size, mainIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
+mainIndicator.BackgroundColor3, mainIndicator.BorderSizePixel = Color3.fromRGB(255,105,180), 0
+mainIndicator.Visible = false
+Corner(mainIndicator, UDim.new(0, 2))
+
+local mainScroll = Instance.new("ScrollingFrame", ContentContainer)
+mainScroll.Size, mainScroll.Position = UDim2.new(1, -12, 1, -29), UDim2.new(0, 6, 0, 28)
+mainScroll.BackgroundTransparency, mainScroll.BorderSizePixel = 1, 0
+mainScroll.ScrollBarThickness, mainScroll.Visible, mainScroll.ClipsDescendants = 3, false, true
+local mainLayout = Instance.new("UIListLayout", mainScroll)
+mainLayout.SortOrder, mainLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 5)
+mainLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+local mainPad = Instance.new("UIPadding", mainScroll)
+mainPad.PaddingLeft, mainPad.PaddingRight = UDim.new(0, 4), UDim.new(0, 10)
+mainPad.PaddingTop, mainPad.PaddingBottom = UDim.new(0, 4), UDim.new(0, 4)
+
+Track(mainLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    mainScroll.CanvasSize = UDim2.new(0, 0, 0, mainLayout.AbsoluteContentSize.Y + 15)
+end))
+
+Track(tabMainBtn.MouseButton1Click:Connect(function()
+    for _, t in pairs(Tabs) do
+        t.Container.Visible = false
+        if t.Indicator then t.Indicator.Visible = false end
+    end
+    mainScroll.Visible, mainIndicator.Visible = true, true
+    ActiveTabTitle.Text = "📌 Main"
+    SearchInputContent.Text = ""
+end))
+
+table.insert(Tabs, {Container = mainScroll, Indicator = mainIndicator})
+
 -- ═════════════════ TAB TEMPLATE ═════════════════
 local RegisteredScripts = {}
 local LastSelectedScriptStroke = nil
 
-local function CreateCategoryTab(tabName)
+local function CreateCategoryTab(tabName, layoutOrder)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
+    tabBtn.LayoutOrder = layoutOrder or 0
     tabBtn.Size, tabBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
     tabBtn.BackgroundTransparency, tabBtn.Text = 0, " " .. tabName
     tabBtn.TextColor3, tabBtn.TextSize = Color3.fromRGB(255,255,255), 8
@@ -555,7 +597,7 @@ local function CreateCategoryTab(tabName)
 end
 
 -- ═════════════════ TAB 1: STEAL AN EGG ═════════════════
-local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸")
+local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸", 2)
 tab1:AddNoKey("1. Hop sv1 người(nokey)", function() SafeLoad("https://raw.githubusercontent.com/raw-roblox/PrivateServerBypass/refs/heads/main/lua") end)
 tab1:AddNoKey("2. FyyCommunity(lúc có key lúc no key)", function() SafeLoad("https://FyyCommunity.my.id") end)
 tab1:AddNoKey("3. Chilli Hub V4(nokey)", function() SafeLoad("https://id.tomroblox.com/raw/kairoblox/chilli-hub-viet-hoa-v4") end)
@@ -570,7 +612,7 @@ tab1:AddHasKey("7. Real kid(có key)", function() SafeLoad("https://raw.githubus
 tab1:AddHasKey("8. Chilli v2(có key)", function() SafeLoad("https://gist.githubusercontent.com/ronnei/1fa67c56dd9af203b192d15e752928e5/raw/4e2d5105640e09a008b4ae6df23f9708cadfef06/chilliv2-stealanegg") end)
 
 -- ═════════════════ TAB 2: BLOX FRUIT ═════════════════
-local tab2 = CreateCategoryTab("🌸BLOX FRUIT🌸")
+local tab2 = CreateCategoryTab("🌸BLOX FRUIT🌸", 3)
 tab2:AddNoKey("1. RedzHub v2 (no key)", function() SafeLoad("https://raw.githubusercontent.com/UCT-hub/main/refs/heads/main/redz-v2") end)
 tab2:AddNoKey("2. Quantumx Hub(nokey)", function() SafeLoad("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua") end)
 tab2:AddHasKey("1. Speed Hub(có key)", function() SafeLoad("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua") end)
@@ -588,16 +630,17 @@ tab2:AddHasKey("6. BananaHub(có key)", function()
 end)
 
 -- ═════════════════ TAB 3: BREAK AN STEAL ═════════════════
-local tab3 = CreateCategoryTab("🌸BREAK AN STEAL🌸")
+local tab3 = CreateCategoryTab("🌸BREAK AN STEAL🌸", 4)
 tab3:AddNoKey("1. break and steal an egg", function()
     SafeLoad("https://raw.githubusercontent.com/joustingming/Ouroboros/main/loader.lua")
 end)
 
-local tab4 = CreateCategoryTab("Tab 4")
-local tab5 = CreateCategoryTab("Tab 5")
+local tab4 = CreateCategoryTab("Tab 4", 5)
+local tab5 = CreateCategoryTab("Tab 5", 6)
 
 -- ═════════════════ TAB MISC ═════════════════
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
+tabMiscBtn.LayoutOrder = 7
 tabMiscBtn.Size, tabMiscBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
 tabMiscBtn.BackgroundTransparency, tabMiscBtn.Text = 0, " ⚙️ MISC"
 tabMiscBtn.TextColor3, tabMiscBtn.TextSize = Color3.fromRGB(255,255,255), 8
@@ -763,7 +806,7 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     end
 end))
 
--- ═════════════════ ÂM NHẠC (Y BẢN GỐC) ═════════════════
+-- ═════════════════ ÂM NHẠC ═════════════════
 local musicToggleBtn = Instance.new("TextButton", miscScroll)
 musicToggleBtn.LayoutOrder = 3
 musicToggleBtn.Size, musicToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(55,12,40)
@@ -1194,6 +1237,7 @@ Track(rainbowConn)
 
 -- ═════════════════ TAB CẤU HÌNH ═════════════════
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
+tabConfigBtn.LayoutOrder = 8
 tabConfigBtn.Size, tabConfigBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
 tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text = 0, " 📦 CẤU HÌNH"
 tabConfigBtn.TextColor3, tabConfigBtn.TextSize = Color3.fromRGB(255,255,255), 8
@@ -1269,7 +1313,7 @@ local function SaveConfig(name)
     return ok
 end
 
-local function LoadConfig(name)
+local function LoadConfigRaw(name)
     if typeof(readfile) ~= "function" then return false, "no readfile" end
     local path = CONFIG_FOLDER .. "/" .. name .. ".json"
     local ok, contents = pcall(readfile, path)
@@ -1280,7 +1324,7 @@ local function LoadConfig(name)
     return true, data
 end
 
--- ─── UI elements phần Cấu Hình ───
+-- ─── UI Cấu Hình ───
 local configToggleBtn = Instance.new("TextButton", configScroll)
 configToggleBtn.LayoutOrder, configToggleBtn.Size = 1, UDim2.new(1, 0, 0, 34)
 configToggleBtn.BackgroundColor3, configToggleBtn.BackgroundTransparency = Color3.fromRGB(55,12,40), 0
@@ -1311,7 +1355,6 @@ Track(configToggleBtn.MouseButton1Click:Connect(function()
     configSubLabel.Visible = mainConfigContainer.Visible
 end))
 
--- Startup label — ĐỘNG theo CurrentConfig
 local startupFrame = Instance.new("Frame", mainConfigContainer)
 startupFrame.LayoutOrder, startupFrame.Size = 1, UDim2.new(1, 0, 0, 30)
 startupFrame.BackgroundColor3, startupFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1326,7 +1369,6 @@ startupLabel.Text = "Startup: " .. State.CurrentConfig
 startupLabel.TextColor3, startupLabel.TextSize = Color3.fromRGB(255,255,255), 9
 startupLabel.Font, startupLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
 
--- Auto Save
 local autoSaveFrame = Instance.new("Frame", mainConfigContainer)
 autoSaveFrame.LayoutOrder, autoSaveFrame.Size = 2, UDim2.new(1, 0, 0, 34)
 autoSaveFrame.BackgroundColor3, autoSaveFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1357,7 +1399,6 @@ asBox.Size, asBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.
 asBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
 Corner(asBox, UDim.new(1, 0))
 
--- Auto Load
 local autoLoadFrame = Instance.new("Frame", mainConfigContainer)
 autoLoadFrame.LayoutOrder, autoLoadFrame.Size = 3, UDim2.new(1, 0, 0, 34)
 autoLoadFrame.BackgroundColor3, autoLoadFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1388,7 +1429,7 @@ alBox.Size, alBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.
 alBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
 Corner(alBox, UDim.new(1, 0))
 
--- ─── Gán thật cho forward declarations ───
+-- ─── Forward declaration assignments ───
 AutoSaveHook = function()
     if not State.Initialized then return end
     if State.AutoSave then
@@ -1400,7 +1441,6 @@ RefreshStartupLabel = function()
     startupLabel.Text = "Startup: " .. State.CurrentConfig
 end
 
--- ApplyConfig — dùng cho LoadConfig
 local function ApplyConfig(data)
     if data.ThemeBase then
         local c = Color3.new(data.ThemeBase[1], data.ThemeBase[2], data.ThemeBase[3])
@@ -1456,21 +1496,18 @@ local function ApplyConfig(data)
     end
 end
 
--- Ghi đè LoadConfig để áp dụng config
-local LoadConfigRaw = LoadConfig
-LoadConfig = function(name)
+local function LoadConfig(name)
     local ok, dataOrErr = LoadConfigRaw(name)
     if not ok then return false, dataOrErr end
     ApplyConfig(dataOrErr)
     return true
 end
 
--- ─── Toggle handlers ───
+-- ─── Toggles ───
 Track(autoSaveToggle.MouseButton1Click:Connect(function()
     State.AutoSave = not State.AutoSave
     autoSaveToggle.BackgroundColor3 = State.AutoSave and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
     asBox.Position = State.AutoSave and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
-    -- Bật → save ngay 1 lần
     if State.AutoSave then
         SaveConfig(State.CurrentConfig)
         svSub.Text = "Save: " .. State.CurrentConfig
@@ -1481,7 +1518,6 @@ Track(autoLoadToggle.MouseButton1Click:Connect(function()
     State.AutoLoadConfig = not State.AutoLoadConfig
     autoLoadToggle.BackgroundColor3 = State.AutoLoadConfig and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
     alBox.Position = State.AutoLoadConfig and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
-    -- Bật → load ngay 1 lần
     if State.AutoLoadConfig then
         local ok, err = LoadConfig(State.CurrentConfig)
         if not ok then warn("[VzNam] Auto Load fail: " .. tostring(err)) end
@@ -1604,43 +1640,8 @@ local delPad = Instance.new("UIPadding", delDropFrame)
 delPad.PaddingRight = UDim.new(0, 8)
 RegTheme(delDropFrame, "DropFrame")
 
-local startupProfileFrame = Instance.new("Frame", profilesContainer)
-startupProfileFrame.LayoutOrder, startupProfileFrame.Size = 5, UDim2.new(1, 0, 0, 30)
-startupProfileFrame.BackgroundColor3, startupProfileFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
-Corner(startupProfileFrame)
-Stroke(startupProfileFrame)
-RegTheme(startupProfileFrame, "Primary")
-
-local stProfileLabel = Instance.new("TextLabel", startupProfileFrame)
-stProfileLabel.Size, stProfileLabel.Position = UDim2.new(0, 80, 1, 0), UDim2.new(0, 5, 0, 0)
-stProfileLabel.BackgroundTransparency, stProfileLabel.Text = 1, "Khởi Động"
-stProfileLabel.TextColor3, stProfileLabel.TextSize = Color3.fromRGB(255,255,255), 9
-stProfileLabel.Font, stProfileLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-
-local stProfileBtn = Instance.new("TextButton", startupProfileFrame)
-stProfileBtn.Size, stProfileBtn.Position = UDim2.new(0, 85, 0, 20), UDim2.new(1, -90, 0.5, -10)
-stProfileBtn.BackgroundColor3, stProfileBtn.BackgroundTransparency = Color3.fromRGB(50,10,35), 0
-stProfileBtn.Text, stProfileBtn.TextColor3 = State.StartupConfig .. " ∨", Color3.fromRGB(50,200,50)
-stProfileBtn.TextSize, stProfileBtn.Font = 8, Enum.Font.GothamBold
-stProfileBtn.TextXAlignment = Enum.TextXAlignment.Center
-Corner(stProfileBtn, UDim.new(0, 4))
-Stroke(stProfileBtn)
-RegTheme(stProfileBtn, "Input")
-
-local stProfileDrop = Instance.new("ScrollingFrame", profilesContainer)
-stProfileDrop.LayoutOrder, stProfileDrop.Size = 6, UDim2.new(1, 0, 0, 80)
-stProfileDrop.BackgroundColor3, stProfileDrop.BackgroundTransparency = Color3.fromRGB(80,20,60), 0
-stProfileDrop.CanvasSize, stProfileDrop.ScrollBarThickness, stProfileDrop.Visible = UDim2.new(0,0,0,0), 3, false
-Corner(stProfileDrop)
-Stroke(stProfileDrop)
-local stProfileLayout = Instance.new("UIListLayout", stProfileDrop)
-stProfileLayout.Padding = UDim.new(0, 3)
-local stPad = Instance.new("UIPadding", stProfileDrop)
-stPad.PaddingRight = UDim.new(0, 8)
-RegTheme(stProfileDrop, "DropFrame")
-
 local loadConfigFrame = Instance.new("Frame", profilesContainer)
-loadConfigFrame.LayoutOrder, loadConfigFrame.Size = 7, UDim2.new(1, 0, 0, 30)
+loadConfigFrame.LayoutOrder, loadConfigFrame.Size = 5, UDim2.new(1, 0, 0, 30)
 loadConfigFrame.BackgroundColor3, loadConfigFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
 Corner(loadConfigFrame)
 Stroke(loadConfigFrame)
@@ -1663,7 +1664,7 @@ Stroke(ldBtn)
 RegTheme(ldBtn, "Input")
 
 local ldDropFrame = Instance.new("ScrollingFrame", profilesContainer)
-ldDropFrame.LayoutOrder, ldDropFrame.Size = 8, UDim2.new(1, 0, 0, 80)
+ldDropFrame.LayoutOrder, ldDropFrame.Size = 6, UDim2.new(1, 0, 0, 80)
 ldDropFrame.BackgroundColor3, ldDropFrame.BackgroundTransparency = Color3.fromRGB(80,20,60), 0
 ldDropFrame.CanvasSize, ldDropFrame.ScrollBarThickness, ldDropFrame.Visible = UDim2.new(0,0,0,0), 3, false
 Corner(ldDropFrame)
@@ -1675,7 +1676,7 @@ ldPad.PaddingRight = UDim.new(0, 8)
 RegTheme(ldDropFrame, "DropFrame")
 
 local saveFrame = Instance.new("Frame", profilesContainer)
-saveFrame.LayoutOrder, saveFrame.Size = 9, UDim2.new(1, 0, 0, 34)
+saveFrame.LayoutOrder, saveFrame.Size = 7, UDim2.new(1, 0, 0, 34)
 saveFrame.BackgroundColor3, saveFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
 Corner(saveFrame)
 Stroke(saveFrame)
@@ -1702,7 +1703,7 @@ Corner(saveBtn, UDim.new(0, 4))
 Stroke(saveBtn)
 
 local function refreshAllDropdowns()
-    for _, drop in ipairs({delDropFrame, stProfileDrop, ldDropFrame}) do
+    for _, drop in ipairs({delDropFrame, ldDropFrame}) do
         for _, child in ipairs(drop:GetChildren()) do
             if child:IsA("TextButton") then child:Destroy() end
         end
@@ -1739,20 +1740,6 @@ local function refreshAllDropdowns()
             refreshAllDropdowns()
         end))
 
-        local f2 = Instance.new("TextButton", stProfileDrop)
-        f2.Size, f2.BackgroundColor3, f2.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
-        f2.Text, f2.TextColor3, f2.TextSize = " 📁 " .. name, Color3.fromRGB(255,255,255), 9
-        f2.Font, f2.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-        Corner(f2, UDim.new(0, 4))
-        Stroke(f2)
-        RegTheme(f2, "DropItem")
-        Track(f2.MouseButton1Click:Connect(function()
-            State.StartupConfig = name
-            stProfileBtn.Text = name .. " ∨"
-            stProfileDrop.Visible = false
-            -- KHÔNG đổi startupLabel — label theo CurrentConfig
-        end))
-
         local f3 = Instance.new("TextButton", ldDropFrame)
         f3.Size, f3.BackgroundColor3, f3.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f3.Text, f3.TextColor3, f3.TextSize = " 📂 " .. name, Color3.fromRGB(255,255,255), 9
@@ -1773,24 +1760,18 @@ local function refreshAllDropdowns()
         end))
     end
     delDropFrame.CanvasSize = UDim2.new(0, 0, 0, #filesList * 25)
-    stProfileDrop.CanvasSize = UDim2.new(0, 0, 0, #filesList * 25)
     ldDropFrame.CanvasSize = UDim2.new(0, 0, 0, #filesList * 25)
 end
 
 Track(delBtn.MouseButton1Click:Connect(function()
     refreshAllDropdowns()
     delDropFrame.Visible = not delDropFrame.Visible
-    stProfileDrop.Visible, ldDropFrame.Visible = false, false
-end))
-Track(stProfileBtn.MouseButton1Click:Connect(function()
-    refreshAllDropdowns()
-    stProfileDrop.Visible = not stProfileDrop.Visible
-    delDropFrame.Visible, ldDropFrame.Visible = false, false
+    ldDropFrame.Visible = false
 end))
 Track(ldBtn.MouseButton1Click:Connect(function()
     refreshAllDropdowns()
     ldDropFrame.Visible = not ldDropFrame.Visible
-    delDropFrame.Visible, stProfileDrop.Visible = false, false
+    delDropFrame.Visible = false
 end))
 
 Track(createBtn.MouseButton1Click:Connect(function()
@@ -1838,7 +1819,6 @@ end))
 ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 
--- Auto load config khi khởi động (nếu toggle bật)
 if State.AutoLoadConfig and typeof(isfile) == "function" then
     local path = CONFIG_FOLDER .. "/" .. State.CurrentConfig .. ".json"
     local ok, exists = pcall(isfile, path)
@@ -1852,8 +1832,6 @@ end
 
 RefreshStartupLabel()
 
--- Bật cờ Initialized SAU khi mọi thứ đã setup
--- (tránh AutoSaveHook ghi đè config ngay khi khởi động)
 task.spawn(function()
     task.wait(0.5)
     State.Initialized = true
