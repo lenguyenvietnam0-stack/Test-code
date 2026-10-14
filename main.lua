@@ -27,7 +27,7 @@ MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner", MainFrame) MainCorner.CornerRadius = UDim.new(0, 8)
-local OuterStroke = Instance.new("UIStroke", MainFrame) OuterStroke.Color, OuterStroke.Thickness, OuterStroke.Transparency = Color3.fromRGB(0, 0, 0), 1, 0.1
+local OuterStroke = Instance.new("UIStroke", MainFrame) OuterStroke.Color, OuterStroke.Thickness, OuterStroke.Transparency = Color3.fromRGB(255, 105, 180), 1.5, 0
 
 local TopBar = Instance.new("Frame", MainFrame) TopBar.Size, TopBar.BackgroundTransparency = UDim2.new(1, 0, 0, 28), 1
 
@@ -494,15 +494,15 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ============================================================================
--- 3. MỤC: ĐỔI MÀU GIAO DIỆN (Nền chính giữ tối, đổi màu các nút tab sang tone-sur-tone nhẹ nhàng)
+-- 3. MỤC: ĐỔI MÀU VIỀN (Có đầy đủ tùy chỉnh màu + Cầu Vồng Rainbow RGB siêu mượt)
 -- ============================================================================
 local colorToggleBtn = Instance.new("TextButton", miscScroll)
 colorToggleBtn.LayoutOrder = 5
-colorToggleBtn.Size, colorToggleBtn.BackgroundColor3, colorToggleBtn.Text, colorToggleBtn.TextColor3, colorToggleBtn.TextSize, colorToggleBtn.Font, colorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
+colorToggleBtn.Size, colorToggleBtn.BackgroundColor3, colorToggleBtn.Text, colorToggleBtn.TextColor3, colorToggleBtn.TextSize, colorToggleBtn.Font, colorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu viền menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
 Instance.new("UICorner", colorToggleBtn).CornerRadius = UDim.new(0, 5)
 
 local coSubLabel = Instance.new("TextLabel", colorToggleBtn)
-coSubLabel.Size, coSubLabel.Position, coSubLabel.BackgroundTransparency, coSubLabel.Text, coSubLabel.TextColor3, coSubLabel.TextSize, coSubLabel.Font, coSubLabel.TextXAlignment = UDim2.new(1, 0, 0, 16), UDim2.new(0, 0, 1, -16), 1, "Tùy chỉnh màu sắc giao diện", Color3.fromRGB(140, 140, 150), 9, Enum.Font.Gotham, Enum.TextXAlignment.Center
+coSubLabel.Size, coSubLabel.Position, coSubLabel.BackgroundTransparency, coSubLabel.Text, coSubLabel.TextColor3, coSubLabel.TextSize, coSubLabel.Font, coSubLabel.TextXAlignment = UDim2.new(1, 0, 0, 16), UDim2.new(0, 0, 1, -16), 1, "Tùy chỉnh màu viền giao diện", Color3.fromRGB(140, 140, 150), 9, Enum.Font.Gotham, Enum.TextXAlignment.Center
 
 local colorContainer = Instance.new("Frame", miscScroll)
 colorContainer.LayoutOrder = 6
@@ -513,23 +513,25 @@ local coLayout = Instance.new("UIListLayout", colorContainer) coLayout.SortOrder
 
 colorToggleBtn.MouseButton1Click:Connect(function()
     colorContainer.Visible = not colorContainer.Visible
-    colorToggleBtn.Text = colorContainer.Visible and "  ↓ màu menu" or "  → màu menu"
+    colorToggleBtn.Text = colorContainer.Visible and "  ↓ màu viền menu" or "  → màu viền menu"
     coSubLabel.Visible = colorContainer.Visible
 end)
 
 local colorList = {
-    {Name = "🖤 Xám Tối Mặc Định", Color = Color3.fromRGB(22, 25, 34)},
-    {Name = "🌸 Hồng Pastel Nhẹ Nhàng", Color = Color3.fromRGB(70, 35, 50)},
-    {Name = "🔴 Đỏ Đậm Trầm", Color = Color3.fromRGB(60, 25, 30)},
-    {Name = "🔵 Xanh Dương Đêm", Color = Color3.fromRGB(25, 40, 65)}
+    {Name = "🌈 Cầu Vồng (Rainbow RGB)", Color = "Rainbow"},
+    {Name = "🌸 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
+    {Name = "🔴 Đỏ Đậm", Color = Color3.fromRGB(220, 20, 60)},
+    {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 191, 255)},
+    {Name = "🟢 Xanh Lá", Color3.fromRGB(50, 205, 50)},
+    {Name = "🟡 Vàng Nổi Bật", Color3.fromRGB(255, 215, 0)}
 }
 local selectedColorObj = colorList[1]
 local colorDropBtn = Instance.new("TextButton", colorContainer)
-colorDropBtn.LayoutOrder = 1 colorDropBtn.Size, colorDropBtn.BackgroundColor3, colorDropBtn.Text, colorDropBtn.TextColor3, colorDropBtn.TextSize, colorDropBtn.Font, colorDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 🎨 Đã chọn: 🖤 Xám Tối Mặc Định", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
+colorDropBtn.LayoutOrder = 1 colorDropBtn.Size, colorDropBtn.BackgroundColor3, colorDropBtn.Text, colorDropBtn.TextColor3, colorDropBtn.TextSize, colorDropBtn.Font, colorDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 🎨 Đã chọn: 🌈 Cầu Vồng (Rainbow RGB)", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", colorDropBtn).CornerRadius = UDim.new(0, 5)
 
 local colorDropFrame = Instance.new("ScrollingFrame", colorContainer)
-colorDropFrame.LayoutOrder = 2 colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible = UDim2.new(1, 0, 0, 110), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
+colorDropFrame.LayoutOrder = 2 colorDropFrame.Size, colorDropFrame.BackgroundColor3, colorDropFrame.CanvasSize, colorDropFrame.ScrollBarThickness, colorDropFrame.Visible = UDim2.new(1, 0, 0, 130), Color3.fromRGB(28, 32, 42), UDim2.new(0,0,0,0), 3, false
 Instance.new("UICorner", colorDropFrame).CornerRadius = UDim.new(0, 5)
 local colorListLayout = Instance.new("UIListLayout", colorDropFrame) colorListLayout.Padding = UDim.new(0, 4)
 
@@ -548,36 +550,35 @@ local colorToggleFrame = Instance.new("Frame", colorContainer)
 colorToggleFrame.LayoutOrder = 3 colorToggleFrame.Size, colorToggleFrame.BackgroundColor3 = UDim2.new(1, 0, 0, 38), Color3.fromRGB(22, 25, 34)
 Instance.new("UICorner", colorToggleFrame).CornerRadius = UDim.new(0, 5) Instance.new("UIStroke", colorToggleFrame).Color = Color3.fromRGB(40, 43, 52)
 local colorTitle = Instance.new("TextLabel", colorToggleFrame)
-colorTitle.Size, colorTitle.Position, colorTitle.BackgroundTransparency, colorTitle.Text, colorTitle.TextColor3, colorTitle.TextSize, colorTitle.Font, colorTitle.TextXAlignment = UDim2.new(1, -50, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Màu Menu Tùy Chỉnh", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
+colorTitle.Size, colorTitle.Position, colorTitle.BackgroundTransparency, colorTitle.Text, colorTitle.TextColor3, colorTitle.TextSize, colorTitle.Font, colorTitle.TextXAlignment = UDim2.new(1, -50, 1, 0), UDim2.new(0, 8, 0, 0), 1, "Bật Màu Viền Tùy Chỉnh", Color3.fromRGB(255, 255, 255), 11, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
 local toggleColorBtn = Instance.new("TextButton", colorToggleFrame)
-toggleColorBtn.Size, toggleColorBtn.Position, toggleColorBtn.BackgroundColor3, toggleColorBtn.Text = UDim2.new(0, 38, 0, 20), UDim2.new(1, -46, 0.5, -10), Color3.fromRGB(60, 65, 75), ""
+toggleColorBtn.Size, toggleColorBtn.Position, toggleColorBtn.BackgroundColor3, toggleColorBtn.Text = UDim2.new(0, 38, 0, 20), UDim2.new(1, -46, 0.5, -10), Color3.fromRGB(50, 200, 50), ""
 Instance.new("UICorner", toggleColorBtn).CornerRadius = UDim.new(1, 0)
 local colorDot = Instance.new("Frame", toggleColorBtn)
-colorDot.Size, colorDot.Position, colorDot.BackgroundColor3 = UDim2.new(0, 16, 0, 16), UDim2.new(0, 2, 0.5, -8), Color3.fromRGB(255, 255, 255)
+colorDot.Size, colorDot.Position, colorDot.BackgroundColor3 = UDim2.new(0, 16, 0, 16), UDim2.new(1, -18, 0.5, -8), Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", colorDot).CornerRadius = UDim.new(1, 0)
 
-local isColorApplied = false
+local isColorApplied = true
 toggleColorBtn.MouseButton1Click:Connect(function()
     isColorApplied = not isColorApplied
     if isColorApplied then
         toggleColorBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50) colorDot.Position = UDim2.new(1, -18, 0.5, -8)
     else
         toggleColorBtn.BackgroundColor3 = Color3.fromRGB(60, 65, 75) colorDot.Position = UDim2.new(0, 2, 0.5, -8)
-        for _, btn in ipairs(SidebarScroll:GetChildren()) do
-            if btn:IsA("TextButton") then btn.BackgroundColor3 = Color3.fromRGB(22, 25, 34) end
-        end
+        OuterStroke.Color = Color3.fromRGB(255, 105, 180)
     end
 end)
 
 RunService.RenderStepped:Connect(function()
-    if isColorApplied and typeof(selectedColorObj.Color) == "Color3" then
-        SidebarPanel.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
-        ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
-        for _, btn in ipairs(SidebarScroll:GetChildren()) do
-            if btn:IsA("TextButton") then
-                btn.BackgroundColor3 = selectedColorObj.Color
-            end
+    if isColorApplied then
+        if selectedColorObj.Color == "Rainbow" then
+            local rainbowColor = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+            OuterStroke.Color = rainbowColor
+            OpenStroke.Color = rainbowColor
+        else
+            OuterStroke.Color = selectedColorObj.Color
+            OpenStroke.Color = selectedColorObj.Color
         end
     end
 end)
