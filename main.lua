@@ -32,7 +32,7 @@ MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 380, 0, 280) 
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 22) -- Đã đổi thành màu tối
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
 MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -98,7 +98,7 @@ end)
 
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
-SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0.3, -4, 1, -34), UDim2.new(0, 6, 0, 28), Color3.fromRGB(15, 16, 22), 0, 0 -- Đã đổi thành màu tối
+SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0.3, -4, 1, -34), UDim2.new(0, 6, 0, 28), Color3.fromRGB(15, 16, 22), 0, 0
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
 local SidebarStroke = TrackStroke(Instance.new("UIStroke", SidebarPanel))
 SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -128,7 +128,7 @@ end)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(0.68, -4, 1, -34), UDim2.new(0.315, 0, 0, 28), Color3.fromRGB(15, 16, 22), 0, 0 -- Đã đổi thành màu tối
+ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(0.68, -4, 1, -34), UDim2.new(0.315, 0, 0, 28), Color3.fromRGB(15, 16, 22), 0, 0
 Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
 local ContentStroke = TrackStroke(Instance.new("UIStroke", ContentContainer))
 ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -165,7 +165,7 @@ tabHomeBtn.LayoutOrder = 0
 tabHomeBtn.Size, tabHomeBtn.BackgroundColor3, tabHomeBtn.BackgroundTransparency, tabHomeBtn.Text, tabHomeBtn.TextColor3, tabHomeBtn.TextSize, tabHomeBtn.Font, tabHomeBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " 🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabHomeBtn).CornerRadius = UDim.new(0, 5)
 local tabHomeStroke = TrackStroke(Instance.new("UIStroke", tabHomeBtn))
-tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
+tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(255, 255, 255), 1.5 -- [ĐÃ SỬA] Trắng, đồng bộ với hệ thống viền
 RegisterTheme(tabHomeBtn, "Primary")
 
 local homeIndicator = Instance.new("Frame", tabHomeBtn)
@@ -242,7 +242,7 @@ local function CreateCategoryTab(tabName)
     tabBtn.Size, tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency, tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " " .. tabName, Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 5)
     local tabStroke = TrackStroke(Instance.new("UIStroke", tabBtn))
-    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
+    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(255, 255, 255), 1.5 -- [ĐÃ SỬA] Trắng, đồng bộ với hệ thống viền
     RegisterTheme(tabBtn, "Primary")
 
     local indicator = Instance.new("Frame", tabBtn) 
@@ -415,7 +415,7 @@ local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
 tabMiscBtn.Size, tabMiscBtn.BackgroundColor3, tabMiscBtn.BackgroundTransparency, tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " ⚙️ MISC", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabMiscBtn).CornerRadius = UDim.new(0, 5)
 local tabMiscStroke = TrackStroke(Instance.new("UIStroke", tabMiscBtn))
-tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
+tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(255, 255, 255), 1.5 -- [ĐÃ SỬA] Trắng, đồng bộ với hệ thống viền
 RegisterTheme(tabMiscBtn, "Primary")
 
 local miscIndicator = Instance.new("Frame", tabMiscBtn)
@@ -679,7 +679,7 @@ local menuThemeList = {
     {Name = "🌊 Xanh Đại Dương", Bg = Color3.fromRGB(10, 22, 50)}
 }
 local themeDropBtn = Instance.new("TextButton", menuColorContainer)
-themeDropBtn.LayoutOrder = 1 themeDropBtn.Size, themeDropBtn.BackgroundColor3, themeDropBtn.BackgroundTransparency, themeDropBtn.Text, themeDropBtn.TextColor3, themeDropBtn.TextSize, themeDropBtn.Font, themeDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " 🎨 Theme: 🌙 Đêm Đen Sâu", Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left -- Đã đổi chữ mặc định
+themeDropBtn.LayoutOrder = 1 themeDropBtn.Size, themeDropBtn.BackgroundColor3, themeDropBtn.BackgroundTransparency, themeDropBtn.Text, themeDropBtn.TextColor3, themeDropBtn.TextSize, themeDropBtn.Font, themeDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " 🎨 Theme: 🌙 Đêm Đen Sâu", Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", themeDropBtn).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", themeDropBtn)).Color = Color3.fromRGB(40, 43, 52)
 RegisterTheme(themeDropBtn, "Primary")
@@ -695,11 +695,11 @@ local themePad = Instance.new("UIPadding", themeDropFrame)
 themePad.PaddingRight = UDim.new(0, 8)
 
 local function ApplyTheme(newBaseColor)
-    local primaryColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.15)
-    local secondaryColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.3)
-    local dropFrameColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.4)
-    local dropItemColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.5)
-    local inputColor = newBaseColor:Lerp(Color3.new(0,0,0), 0.2)
+    local primaryColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.08)
+    local secondaryColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.15)
+    local dropFrameColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.2)
+    local dropItemColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.3)
+    local inputColor = newBaseColor:Lerp(Color3.new(0,0,0), 0.4)
 
     SidebarPanel.BackgroundColor3 = newBaseColor
     ContentContainer.BackgroundColor3 = newBaseColor
@@ -780,7 +780,8 @@ local colorList = {
     {Name = "🌈 Cầu Vồng (Rainbow)", Color = "Rainbow"},
     {Name = "🌸 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
     {Name = "🔴 Đỏ Đậm", Color = Color3.fromRGB(220, 20, 60)},
-    {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 191, 255)}
+    {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 191, 255)},
+    {Name = "❌ Không Viền", Color = "None"}
 }
 local selectedColorObj = colorList[1]
 local colorDropBtn = Instance.new("TextButton", menuColorContainer)
@@ -809,9 +810,19 @@ for i, cItem in ipairs(colorList) do
         selectedColorObj = cItem
         colorDropBtn.Text = " 🎨 Viền: " .. cItem.Name
         colorDropFrame.Visible = false
-        if cItem.Color ~= "Rainbow" then
+        
+        if cItem.Color == "None" then
             for _, stroke in ipairs(AllUIStrokes) do
-                if stroke then stroke.Color = cItem.Color end
+                if stroke then stroke.Transparency = 1 end
+            end
+        else
+            for _, stroke in ipairs(AllUIStrokes) do
+                if stroke then stroke.Transparency = 0 end
+            end
+            if cItem.Color ~= "Rainbow" then
+                for _, stroke in ipairs(AllUIStrokes) do
+                    if stroke then stroke.Color = cItem.Color end
+                end
             end
         end
     end)
@@ -823,7 +834,10 @@ RunService.RenderStepped:Connect(function()
     if selectedColorObj and selectedColorObj.Color == "Rainbow" then
         local targetColor = Color3.fromHSV(tick() % 5 / 5, 1, 1)
         for _, stroke in ipairs(AllUIStrokes) do
-            if stroke then stroke.Color = targetColor end
+            if stroke then 
+                stroke.Transparency = 0
+                stroke.Color = targetColor 
+            end
         end
     end
 end)
@@ -833,7 +847,8 @@ miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1300)
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
 tabConfigBtn.Size, tabConfigBtn.BackgroundColor3, tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " 📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabConfigBtn).CornerRadius = UDim.new(0, 5)
-TrackStroke(Instance.new("UIStroke", tabConfigBtn)).Color = Color3.fromRGB(40, 43, 52)
+local tabConfigStroke = TrackStroke(Instance.new("UIStroke", tabConfigBtn))
+tabConfigStroke.Color, tabConfigStroke.Thickness = Color3.fromRGB(255, 255, 255), 1.5 -- [ĐÃ SỬA] Trắng, đồng bộ với hệ thống viền
 RegisterTheme(tabConfigBtn, "Primary")
 
 local configIndicator = Instance.new("Frame", tabConfigBtn)
