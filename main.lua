@@ -21,10 +21,10 @@ ScreenGui.DisplayOrder = 99999
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- Khung ngoài chính chuẩn gọn gàng
+-- Khung ngoài chính: Thu gọn vừa vặn & cân đối ở giữa
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 360, 0, 280)
+MainFrame.Size = UDim2.new(0, 340, 0, 270)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
@@ -66,8 +66,8 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - resizeStart
-        local newWidth = math.clamp(startSize.X + delta.X, 330, 500)
-        local newHeight = math.clamp(startSize.Y + delta.Y, 230, 450)
+        local newWidth = math.clamp(startSize.X + delta.X, 310, 480)
+        local newHeight = math.clamp(startSize.Y + delta.Y, 220, 420)
         MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
     end
 end)
@@ -92,23 +92,27 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- SidebarPanel bên trái (chiều rộng 100px)
+-- SidebarPanel bên trái: Đã cách lề trái rõ ràng (6px) không bị sát lề
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
-SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 100, 1, -30), UDim2.new(0, 4, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
+SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 95, 1, -32), UDim2.new(0, 6, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
 local SidebarStroke = TrackStroke(Instance.new("UIStroke", SidebarPanel))
 SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 
 local SearchBoxTab = Instance.new("TextBox", SidebarPanel)
-SearchBoxTab.Size, SearchBoxTab.Position, SearchBoxTab.BackgroundColor3, SearchBoxTab.BackgroundTransparency, SearchBoxTab.Text, SearchBoxTab.PlaceholderText, SearchBoxTab.PlaceholderColor3, SearchBoxTab.TextColor3, SearchBoxTab.TextSize, SearchBoxTab.Font = UDim2.new(1, -6, 0, 18), UDim2.new(0, 3, 0, 3), Color3.fromRGB(70, 15, 50), 0, "", "🔍 Search...", Color3.fromRGB(150, 155, 165), Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham
+SearchBoxTab.Size, SearchBoxTab.Position, SearchBoxTab.BackgroundColor3, SearchBoxTab.BackgroundTransparency, SearchBoxTab.Text, SearchBoxTab.PlaceholderText, SearchBoxTab.PlaceholderColor3, SearchBoxTab.TextColor3, SearchBoxTab.TextSize, SearchBoxTab.Font = UDim2.new(1, -8, 0, 18), UDim2.new(0, 4, 0, 3), Color3.fromRGB(70, 15, 50), 0, "", "🔍 Search...", Color3.fromRGB(150, 155, 165), Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham
 Instance.new("UICorner", SearchBoxTab).CornerRadius = UDim.new(0, 4)
 TrackStroke(Instance.new("UIStroke", SearchBoxTab)).Color = Color3.fromRGB(40, 43, 52)
 
--- ĐÃ THÊM ClipsDescendants = true ĐỂ KHÔNG BAO GIỜ BỊ TRÀN VIỀN LẸM RA NGOÀI
 local SidebarScroll = Instance.new("ScrollingFrame", SidebarPanel)
 SidebarScroll.Size, SidebarScroll.Position, SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel, SidebarScroll.ScrollBarThickness, SidebarScroll.ClipsDescendants = UDim2.new(1, -4, 1, -24), UDim2.new(0, 2, 0, 23), 1, 0, 2, true
 local SidebarLayout = Instance.new("UIListLayout", SidebarScroll) SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 3)
+
+-- Thêm lề đệm bên trong để các nút tab không bị dính sát mép
+local SidebarPadding = Instance.new("UIPadding", SidebarScroll)
+SidebarPadding.PaddingLeft = UDim.new(0, 3)
+SidebarPadding.PaddingRight = UDim.new(0, 3)
 
 SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     local query = string.lower(SearchBoxTab.Text)
@@ -119,10 +123,10 @@ SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
--- ContentContainer bên phải (tự động căn lề chuẩn xác tuyệt đối)
+-- ContentContainer bên phải: Căn lề cân đối hoàn hảo, có khoảng hở đẹp mắt với cột trái
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -108, 1, -30), UDim2.new(0, 105, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
+ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -111, 1, -32), UDim2.new(0, 105, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
 local ContentStroke = TrackStroke(Instance.new("UIStroke", ContentContainer))
 ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
