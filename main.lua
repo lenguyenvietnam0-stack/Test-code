@@ -21,7 +21,7 @@ ScreenGui.DisplayOrder = 99999
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- Khung ngoài chính: Thu gọn vừa vặn & cân đối ở giữa
+-- Khung ngoài chính chuẩn gọn gàng
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 340, 0, 270)
@@ -92,10 +92,10 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- SidebarPanel bên trái: Đã cách lề trái rõ ràng (6px) không bị sát lề
+-- SidebarPanel bên trái: Đặt cách lề trái hoàn hảo (8px)
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
-SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 95, 1, -32), UDim2.new(0, 6, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
+SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 93, 1, -32), UDim2.new(0, 8, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
 local SidebarStroke = TrackStroke(Instance.new("UIStroke", SidebarPanel))
 SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -109,7 +109,6 @@ local SidebarScroll = Instance.new("ScrollingFrame", SidebarPanel)
 SidebarScroll.Size, SidebarScroll.Position, SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel, SidebarScroll.ScrollBarThickness, SidebarScroll.ClipsDescendants = UDim2.new(1, -4, 1, -24), UDim2.new(0, 2, 0, 23), 1, 0, 2, true
 local SidebarLayout = Instance.new("UIListLayout", SidebarScroll) SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 3)
 
--- Thêm lề đệm bên trong để các nút tab không bị dính sát mép
 local SidebarPadding = Instance.new("UIPadding", SidebarScroll)
 SidebarPadding.PaddingLeft = UDim.new(0, 3)
 SidebarPadding.PaddingRight = UDim.new(0, 3)
@@ -123,10 +122,10 @@ SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
--- ContentContainer bên phải: Căn lề cân đối hoàn hảo, có khoảng hở đẹp mắt với cột trái
+-- ContentContainer bên phải: Đã co ngắn lại và cách đều lề phải chuẩn xác (cách viền phải 8px)
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -111, 1, -32), UDim2.new(0, 105, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
+ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -113, 1, -32), UDim2.new(0, 105, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
 local ContentStroke = TrackStroke(Instance.new("UIStroke", ContentContainer))
 ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
