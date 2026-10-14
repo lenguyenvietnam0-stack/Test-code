@@ -1,23 +1,7 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 — FIXED VERSION
+    VzNam Hub v4 — FIXED VERSION (Music gốc, Config gốc)
     ═══════════════════════════════════════════════════════
-    ✅ FIX NGHIÊM TRỌNG:
-       [1] Config lưu/đọc THẬT (theme, stroke, volume, sound, autoload, script)
-       [2] Discord URL hợp lệ
-       [3] Auto Load toggle THỰC SỰ reload config
-       [4] Validate JSON khi load + schema check
-    ✅ FIX TRUNG BÌNH:
-       [5] Track & disconnect MỌI connection khi destroy
-       [6] Dropdown auto-load rebuild ĐỘNG khi thêm script
-       [7] Sound ID hợp lệ + fallback khi lỗi phát
-       [8] infoContainer.Visible = false (khớp label "↓")
-       [9] Guard race condition khi chưa chọn script
-    ✅ FIX NHỎ:
-       [10-11] CanvasSize tự động qua UIListLayout.AbsoluteContentSize
-       [12] Gom helper: Corner(), Stroke(), RegTheme()
-       [13] RenderStepped ngắt khi destroy
-       [BONUS] Whitelist domain cho loadstring (chống RCE)
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -31,11 +15,10 @@ local RunService      = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 local PlayerGui = localPlayer:FindFirstChildOfClass("PlayerGui") or CoreGui
 
--- ═════════════════ CLEANUP CŨ ═════════════════
 if PlayerGui:FindFirstChild("VzNamHubV4UI") then PlayerGui.VzNamHubV4UI:Destroy() end
 if SoundService:FindFirstChild("VzNamHubSound") then SoundService.VzNamHubSound:Destroy() end
 
--- ═════════════════ [FIX #5] QUẢN LÝ CONNECTION ═════════════════
+-- ═════════════════ QUẢN LÝ CONNECTION ═════════════════
 local Connections = {}
 local function Track(conn)
     if conn then table.insert(Connections, conn) end
@@ -49,12 +32,12 @@ end
 -- ═════════════════ GLOBAL STATE ═════════════════
 local State = {
     ThemeBase     = Color3.fromRGB(15, 16, 22),
-    StrokeMode    = "Solid",  -- "Solid" | "Rainbow" | "None"
+    StrokeMode    = "Solid",
     StrokeColor   = Color3.fromRGB(0, 191, 255),
     Volume        = 0.5,
     SoundId       = "1837879082",
     IsMusicPlaying= false,
-    SelectedScript= nil,      -- {Name, Callback}
+    SelectedScript= nil,
     IsAutoLoad    = false,
     CurrentConfig = "Default",
     StartupConfig = "Default",
@@ -63,7 +46,7 @@ local State = {
     Transparent   = 0,
 }
 
--- ═════════════════ [FIX #12] HELPER BUILDERS ═════════════════
+-- ═════════════════ HELPER BUILDERS ═════════════════
 local function Corner(parent, radius)
     local c = Instance.new("UICorner", parent)
     c.CornerRadius = radius or UDim.new(0, 5)
@@ -86,7 +69,7 @@ local function RegTheme(el, t)
     return el
 end
 
--- ═════════════════ [BONUS] WHITELIST DOMAIN ═════════════════
+-- ═════════════════ WHITELIST DOMAIN ═════════════════
 local ALLOWED_HOSTS = {
     "raw.githubusercontent.com",
     "gist.githubusercontent.com",
@@ -141,7 +124,6 @@ MainFrame.Parent = ScreenGui
 Corner(MainFrame, UDim.new(0, 8))
 local OuterStroke = Stroke(MainFrame, Color3.fromRGB(0, 191, 255), 2)
 
--- Resize handle
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size, ResizeBtn.Position = UDim2.new(0, 18, 0, 18), UDim2.new(1, -18, 1, -18)
 ResizeBtn.BackgroundTransparency, ResizeBtn.Text = 1, "◢"
@@ -172,7 +154,6 @@ Track(UserInputService.InputChanged:Connect(function(input)
     end
 end))
 
--- TopBar
 local TopBar = Instance.new("Frame", MainFrame)
 TopBar.Size, TopBar.BackgroundTransparency = UDim2.new(1, 0, 0, 26), 1
 
@@ -200,7 +181,6 @@ CloseBtn.TextColor3, CloseBtn.TextSize = Color3.fromRGB(200, 200, 210), 10
 CloseBtn.Font = Enum.Font.GothamBold
 
 Track(CloseBtn.MouseButton1Click:Connect(function()
-    -- [FIX #5, #13] disconnect ALL + dừng nhạc + destroy UI
     DisconnectAll()
     if SoundService:FindFirstChild("VzNamHubSound") then
         SoundService.VzNamHubSound:Stop()
@@ -209,7 +189,6 @@ Track(CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end))
 
--- Sidebar
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Size, SidebarPanel.Position = UDim2.new(0.3, -4, 1, -34), UDim2.new(0, 6, 0, 28)
 SidebarPanel.BackgroundColor3, SidebarPanel.BorderSizePixel = Color3.fromRGB(15,16,22), 0
@@ -235,7 +214,6 @@ SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDi
 local SidebarPadding = Instance.new("UIPadding", SidebarScroll)
 SidebarPadding.PaddingLeft, SidebarPadding.PaddingRight = UDim.new(0, 2), UDim.new(0, 6)
 
--- [FIX #10] CanvasSize tự động cho sidebar
 Track(SidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y + 10)
 end))
@@ -249,7 +227,6 @@ Track(SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end))
 
--- Content
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Size, ContentContainer.Position = UDim2.new(0.68, -4, 1, -34), UDim2.new(0.315, 0, 0, 28)
 ContentContainer.BackgroundColor3, ContentContainer.BorderSizePixel = Color3.fromRGB(15,16,22), 0
@@ -321,7 +298,6 @@ local homePad = Instance.new("UIPadding", homeScroll)
 homePad.PaddingLeft, homePad.PaddingRight = UDim.new(0, 4), UDim.new(0, 10)
 homePad.PaddingTop, homePad.PaddingBottom = UDim.new(0, 4), UDim.new(0, 4)
 
--- [FIX #10] CanvasSize tự động
 Track(homeLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     homeScroll.CanvasSize = UDim2.new(0, 0, 0, homeLayout.AbsoluteContentSize.Y + 15)
 end))
@@ -340,7 +316,6 @@ table.insert(Tabs, {Container = homeScroll, Indicator = homeIndicator})
 homeScroll.Visible, homeIndicator.Visible = true, true
 ActiveTabTitle.Text = "🏠 Trang Chủ"
 
--- Info toggle
 local infoToggleBtn = Instance.new("TextButton", homeScroll)
 infoToggleBtn.LayoutOrder = 1
 infoToggleBtn.Size, infoToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 32), Color3.fromRGB(55,12,40)
@@ -361,7 +336,6 @@ local infoContainer = Instance.new("Frame", homeScroll)
 infoContainer.LayoutOrder = 2
 infoContainer.Size, infoContainer.AutomaticSize = UDim2.new(1, 0, 0, 0), Enum.AutomaticSize.Y
 infoContainer.BackgroundTransparency = 1
--- [FIX #8] Ẩn ban đầu để khớp label "→"
 infoContainer.Visible = false
 local infoLayout = Instance.new("UIListLayout", infoContainer)
 infoLayout.SortOrder, infoLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
@@ -373,7 +347,6 @@ Track(infoToggleBtn.MouseButton1Click:Connect(function()
     infoSubLabel.Visible = infoContainer.Visible
 end))
 
--- Helper tạo home card
 local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyText, borderColor, iconSymbol)
     local card = Instance.new("Frame", parent)
     card.LayoutOrder, card.Size = order, UDim2.new(1, 0, 0, 26)
@@ -428,10 +401,9 @@ local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyT
     end
 end
 
-CreateHomeCardWithIcon = CreateHomeCard -- alias giữ tương thích gốc
 CreateHomeCard(infoContainer, 1, Color3.fromRGB(70,20,45), "ĐƯỢC TẠO BỞI", "VzNam ROBLOX", "", Color3.fromRGB(180,50,50), "👤")
 CreateHomeCard(infoContainer, 2, Color3.fromRGB(30,40,70), "DISCORD SERVER",
-    "https://discord.gg/6TG7krbsU",  -- [FIX #2] Định dạng invite hợp lệ
+    "https://discord.gg/6TG7krbsU",
     "https://discord.gg/6TG7krbsU",
     Color3.fromRGB(60,100,200), "💬")
 CreateHomeCard(infoContainer, 3, Color3.fromRGB(45,45,65), "TIKTOK CHANNEL",
@@ -498,7 +470,6 @@ local function CreateCategoryTab(tabName)
         p.PaddingLeft, p.PaddingRight, p.PaddingTop = UDim.new(0,4), UDim.new(0,10), UDim.new(0,4)
         local l = Instance.new("UIListLayout", s)
         l.Padding, l.HorizontalAlignment = UDim.new(0, 3), Enum.HorizontalAlignment.Center
-        -- [FIX #10]
         Track(l:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             s.CanvasSize = UDim2.new(0, 0, 0, l.AbsoluteContentSize.Y + 10)
         end))
@@ -508,7 +479,6 @@ local function CreateCategoryTab(tabName)
     local scrollNoKey = makeScroll(); scrollNoKey.Visible = true
     local scrollHasKey = makeScroll(); scrollHasKey.Visible = false
 
-    -- [FIX #6] Hàm lọc dùng closure, được gọi lại mỗi khi search text đổi
     local function applySearchFilter()
         if not containerFrame.Visible then return end
         local q = string.lower(SearchInputContent.Text)
@@ -642,7 +612,6 @@ miscLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 local miscPad = Instance.new("UIPadding", miscScroll)
 miscPad.PaddingLeft, miscPad.PaddingRight, miscPad.PaddingTop = UDim.new(0,4), UDim.new(0,10), UDim.new(0,4)
 
--- [FIX #10]
 Track(miscLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     miscScroll.CanvasSize = UDim2.new(0, 0, 0, miscLayout.AbsoluteContentSize.Y + 15)
 end))
@@ -657,7 +626,7 @@ Track(tabMiscBtn.MouseButton1Click:Connect(function()
 end))
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
--- Auto Load Script — [FIX #3, #9]
+-- Auto Load Script
 local autoLoadToggleBtn = Instance.new("TextButton", miscScroll)
 autoLoadToggleBtn.LayoutOrder = 1
 autoLoadToggleBtn.Size, autoLoadToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(55,12,40)
@@ -716,7 +685,6 @@ Track(dropBtn.MouseButton1Click:Connect(function()
     dropFrame.Visible = not dropFrame.Visible
 end))
 
--- [FIX #6] Rebuild dropdown ĐỘNG mỗi khi RegisteredScripts thay đổi
 local function rebuildScriptDropdown()
     for _, c in ipairs(dropFrame:GetChildren()) do
         if c:IsA("TextButton") then c:Destroy() end
@@ -734,7 +702,7 @@ local function rebuildScriptDropdown()
             State.SelectedScript = scr
             dropBtn.Text = " 📜 " .. scr.Name
             dropFrame.Visible = false
-            if State.IsAutoLoad then pcall(scr.Callback) end  -- [FIX #3]
+            if State.IsAutoLoad then pcall(scr.Callback) end
         end))
     end
     dropFrame.CanvasSize = UDim2.new(0, 0, 0, #RegisteredScripts * 25)
@@ -766,7 +734,6 @@ autoDot.BackgroundColor3 = Color3.fromRGB(255,255,255)
 Corner(autoDot, UDim.new(1, 0))
 
 Track(toggleAutoBtn.MouseButton1Click:Connect(function()
-    -- [FIX #9] Guard: yêu cầu chọn script trước
     if not State.SelectedScript then
         dropBtn.Text = " ⚠️ Chọn script trước!"
         task.delay(1.5, function()
@@ -787,7 +754,7 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     end
 end))
 
--- ÂM NHẠC — [FIX #7] Sound IDs hợp lệ
+-- ═════════════════ ÂM NHẠC (BẢN GỐC) ═════════════════
 local musicToggleBtn = Instance.new("TextButton", miscScroll)
 musicToggleBtn.LayoutOrder = 3
 musicToggleBtn.Size, musicToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(55,12,40)
@@ -854,13 +821,13 @@ RegTheme(musicDropFrame, "DropFrame")
 local musicPad = Instance.new("UIPadding", musicDropFrame)
 musicPad.PaddingRight = UDim.new(0, 8)
 
--- [FIX #7] Sound IDs đã kiểm tra (dùng ID phổ biến trên Roblox)
+-- ✅ PRESET NHẠC GIỮ NGUYÊN BẢN GỐC
 local presetMusics = {
-    {Name = "🎵 Chill Lofi",       Id = "1837879082"},
+    {Name = "🎵 Chill Lofi",        Id = "1837879082"},
     {Name = "🎶 Phonk Beat",        Id = "1843404008"},
     {Name = "🎵 Anime Relax",       Id = "9043887091"},
     {Name = "🎶 EDM Hype",          Id = "1837871000"},
-    {Name = "🎶 Như Một Người Dưng",Id = "1842757443"}, -- [FIX] Đổi ID 14 số → 10 số hợp lệ
+    {Name = "🎶 Như Một Người Dưng",Id = "91897652967267"},
 }
 for i, m in ipairs(presetMusics) do
     local mBtn = Instance.new("TextButton", musicDropFrame)
@@ -886,7 +853,6 @@ Track(musicDropBtn.MouseButton1Click:Connect(function()
     musicDropFrame.Visible = not musicDropFrame.Visible
 end))
 
--- Volume slider
 local volumeFrame = Instance.new("Frame", musicContainer)
 volumeFrame.LayoutOrder, volumeFrame.Size = 4, UDim2.new(1, 0, 0, 26)
 volumeFrame.BackgroundColor3, volumeFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -935,7 +901,6 @@ Track(UserInputService.InputChanged:Connect(function(input)
     end
 end))
 
--- Music toggle
 local musicToggleFrame = Instance.new("Frame", musicContainer)
 musicToggleFrame.LayoutOrder, musicToggleFrame.Size = 5, UDim2.new(1, 0, 0, 30)
 musicToggleFrame.BackgroundColor3, musicToggleFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -959,37 +924,18 @@ musicDot.Size, musicDot.Position = UDim2.new(0, 11, 0, 11), UDim2.new(0, 2, 0.5,
 musicDot.BackgroundColor3 = Color3.fromRGB(255,255,255)
 Corner(musicDot, UDim.new(1, 0))
 
--- [FIX #7] Fallback khi sound lỗi
-Track(HubSound.Loaded:Connect(function() end))
-Track(HubSound:GetPropertyChangedSignal("SoundId"):Connect(function() end))
-
+-- ✅ NHẠC — Y BẢN GỐC
+local isMusicPlaying = false
 Track(toggleMusicBtn.MouseButton1Click:Connect(function()
-    State.IsMusicPlaying = not State.IsMusicPlaying
-    if State.IsMusicPlaying then
-        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
+    isMusicPlaying = not isMusicPlaying
+    if isMusicPlaying then
+        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
         musicDot.Position = UDim2.new(1, -13, 0.5, -5.5)
         local customId = tonumber(customIdBox.Text)
-        local finalId = customId and tostring(customId) or State.SoundId
-        local ok = pcall(function()
-            HubSound.SoundId = "rbxassetid://" .. finalId
-        end)
-        if ok then
-            -- [FIX #7] verify sound hợp lệ
-            local success = pcall(function()
-                HubSound:Play()
-                task.wait(0.3)
-                if not HubSound.IsPlaying and HubSound.TimeLength == 0 then
-                    error("invalid sound id")
-                end
-            end)
-            if not success then
-                warn("[VzNam] Sound ID không hợp lệ, dùng mặc định.")
-                HubSound.SoundId = "rbxassetid://1837879082"
-                HubSound:Play()
-            end
-        end
+        HubSound.SoundId = "rbxassetid://" .. (customId and tostring(customId) or State.SoundId)
+        HubSound:Play()
     else
-        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(60,65,75)
+        toggleMusicBtn.BackgroundColor3 = Color3.fromRGB(60, 65, 75)
         musicDot.Position = UDim2.new(0, 2, 0.5, -5.5)
         HubSound:Stop()
     end
@@ -1026,7 +972,6 @@ Track(menuColorToggleBtn.MouseButton1Click:Connect(function()
     mcSubLabel.Visible = menuColorContainer.Visible
 end))
 
--- Theme dropdown
 local menuThemeList = {
     {Name = "🌸 Hồng Pastel",      Bg = Color3.fromRGB(70, 15, 50)},
     {Name = "🌙 Đêm Đen Sâu",     Bg = Color3.fromRGB(15, 16, 22)},
@@ -1100,7 +1045,6 @@ Track(themeDropBtn.MouseButton1Click:Connect(function()
     themeDropFrame.Visible = not themeDropFrame.Visible
 end))
 
--- Transparency slider
 local transFrame = Instance.new("Frame", menuColorContainer)
 transFrame.LayoutOrder, transFrame.Size = 3, UDim2.new(1, 0, 0, 26)
 transFrame.BackgroundColor3, transFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1151,7 +1095,6 @@ Track(UserInputService.InputChanged:Connect(function(input)
     end
 end))
 
--- Stroke color picker
 local colorList = {
     {Name = "🔵 Xanh Dương",        Color = Color3.fromRGB(0, 191, 255)},
     {Name = "🌈 Cầu Vồng (Rainbow)",Color = "Rainbow"},
@@ -1226,7 +1169,6 @@ Track(colorDropBtn.MouseButton1Click:Connect(function()
     colorDropFrame.Visible = not colorDropFrame.Visible
 end))
 
--- [FIX #13] RenderStepped tracked + chỉ chạy khi mode = Rainbow
 local rainbowConn = RunService.RenderStepped:Connect(function()
     if State.StrokeMode ~= "Rainbow" then return end
     local rainbow = Color3.fromHSV(tick() % 5 / 5, 1, 1)
@@ -1261,7 +1203,6 @@ configLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 local cfgPad = Instance.new("UIPadding", configScroll)
 cfgPad.PaddingLeft, cfgPad.PaddingRight, cfgPad.PaddingTop = UDim.new(0,4), UDim.new(0,10), UDim.new(0,4)
 
--- [FIX #11]
 Track(configLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     configScroll.CanvasSize = UDim2.new(0, 0, 0, configLayout.AbsoluteContentSize.Y + 15)
 end))
@@ -1279,7 +1220,6 @@ table.insert(Tabs, {Container = configScroll, Indicator = configIndicator})
 local CONFIG_FOLDER = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, CONFIG_FOLDER) end
 
--- ═════════════════ [FIX #1] CONFIG THẬT ═════════════════
 local function SerializeState(scriptName)
     return {
         Version        = 4,
@@ -1299,7 +1239,6 @@ end
 local function ValidateConfig(data)
     if type(data) ~= "table" then return false end
     if data.Version ~= 4 then return false end
-    -- các field optional nhưng phải đúng kiểu nếu có
     if data.ThemeBase and type(data.ThemeBase) ~= "table" then return false end
     if data.StrokeColor and type(data.StrokeColor) ~= "table" then return false end
     if data.Volume and type(data.Volume) ~= "number" then return false end
@@ -1316,12 +1255,10 @@ local function SaveConfig(name)
 end
 
 local function ApplyConfig(data)
-    -- Theme
     if data.ThemeBase then
         local c = Color3.new(data.ThemeBase[1], data.ThemeBase[2], data.ThemeBase[3])
         ApplyTheme(c)
     end
-    -- Stroke
     if data.StrokeMode == "Rainbow" then
         State.StrokeMode = "Rainbow"
         UpdateAllStrokes("Rainbow")
@@ -1333,19 +1270,16 @@ local function ApplyConfig(data)
         State.StrokeMode = "Solid"
         UpdateAllStrokes(c)
     end
-    -- Volume
     if type(data.Volume) == "number" then
         State.Volume = math.clamp(data.Volume, 0, 1)
         HubSound.Volume = State.Volume
         volumeBarFill.Size = UDim2.new(State.Volume, 0, 1, 0)
         volumeLabel.Text = "🔊 Vol: " .. math.floor(State.Volume * 100) .. "%"
     end
-    -- Sound ID
     if type(data.SoundId) == "string" then
         State.SoundId = data.SoundId
         HubSound.SoundId = "rbxassetid://" .. State.SoundId
     end
-    -- Transparent
     if type(data.Transparent) == "number" then
         State.Transparent = math.clamp(data.Transparent, 0, 1)
         transBarFill.Size = UDim2.new(State.Transparent, 0, 1, 0)
@@ -1354,7 +1288,6 @@ local function ApplyConfig(data)
         ContentContainer.BackgroundTransparency = State.Transparent
         transLabel.Text = "✨ Trong suốt: " .. math.floor(State.Transparent * 100) .. "%"
     end
-    -- Toggles
     if type(data.AutoSave) == "boolean" then
         State.AutoSave = data.AutoSave
         autoSaveToggle.BackgroundColor3 = State.AutoSave and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
@@ -1365,7 +1298,6 @@ local function ApplyConfig(data)
         autoLoadToggle.BackgroundColor3 = State.AutoLoadConfig and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
         alBox.Position = State.AutoLoadConfig and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
     end
-    -- Selected script
     if data.SelectedScript then
         for _, scr in ipairs(RegisteredScripts) do
             if scr.Name == data.SelectedScript then
@@ -1419,7 +1351,7 @@ Track(configToggleBtn.MouseButton1Click:Connect(function()
     configSubLabel.Visible = mainConfigContainer.Visible
 end))
 
--- Startup label
+-- ✅ STARTUP LABEL GIỮ NGUYÊN "Default"
 local startupFrame = Instance.new("Frame", mainConfigContainer)
 startupFrame.LayoutOrder, startupFrame.Size = 1, UDim2.new(1, 0, 0, 30)
 startupFrame.BackgroundColor3, startupFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1429,11 +1361,10 @@ RegTheme(startupFrame, "Primary")
 
 local startupLabel = Instance.new("TextLabel", startupFrame)
 startupLabel.Size, startupLabel.Position = UDim2.new(1, -8, 1, 0), UDim2.new(0, 5, 0, 0)
-startupLabel.BackgroundTransparency, startupLabel.Text = 1, "Startup: " .. State.StartupConfig
+startupLabel.BackgroundTransparency, startupLabel.Text = 1, "Startup: Default"
 startupLabel.TextColor3, startupLabel.TextSize = Color3.fromRGB(255,255,255), 9
 startupLabel.Font, startupLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
 
--- Auto save toggle
 local autoSaveFrame = Instance.new("Frame", mainConfigContainer)
 autoSaveFrame.LayoutOrder, autoSaveFrame.Size = 2, UDim2.new(1, 0, 0, 34)
 autoSaveFrame.BackgroundColor3, autoSaveFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1470,7 +1401,6 @@ Track(autoSaveToggle.MouseButton1Click:Connect(function()
     asBox.Position = State.AutoSave and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
 end))
 
--- Auto load config toggle
 local autoLoadFrame = Instance.new("Frame", mainConfigContainer)
 autoLoadFrame.LayoutOrder, autoLoadFrame.Size = 3, UDim2.new(1, 0, 0, 34)
 autoLoadFrame.BackgroundColor3, autoLoadFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1507,7 +1437,6 @@ Track(autoLoadToggle.MouseButton1Click:Connect(function()
     alBox.Position = State.AutoLoadConfig and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
 end))
 
--- Profiles
 local profilesToggleBtn = Instance.new("TextButton", configScroll)
 profilesToggleBtn.LayoutOrder, profilesToggleBtn.Size = 3, UDim2.new(1, 0, 0, 34)
 profilesToggleBtn.BackgroundColor3, profilesToggleBtn.BackgroundTransparency = Color3.fromRGB(55,12,40), 0
@@ -1538,7 +1467,6 @@ Track(profilesToggleBtn.MouseButton1Click:Connect(function()
     profilesSubLabel.Visible = profilesContainer.Visible
 end))
 
--- New config name
 local newConfigFrame = Instance.new("Frame", profilesContainer)
 newConfigFrame.LayoutOrder, newConfigFrame.Size = 1, UDim2.new(1, 0, 0, 30)
 newConfigFrame.BackgroundColor3, newConfigFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1562,7 +1490,6 @@ Corner(configNameBox, UDim.new(0, 4))
 Stroke(configNameBox)
 RegTheme(configNameBox, "Input")
 
--- Create button
 local createFrame = Instance.new("Frame", profilesContainer)
 createFrame.LayoutOrder, createFrame.Size = 2, UDim2.new(1, 0, 0, 34)
 createFrame.BackgroundColor3, createFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1590,7 +1517,6 @@ createBtn.Font = Enum.Font.GothamBold
 Corner(createBtn, UDim.new(0, 4))
 Stroke(createBtn)
 
--- Delete
 local deleteFrame = Instance.new("Frame", profilesContainer)
 deleteFrame.LayoutOrder, deleteFrame.Size = 3, UDim2.new(1, 0, 0, 30)
 deleteFrame.BackgroundColor3, deleteFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1626,7 +1552,6 @@ local delPad = Instance.new("UIPadding", delDropFrame)
 delPad.PaddingRight = UDim.new(0, 8)
 RegTheme(delDropFrame, "DropFrame")
 
--- Startup profile
 local startupProfileFrame = Instance.new("Frame", profilesContainer)
 startupProfileFrame.LayoutOrder, startupProfileFrame.Size = 5, UDim2.new(1, 0, 0, 30)
 startupProfileFrame.BackgroundColor3, startupProfileFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1662,7 +1587,6 @@ local stPad = Instance.new("UIPadding", stProfileDrop)
 stPad.PaddingRight = UDim.new(0, 8)
 RegTheme(stProfileDrop, "DropFrame")
 
--- Load config
 local loadConfigFrame = Instance.new("Frame", profilesContainer)
 loadConfigFrame.LayoutOrder, loadConfigFrame.Size = 7, UDim2.new(1, 0, 0, 30)
 loadConfigFrame.BackgroundColor3, loadConfigFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1698,7 +1622,6 @@ local ldPad = Instance.new("UIPadding", ldDropFrame)
 ldPad.PaddingRight = UDim.new(0, 8)
 RegTheme(ldDropFrame, "DropFrame")
 
--- Save frame
 local saveFrame = Instance.new("Frame", profilesContainer)
 saveFrame.LayoutOrder, saveFrame.Size = 9, UDim2.new(1, 0, 0, 34)
 saveFrame.BackgroundColor3, saveFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
@@ -1726,7 +1649,6 @@ saveBtn.Font = Enum.Font.GothamBold
 Corner(saveBtn, UDim.new(0, 4))
 Stroke(saveBtn)
 
--- [FIX #4] refreshAllDropdowns dùng listfiles an toàn + filter .json
 local function refreshAllDropdowns()
     for _, drop in ipairs({delDropFrame, stProfileDrop, ldDropFrame}) do
         for _, child in ipairs(drop:GetChildren()) do
@@ -1749,7 +1671,6 @@ local function refreshAllDropdowns()
     if #filesList == 0 then delBtn.Text = "Không có ∨" end
 
     for _, name in ipairs(filesList) do
-        -- Delete item
         local f1 = Instance.new("TextButton", delDropFrame)
         f1.Size, f1.BackgroundColor3, f1.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f1.Text, f1.TextColor3, f1.TextSize = " 🗑️ " .. name, Color3.fromRGB(255,100,100), 9
@@ -1766,7 +1687,6 @@ local function refreshAllDropdowns()
             refreshAllDropdowns()
         end))
 
-        -- Startup item
         local f2 = Instance.new("TextButton", stProfileDrop)
         f2.Size, f2.BackgroundColor3, f2.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f2.Text, f2.TextColor3, f2.TextSize = " 📁 " .. name, Color3.fromRGB(255,255,255), 9
@@ -1777,11 +1697,10 @@ local function refreshAllDropdowns()
         Track(f2.MouseButton1Click:Connect(function()
             State.StartupConfig = name
             stProfileBtn.Text = name .. " ∨"
-            startupLabel.Text = "Startup: " .. name
+            -- ✅ KHÔNG đổi startupLabel, giữ nguyên "Startup: Default"
             stProfileDrop.Visible = false
         end))
 
-        -- Load item
         local f3 = Instance.new("TextButton", ldDropFrame)
         f3.Size, f3.BackgroundColor3, f3.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f3.Text, f3.TextColor3, f3.TextSize = " 📂 " .. name, Color3.fromRGB(255,255,255), 9
@@ -1796,7 +1715,6 @@ local function refreshAllDropdowns()
             asSub.Text = "Save: " .. name
             alSub.Text = "Load: " .. name
             ldDropFrame.Visible = false
-            -- [FIX #1] THỰC SỰ LOAD CONFIG
             local ok, err = LoadConfig(name)
             if not ok then warn("[VzNam] Load config fail: " .. tostring(err)) end
         end))
@@ -1822,11 +1740,9 @@ Track(ldBtn.MouseButton1Click:Connect(function()
     delDropFrame.Visible, stProfileDrop.Visible = false, false
 end))
 
--- [FIX #1] createBtn giờ lưu config THẬT
 Track(createBtn.MouseButton1Click:Connect(function()
     local name = configNameBox.Text
     if name == "" then return end
-    -- validate tên file
     if string.find(name, "[\\/:*?\"<>|]") then
         warn("[VzNam] Tên config chứa ký tự không hợp lệ")
         return
@@ -1843,25 +1759,13 @@ Track(createBtn.MouseButton1Click:Connect(function()
     end
 end))
 
--- [FIX #1] saveBtn lưu TOÀN BỘ state
 Track(saveBtn.MouseButton1Click:Connect(function()
     if SaveConfig(State.CurrentConfig) then
         svSub.Text = "Save: " .. State.CurrentConfig
     end
 end))
 
--- [FIX #1] Khởi động: load startup config nếu AutoLoadConfig bật
-if State.AutoLoadConfig and typeof(isfile) == "function" then
-    local path = CONFIG_FOLDER .. "/" .. State.StartupConfig .. ".json"
-    local ok, exists = pcall(isfile, path)
-    if ok and exists then
-        task.spawn(function()
-            task.wait(0.1) -- chờ UI ổn định
-            local okL, err = LoadConfig(State.StartupConfig)
-            if not okL then warn("[VzNam] startup load fail: " .. tostring(err)) end
-        end)
-    end
-end
+-- ✅ KHÔNG auto-load config khi khởi động (giữ hành vi gốc)
 
 -- ═════════════════ NÚT MỞ HUB ═════════════════
 local OpenButton = Instance.new("TextButton", ScreenGui)
@@ -1872,7 +1776,7 @@ OpenButton.Active, OpenButton.Draggable = true, true
 Corner(OpenButton, UDim.new(1, 0))
 local OpenStroke = Instance.new("UIStroke", OpenButton)
 OpenStroke.Thickness, OpenStroke.Color = 3, Color3.fromRGB(0,191,255)
-table.insert(AllUIStrokes, OpenStroke) -- thêm vào hệ thống rainbow
+table.insert(AllUIStrokes, OpenStroke)
 
 Track(OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
