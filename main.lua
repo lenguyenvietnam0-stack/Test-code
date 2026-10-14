@@ -64,6 +64,7 @@ SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 local SearchBoxTab = Instance.new("TextBox", SidebarPanel)
 SearchBoxTab.Size, SearchBoxTab.Position, SearchBoxTab.BackgroundColor3, SearchBoxTab.BackgroundTransparency, SearchBoxTab.Text, SearchBoxTab.PlaceholderText, SearchBoxTab.PlaceholderColor3, SearchBoxTab.TextColor3, SearchBoxTab.TextSize, SearchBoxTab.Font = UDim2.new(1, -10, 0, 24), UDim2.new(0, 5, 0, 5), Color3.fromRGB(22, 25, 34), 0, "", "🔍 Search section...", Color3.fromRGB(130, 135, 145), Color3.fromRGB(255, 255, 255), 10, Enum.Font.Gotham
 Instance.new("UICorner", SearchBoxTab).CornerRadius = UDim.new(0, 4)
+TrackStroke(Instance.new("UIStroke", SearchBoxTab)).Color = Color3.fromRGB(40, 43, 52)
 
 local SidebarScroll = Instance.new("ScrollingFrame", SidebarPanel)
 SidebarScroll.Size, SidebarScroll.Position, SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel, SidebarScroll.ScrollBarThickness = UDim2.new(1, -8, 1, -34), UDim2.new(0, 4, 0, 32), 1, 0, 2
@@ -93,6 +94,7 @@ ActiveTabTitle.Size, ActiveTabTitle.Position, ActiveTabTitle.BackgroundTranspare
 local SearchInputContent = Instance.new("TextBox", ContentHeader)
 SearchInputContent.Size, SearchInputContent.Position, SearchInputContent.BackgroundColor3, SearchInputContent.TextColor3, SearchInputContent.PlaceholderText, SearchInputContent.PlaceholderColor3, SearchInputContent.TextSize, SearchInputContent.Font, SearchInputContent.Visible = UDim2.new(1, -45, 0, 22), UDim2.new(0, 10, 0.5, -11), Color3.fromRGB(22, 25, 34), Color3.fromRGB(255, 255, 255), "Search features...", Color3.fromRGB(140, 140, 150), 10, Enum.Font.Gotham, false
 Instance.new("UICorner", SearchInputContent).CornerRadius = UDim.new(0, 4)
+TrackStroke(Instance.new("UIStroke", SearchInputContent)).Color = Color3.fromRGB(40, 43, 52)
 
 local SearchContentIcon = Instance.new("TextButton", ContentHeader)
 SearchContentIcon.Size, SearchContentIcon.Position, SearchContentIcon.BackgroundTransparency, SearchContentIcon.Text, SearchContentIcon.TextSize, SearchContentIcon.TextColor3 = UDim2.new(0, 24, 0, 24), UDim2.new(1, -28, 0.5, -12), 1, "🔍", 12, Color3.fromRGB(200, 205, 215)
@@ -109,9 +111,7 @@ local HeaderDivider = Instance.new("Frame", ContentContainer) HeaderDivider.Size
 local Tabs = {}
 local FirstTab = nil
 
--- ============================================================================
 -- TAB 0: TRANG CHỦ
--- ============================================================================
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
 tabHomeBtn.Size, tabHomeBtn.BackgroundColor3, tabHomeBtn.BackgroundTransparency, tabHomeBtn.Text, tabHomeBtn.TextColor3, tabHomeBtn.TextSize, tabHomeBtn.Font, tabHomeBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0, "   🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -146,11 +146,12 @@ local function CreateHomeCardWithIcon(parent, order, bgColor, titleText, mainTex
     card.Size, card.BackgroundColor3, card.BorderSizePixel = UDim2.new(1, -4, 0, 42), bgColor, 0
     Instance.new("UICorner", card).CornerRadius = UDim.new(0, 6)
     local stroke = TrackStroke(Instance.new("UIStroke", card))
-    stroke.Color, stroke.Thickness = borderColor, 1
+    stroke.Color, stroke.Thickness = 1.5, 0
 
     local iconCircle = Instance.new("Frame", card)
     iconCircle.Size, iconCircle.Position, iconCircle.BackgroundColor3, iconCircle.BorderSizePixel = UDim2.new(0, 30, 0, 30), UDim2.new(0, 6, 0.5, -15), borderColor, 0
     Instance.new("UICorner", iconCircle).CornerRadius = UDim.new(1, 0)
+    TrackStroke(Instance.new("UIStroke", iconCircle)).Color = borderColor
     
     local iconLbl = Instance.new("TextLabel", iconCircle)
     iconLbl.Size, iconLbl.BackgroundTransparency, iconLbl.Text, iconLbl.TextColor3, iconLbl.TextSize, iconLbl.Font = UDim2.new(1, 0, 1, 0), 1, iconSymbol, Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold
@@ -314,9 +315,7 @@ tab3:AddNoKey("1. break and steal an egg", function() loadstring(game:HttpGet("h
 local tab4 = CreateCategoryTab("Tab 4")
 local tab5 = CreateCategoryTab("Tab 5")
 
--- ============================================================================
 -- TAB 6: MISC
--- ============================================================================
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
 tabMiscBtn.Size, tabMiscBtn.BackgroundColor3, tabMiscBtn.BackgroundTransparency, tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0, "   ⚙️ MISC", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabMiscBtn).CornerRadius = UDim.new(0, 5)
@@ -526,9 +525,7 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ============================================================================
--- 3. MỤC: CHỌN MÀU MENU & MÀU VIỀN (Đầy đủ đổi màu nền + Màu viền cho mọi chức năng + Cầu Vồng)
--- ============================================================================
+-- 3. MỤC: CHỌN MÀU MENU & MÀU VIỀN
 local menuColorToggleBtn = Instance.new("TextButton", miscScroll)
 menuColorToggleBtn.LayoutOrder = 5
 menuColorToggleBtn.Size, menuColorToggleBtn.BackgroundColor3, menuColorToggleBtn.Text, menuColorToggleBtn.TextColor3, menuColorToggleBtn.TextSize, menuColorToggleBtn.Font, menuColorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -616,7 +613,7 @@ toggleMenuColorBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Mục Con: Đổi Màu Viền (Cho tất cả chức năng, tab + Rainbow)
+-- Màu Viền (Cho tất cả chức năng, tab + Cầu Vồng)
 local colorList = {
     {Name = "🌈 Cầu Vồng (Rainbow RGB)", Color = "Rainbow"},
     {Name = "🌸 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
@@ -694,9 +691,7 @@ RunService.RenderStepped:Connect(function()
 end)
 miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1500)
 
--- ============================================================================
 -- TAB 7: CẤU HÌNH & PROFILES
--- ============================================================================
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
 tabConfigBtn.Size, tabConfigBtn.BackgroundColor3, tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0, "   📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabConfigBtn).CornerRadius = UDim.new(0, 5)
@@ -1057,6 +1052,7 @@ Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(1, 0)
 local OpenStroke = Instance.new("UIStroke", OpenButton) 
 OpenStroke.Thickness = 2
 OpenStroke.Color = Color3.fromRGB(255, 105, 180)
+TrackStroke(OpenStroke)
 
 OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
