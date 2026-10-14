@@ -21,7 +21,7 @@ ScreenGui.DisplayOrder = 99999
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- Khung ngoài chính: Thu ngắn chiều ngang hẹp lại 1/5 (xuống còn 390)
+-- Khung ngoài chính
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 390, 0, 300)
@@ -92,10 +92,10 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- SidebarPanel bên trái (chiều rộng 125)
+-- SidebarPanel bên trái
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
-SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 125, 1, -32), UDim2.new(0, 4, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
+SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 126, 1, -32), UDim2.new(0, 4, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
 local SidebarStroke = TrackStroke(Instance.new("UIStroke", SidebarPanel))
 SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -118,10 +118,10 @@ SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
--- ContentContainer bên phải: Thụt lề cực kỳ an toàn, cách lề phải 8px để tránh tuyệt đối việc bị lẹm viền
+-- ContentContainer bên phải: Đã fix chuẩn xác không bị lẹm viền phải
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -137, 1, -32), UDim2.new(0, 131, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
+ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -135, 1, -32), UDim2.new(0, 131, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
 local ContentStroke = TrackStroke(Instance.new("UIStroke", ContentContainer))
 ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -151,7 +151,7 @@ local HeaderDivider = Instance.new("Frame", ContentContainer) HeaderDivider.Size
 local Tabs = {}
 local FirstTab = nil
 
--- TAB 0: TRANG CHỦ (Có nút "→ thông tin" ấn mở/đóng 3 thông tin)
+-- TAB 0: TRANG CHỦ
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
 tabHomeBtn.Size, tabHomeBtn.BackgroundColor3, tabHomeBtn.BackgroundTransparency, tabHomeBtn.Text, tabHomeBtn.TextColor3, tabHomeBtn.TextSize, tabHomeBtn.Font, tabHomeBtn.TextXAlignment = UDim2.new(1, 0, 0, 28), Color3.fromRGB(70, 15, 50), 0, "   🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 10, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -165,7 +165,7 @@ Instance.new("UICorner", homeIndicator).CornerRadius = UDim.new(0, 2)
 
 local homeScroll = Instance.new("ScrollingFrame", ContentContainer)
 homeScroll.Name = "Container_HOME"
-homeScroll.Size, homeScroll.Position, homeScroll.BackgroundTransparency, homeScroll.BorderSizePixel, homeScroll.ScrollBarThickness, homeScroll.Visible, homeScroll.ClipsDescendants = UDim2.new(1, -10, 1, -30), UDim2.new(0, 5, 0, 28), 1, 0, 3, false, true
+homeScroll.Size, homeScroll.Position, homeScroll.BackgroundTransparency, homeScroll.BorderSizePixel, homeScroll.ScrollBarThickness, homeScroll.Visible, homeScroll.ClipsDescendants = UDim2.new(1, -16, 1, -30), UDim2.new(0, 6, 0, 28), 1, 0, 3, false, true
 local homeLayout = Instance.new("UIListLayout", homeScroll) homeLayout.SortOrder = Enum.SortOrder.LayoutOrder homeLayout.Padding = UDim.new(0, 5)
 
 tabHomeBtn.MouseButton1Click:Connect(function()
@@ -220,14 +220,14 @@ local function CreateHomeCardWithIcon(parent, order, bgColor, titleText, mainTex
     iconLbl.Size, iconLbl.BackgroundTransparency, iconLbl.Text, iconLbl.TextColor3, iconLbl.TextSize, iconLbl.Font = UDim2.new(1, 0, 1, 0), 1, iconSymbol, Color3.fromRGB(255, 255, 255), 8, Enum.Font.GothamBold
 
     local tLbl = Instance.new("TextLabel", card)
-    tLbl.Size, tLbl.Position, tLbl.BackgroundTransparency, tLbl.Text, tLbl.TextColor3, tLbl.TextSize, tLbl.Font, tLbl.TextXAlignment = UDim2.new(1, -85, 0, 10), UDim2.new(0, 26, 0, 1), 1, titleText, Color3.fromRGB(255, 150, 100), 7, Enum.Font.GothamBold, Enum.TextXAlignment.Left
+    tLbl.Size, tLbl.Position, tLbl.BackgroundTransparency, tLbl.Text, tLbl.TextColor3, tLbl.TextSize, tLbl.Font, tLbl.TextXAlignment = UDim2.new(1, -80, 0, 10), UDim2.new(0, 26, 0, 1), 1, titleText, Color3.fromRGB(255, 150, 100), 7, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
     local mLbl = Instance.new("TextLabel", card)
-    mLbl.Size, mLbl.Position, mLbl.BackgroundTransparency, mLbl.Text, mLbl.TextColor3, mLbl.TextSize, mLbl.Font, mLbl.TextXAlignment = UDim2.new(1, -85, 0, 13), UDim2.new(0, 26, 0, 12), 1, mainText, Color3.fromRGB(220, 220, 230), 7, Enum.Font.Gotham, Enum.TextXAlignment.Left
+    mLbl.Size, mLbl.Position, mLbl.BackgroundTransparency, mLbl.Text, mLbl.TextColor3, mLbl.TextSize, mLbl.Font, mLbl.TextXAlignment = UDim2.new(1, -80, 0, 13), UDim2.new(0, 26, 0, 12), 1, mainText, Color3.fromRGB(220, 220, 230), 7, Enum.Font.Gotham, Enum.TextXAlignment.Left
 
     if copyText ~= "" then
         local copyBtn = Instance.new("TextButton", card)
-        copyBtn.Size, copyBtn.Position, copyBtn.BackgroundTransparency, copyBtn.Text, copyBtn.TextColor3, copyBtn.TextSize, copyBtn.Font = UDim2.new(0, 46, 0, 18), UDim2.new(1, -48, 0.5, -9), 1, "📋 COPY", Color3.fromRGB(200, 200, 210), 7, Enum.Font.GothamBold
+        copyBtn.Size, copyBtn.Position, copyBtn.BackgroundTransparency, copyBtn.Text, copyBtn.TextColor3, copyBtn.TextSize, copyBtn.Font = UDim2.new(0, 44, 0, 18), UDim2.new(1, -46, 0.5, -9), 1, "📋 COPY", Color3.fromRGB(200, 200, 210), 7, Enum.Font.GothamBold
         
         local function doCopy()
             if typeof(setclipboard) == "function" then
@@ -262,9 +262,9 @@ local function CreateCategoryTab(tabName)
 
     local containerFrame = Instance.new("Frame", ContentContainer)
     containerFrame.Name = "Container_" .. tabName
-    containerFrame.Size, containerFrame.Position, containerFrame.BackgroundTransparency, containerFrame.Visible = UDim2.new(1, -10, 1, -30), UDim2.new(0, 5, 0, 28), 1, false
+    containerFrame.Size, containerFrame.Position, containerFrame.BackgroundTransparency, containerFrame.Visible = UDim2.new(1, 0, 1, -30), UDim2.new(0, 0, 0, 28), 1, false
 
-    local subBar = Instance.new("Frame", containerFrame) subBar.Size, subBar.BackgroundTransparency = UDim2.new(1, 0, 0, 22), 1
+    local subBar = Instance.new("Frame", containerFrame) subBar.Size, subBar.BackgroundTransparency = UDim2.new(1, -12, 0, 22), UDim2.new(0, 6, 0, 0)
     local subLayout = Instance.new("UIListLayout", subBar) subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 4)
 
     local noKeyBtn = Instance.new("TextButton", subBar)
@@ -279,10 +279,10 @@ local function CreateCategoryTab(tabName)
     local hkStroke = TrackStroke(Instance.new("UIStroke", hasKeyBtn))
     hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 
-    local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) scrollNoKey.Position, scrollNoKey.Size, scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel, scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = UDim2.new(0, 0, 0, 26), UDim2.new(1, 0, 1, -26), 1, 0, 3, true, true
+    local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) scrollNoKey.Position, scrollNoKey.Size, scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel, scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26), 1, 0, 3, true, true
     local l1 = Instance.new("UIListLayout", scrollNoKey) l1.Padding = UDim.new(0, 3)
 
-    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) scrollHasKey.Position, scrollHasKey.Size, scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel, scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = UDim2.new(0, 0, 0, 26), UDim2.new(1, 0, 1, -26), 1, 0, 3, false, true
+    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) scrollHasKey.Position, scrollHasKey.Size, scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel, scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26), 1, 0, 3, false, true
     local l2 = Instance.new("UIListLayout", scrollHasKey) l2.Padding = UDim.new(0, 3)
 
     SearchInputContent:GetPropertyChangedSignal("Text"):Connect(function()
@@ -391,7 +391,7 @@ Instance.new("UICorner", miscIndicator).CornerRadius = UDim.new(0, 2)
 
 local miscScroll = Instance.new("ScrollingFrame", ContentContainer)
 miscScroll.Name = "Container_MISC"
-miscScroll.Size, miscScroll.Position, miscScroll.BackgroundTransparency, miscScroll.BorderSizePixel, miscScroll.ScrollBarThickness, miscScroll.Visible, miscScroll.ClipsDescendants = UDim2.new(1, -10, 1, -30), UDim2.new(0, 5, 0, 28), 1, 0, 3, false, true
+miscScroll.Size, miscScroll.Position, miscScroll.BackgroundTransparency, miscScroll.BorderSizePixel, miscScroll.ScrollBarThickness, miscScroll.Visible, miscScroll.ClipsDescendants = UDim2.new(1, -12, 1, -30), UDim2.new(0, 6, 0, 28), 1, 0, 3, false, true
 local miscLayout = Instance.new("UIListLayout", miscScroll) miscLayout.SortOrder = Enum.SortOrder.LayoutOrder miscLayout.Padding = UDim.new(0, 5)
 
 tabMiscBtn.MouseButton1Click:Connect(function()
@@ -741,7 +741,7 @@ Instance.new("UICorner", configIndicator).CornerRadius = UDim.new(0, 2)
 
 local configScroll = Instance.new("ScrollingFrame", ContentContainer)
 configScroll.Name = "Container_CONFIG"
-configScroll.Size, configScroll.Position, configScroll.BackgroundTransparency, configScroll.BorderSizePixel, configScroll.ScrollBarThickness, configScroll.Visible, configScroll.ClipsDescendants = UDim2.new(1, -10, 1, -30), UDim2.new(0, 5, 0, 28), 1, 0, 3, false, true
+configScroll.Size, configScroll.Position, configScroll.BackgroundTransparency, configScroll.BorderSizePixel, configScroll.ScrollBarThickness, configScroll.Visible, configScroll.ClipsDescendants = UDim2.new(1, -12, 1, -30), UDim2.new(0, 6, 0, 28), 1, 0, 3, false, true
 local configLayout = Instance.new("UIListLayout", configScroll) configLayout.SortOrder = Enum.SortOrder.LayoutOrder configLayout.Padding = UDim.new(0, 5)
 
 tabConfigBtn.MouseButton1Click:Connect(function()
