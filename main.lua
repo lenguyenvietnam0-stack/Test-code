@@ -227,7 +227,6 @@ CreateHomeCardWithIcon(infoContainer, 3, Color3.fromRGB(45, 45, 65), "TIKTOK CHA
 
 homeScroll.CanvasSize = UDim2.new(0, 0, 0, 120)
 
--- ============ ĐÃ SỬA LỖI SUB-BAR ============
 local function CreateCategoryTab(tabName)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
     tabBtn.Size, tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency, tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " " .. tabName, Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -245,28 +244,27 @@ local function CreateCategoryTab(tabName)
     containerFrame.Position = UDim2.new(0, 0, 0, 27)
     containerFrame.BackgroundTransparency = 1
     containerFrame.Visible = false
-    containerFrame.ClipsDescendants = true -- [ĐÃ SỬA] Ngăn không cho phần tử con trôi ra ngoài
+    containerFrame.ClipsDescendants = true 
     
-    -- [ĐÃ SỬA] subBar được sửa lại hoàn chỉnh
     local subBar = Instance.new("Frame", containerFrame) 
     subBar.Size = UDim2.new(1, -12, 0, 22)
     subBar.Position = UDim2.new(0, 6, 0, 0)
-    subBar.BackgroundTransparency = 1 -- [ĐÃ SỬA] Đổi từ UDim2 thành số 1 (trong suốt hoàn toàn)
-    subBar.ZIndex = 5 -- [ĐÃ SỬA] Đảm bảo luôn nổi lên trên các ScrollingFrame
+    subBar.BackgroundTransparency = 1 
+    subBar.ZIndex = 5 
     
     local subLayout = Instance.new("UIListLayout", subBar) 
     subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 4) 
     
     local noKeyBtn = Instance.new("TextButton", subBar) 
     noKeyBtn.Size, noKeyBtn.BackgroundColor3, noKeyBtn.BackgroundTransparency, noKeyBtn.Text, noKeyBtn.TextColor3, noKeyBtn.TextSize, noKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(70, 15, 50), 0, "no key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold 
-    noKeyBtn.ZIndex = 6 -- [ĐÃ SỬA] Cao hơn subBar
+    noKeyBtn.ZIndex = 6 
     Instance.new("UICorner", noKeyBtn).CornerRadius = UDim.new(0, 5) 
     local nkStroke = TrackStroke(Instance.new("UIStroke", noKeyBtn)) 
     nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255, 50, 50), 2 
     
     local hasKeyBtn = Instance.new("TextButton", subBar) 
     hasKeyBtn.Size, hasKeyBtn.BackgroundColor3, hasKeyBtn.BackgroundTransparency, hasKeyBtn.Text, hasKeyBtn.TextColor3, hasKeyBtn.TextSize, hasKeyBtn.Font = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(70, 15, 50), 0, "có key", Color3.fromRGB(255, 255, 255), 9, Enum.Font.GothamBold 
-    hasKeyBtn.ZIndex = 6 -- [ĐÃ SỬA]
+    hasKeyBtn.ZIndex = 6 
     Instance.new("UICorner", hasKeyBtn).CornerRadius = UDim.new(0, 5) 
     local hkStroke = TrackStroke(Instance.new("UIStroke", hasKeyBtn)) 
     hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1 
@@ -275,7 +273,7 @@ local function CreateCategoryTab(tabName)
     scrollNoKey.Position, scrollNoKey.Size = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26)
     scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel = 1, 0
     scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = 3, true, true
-    scrollNoKey.ZIndex = 1 -- [ĐÃ SỬA] Thấp hơn subBar
+    scrollNoKey.ZIndex = 1 
     
     local snkPad = Instance.new("UIPadding", scrollNoKey) 
     snkPad.PaddingLeft = UDim.new(0, 4)
@@ -289,7 +287,7 @@ local function CreateCategoryTab(tabName)
     scrollHasKey.Position, scrollHasKey.Size = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26)
     scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel = 1, 0
     scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = 3, false, true
-    scrollHasKey.ZIndex = 1 -- [ĐÃ SỬA] Thấp hơn subBar
+    scrollHasKey.ZIndex = 1 
     
     local shkPad = Instance.new("UIPadding", scrollHasKey) 
     shkPad.PaddingLeft = UDim.new(0, 4)
@@ -363,7 +361,6 @@ local function CreateCategoryTab(tabName)
     function Elements:AddHasKey(name, callback) AddBtnTo(scrollHasKey, name, callback) end 
     return Elements 
 end
--- ============ KẾT THÚC SỬA ============
 
 -- TAB 1: STEAL AN EGG
 local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸")
@@ -668,6 +665,39 @@ local themePad = Instance.new("UIPadding", themeDropFrame)
 themePad.PaddingRight = UDim.new(0, 8)
 
 local currentThemeColor = Color3.fromRGB(55, 12, 40)
+
+-- ============ HÀM ĐỔI MÀU THEME ============
+local function ApplyTheme(newBaseColor)
+    local btnColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.15)
+    local toggleColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.1)
+    local dropFrameColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.2)
+    local dropItemColor = newBaseColor:Lerp(Color3.new(1,1,1), 0.3)
+    
+    SidebarPanel.BackgroundColor3 = newBaseColor
+    ContentContainer.BackgroundColor3 = newBaseColor
+    
+    for _, v in ipairs(MainFrame:GetDescendants()) do
+        if v:IsA("TextButton") then
+            if v.BackgroundColor3 == Color3.fromRGB(70, 15, 50) then
+                v.BackgroundColor3 = btnColor
+            elseif v.BackgroundColor3 == Color3.fromRGB(55, 12, 40) then
+                v.BackgroundColor3 = toggleColor
+            end
+        elseif v:IsA("Frame") then
+            if v.BackgroundColor3 == Color3.fromRGB(80, 20, 60) then
+                v.BackgroundColor3 = dropFrameColor
+            elseif v.BackgroundColor3 == Color3.fromRGB(90, 25, 65) then
+                v.BackgroundColor3 = dropItemColor
+            elseif v.BackgroundColor3 == Color3.fromRGB(70, 15, 50) then
+                v.BackgroundColor3 = btnColor
+            elseif v.BackgroundColor3 == Color3.fromRGB(55, 12, 40) then
+                v.BackgroundColor3 = toggleColor
+            end
+        end
+    end
+end
+-- ===========================================
+
 for i, th in ipairs(menuThemeList) do
     local tBtn = Instance.new("TextButton", themeDropFrame)
     tBtn.LayoutOrder = i tBtn.Size, tBtn.BackgroundColor3, tBtn.BackgroundTransparency, tBtn.Text, tBtn.TextColor3, tBtn.TextSize, tBtn.Font, tBtn.TextXAlignment = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90, 25, 65), 0, " " .. th.Name, Color3.fromRGB(255, 255, 255), 9, Enum.Font.Gotham, Enum.TextXAlignment.Left
@@ -677,8 +707,7 @@ for i, th in ipairs(menuThemeList) do
         themeDropBtn.Text = " 🎨 Theme: " .. th.Name
         themeDropFrame.Visible = false
         currentThemeColor = th.Bg
-        SidebarPanel.BackgroundColor3 = th.Bg
-        ContentContainer.BackgroundColor3 = th.Bg
+        ApplyTheme(th.Bg) -- Gọi hàm đổi màu toàn bộ UI
     end)
 end
 themeDropFrame.CanvasSize = UDim2.new(0, 0, 0, #menuThemeList * 25)
@@ -1082,3 +1111,6 @@ OpenStroke.Color = Color3.fromRGB(255, 255, 255)
 OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
+
+-- Khởi tạo màu mặc định lúc mới mở Hub
+ApplyTheme(Color3.fromRGB(55, 12, 40))
