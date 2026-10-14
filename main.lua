@@ -41,7 +41,7 @@ MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner", MainFrame) MainCorner.CornerRadius = UDim.new(0, 8)
 local OuterStroke = TrackStroke(Instance.new("UIStroke", MainFrame))
-OuterStroke.Color, OuterStroke.Thickness = Color3.fromRGB(255, 105, 180), 2 -- Viền ngoài dày 2
+OuterStroke.Color, OuterStroke.Thickness = Color3.fromRGB(255, 105, 180), 2
 
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Name = "ResizeButton"
@@ -165,7 +165,7 @@ tabHomeBtn.LayoutOrder = 0
 tabHomeBtn.Size, tabHomeBtn.BackgroundColor3, tabHomeBtn.BackgroundTransparency, tabHomeBtn.Text, tabHomeBtn.TextColor3, tabHomeBtn.TextSize, tabHomeBtn.Font, tabHomeBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " 🏠 Trang Chủ", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabHomeBtn).CornerRadius = UDim.new(0, 5)
 local tabHomeStroke = TrackStroke(Instance.new("UIStroke", tabHomeBtn))
-tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(255, 255, 255), 2.5 -- [ĐÃ SỬA] Dày hơn
+tabHomeStroke.Color, tabHomeStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 RegisterTheme(tabHomeBtn, "Primary")
 
 local homeIndicator = Instance.new("Frame", tabHomeBtn)
@@ -242,7 +242,7 @@ local function CreateCategoryTab(tabName)
     tabBtn.Size, tabBtn.BackgroundColor3, tabBtn.BackgroundTransparency, tabBtn.Text, tabBtn.TextColor3, tabBtn.TextSize, tabBtn.Font, tabBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " " .. tabName, Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
     Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 5)
     local tabStroke = TrackStroke(Instance.new("UIStroke", tabBtn))
-    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(255, 255, 255), 2.5 -- [ĐÃ SỬA] Dày hơn
+    tabStroke.Color, tabStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
     RegisterTheme(tabBtn, "Primary")
 
     local indicator = Instance.new("Frame", tabBtn) 
@@ -415,7 +415,7 @@ local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
 tabMiscBtn.Size, tabMiscBtn.BackgroundColor3, tabMiscBtn.BackgroundTransparency, tabMiscBtn.Text, tabMiscBtn.TextColor3, tabMiscBtn.TextSize, tabMiscBtn.Font, tabMiscBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " ⚙️ MISC", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabMiscBtn).CornerRadius = UDim.new(0, 5)
 local tabMiscStroke = TrackStroke(Instance.new("UIStroke", tabMiscBtn))
-tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(255, 255, 255), 2.5 -- [ĐÃ SỬA] Dày hơn
+tabMiscStroke.Color, tabMiscStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 RegisterTheme(tabMiscBtn, "Primary")
 
 local miscIndicator = Instance.new("Frame", tabMiscBtn)
@@ -848,7 +848,7 @@ local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
 tabConfigBtn.Size, tabConfigBtn.BackgroundColor3, tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text, tabConfigBtn.TextColor3, tabConfigBtn.TextSize, tabConfigBtn.Font, tabConfigBtn.TextXAlignment = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70, 15, 50), 0, " 📦 CẤU HÌNH", Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", tabConfigBtn).CornerRadius = UDim.new(0, 5)
 local tabConfigStroke = TrackStroke(Instance.new("UIStroke", tabConfigBtn))
-tabConfigStroke.Color, tabConfigStroke.Thickness = Color3.fromRGB(255, 255, 255), 2.5 -- [ĐÃ SỬA] Dày hơn
+tabConfigStroke.Color, tabConfigStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 RegisterTheme(tabConfigBtn, "Primary")
 
 local configIndicator = Instance.new("Frame", tabConfigBtn)
