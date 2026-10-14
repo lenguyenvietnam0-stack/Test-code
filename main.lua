@@ -21,10 +21,10 @@ ScreenGui.DisplayOrder = 99999
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- Khung ngoài chính chuẩn gọn gàng
+-- Khung ngoài chính chuẩn gọn gàng, cân đối ở giữa
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 340, 0, 270)
+MainFrame.Size = UDim2.new(0, 350, 0, 270)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
@@ -66,8 +66,8 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - resizeStart
-        local newWidth = math.clamp(startSize.X + delta.X, 310, 480)
-        local newHeight = math.clamp(startSize.Y + delta.Y, 220, 420)
+        local newWidth = math.clamp(startSize.X + delta.X, 320, 500)
+        local newHeight = math.clamp(startSize.Y + delta.Y, 230, 450)
         MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
     end
 end)
@@ -92,26 +92,26 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- SidebarPanel bên trái: Đặt cách lề trái hoàn hảo (8px)
+-- SidebarPanel bên trái: Dùng Scale để tự co giãn cực kỳ chuẩn xác, không bao giờ lẹm
 local SidebarPanel = Instance.new("Frame", MainFrame)
 SidebarPanel.Name = "SidebarPanel"
-SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0, 93, 1, -32), UDim2.new(0, 8, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
+SidebarPanel.Size, SidebarPanel.Position, SidebarPanel.BackgroundColor3, SidebarPanel.BackgroundTransparency, SidebarPanel.BorderSizePixel = UDim2.new(0.3, -4, 1, -34), UDim2.new(0, 6, 0, 28), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", SidebarPanel).CornerRadius = UDim.new(0, 6)
 local SidebarStroke = TrackStroke(Instance.new("UIStroke", SidebarPanel))
 SidebarStroke.Color, SidebarStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 
 local SearchBoxTab = Instance.new("TextBox", SidebarPanel)
-SearchBoxTab.Size, SearchBoxTab.Position, SearchBoxTab.BackgroundColor3, SearchBoxTab.BackgroundTransparency, SearchBoxTab.Text, SearchBoxTab.PlaceholderText, SearchBoxTab.PlaceholderColor3, SearchBoxTab.TextColor3, SearchBoxTab.TextSize, SearchBoxTab.Font = UDim2.new(1, -8, 0, 18), UDim2.new(0, 4, 0, 3), Color3.fromRGB(70, 15, 50), 0, "", "🔍 Search...", Color3.fromRGB(150, 155, 165), Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham
+SearchBoxTab.Size, SearchBoxTab.Position, SearchBoxTab.BackgroundColor3, SearchBoxTab.BackgroundTransparency, SearchBoxTab.Text, SearchBoxTab.PlaceholderText, SearchBoxTab.PlaceholderColor3, SearchBoxTab.TextColor3, SearchBoxTab.TextSize, SearchBoxTab.Font = UDim2.new(1, -8, 0, 18), UDim2.new(0, 4, 0, 4), Color3.fromRGB(70, 15, 50), 0, "", "🔍 Search...", Color3.fromRGB(150, 155, 165), Color3.fromRGB(255, 255, 255), 8, Enum.Font.Gotham
 Instance.new("UICorner", SearchBoxTab).CornerRadius = UDim.new(0, 4)
 TrackStroke(Instance.new("UIStroke", SearchBoxTab)).Color = Color3.fromRGB(40, 43, 52)
 
 local SidebarScroll = Instance.new("ScrollingFrame", SidebarPanel)
-SidebarScroll.Size, SidebarScroll.Position, SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel, SidebarScroll.ScrollBarThickness, SidebarScroll.ClipsDescendants = UDim2.new(1, -4, 1, -24), UDim2.new(0, 2, 0, 23), 1, 0, 2, true
+SidebarScroll.Size, SidebarScroll.Position, SidebarScroll.BackgroundTransparency, SidebarScroll.BorderSizePixel, SidebarScroll.ScrollBarThickness, SidebarScroll.ClipsDescendants = UDim2.new(1, -4, 1, -26), UDim2.new(0, 2, 0, 25), 1, 0, 2, true
 local SidebarLayout = Instance.new("UIListLayout", SidebarScroll) SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 3)
 
 local SidebarPadding = Instance.new("UIPadding", SidebarScroll)
-SidebarPadding.PaddingLeft = UDim.new(0, 3)
-SidebarPadding.PaddingRight = UDim.new(0, 3)
+SidebarPadding.PaddingLeft = UDim.new(0, 2)
+SidebarPadding.PaddingRight = UDim.new(0, 2)
 
 SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     local query = string.lower(SearchBoxTab.Text)
@@ -122,10 +122,10 @@ SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
--- ContentContainer bên phải: Đã co ngắn lại và cách đều lề phải chuẩn xác (cách viền phải 8px)
+-- ContentContainer bên phải: Tự động tính toán phần diện tích còn lại chuẩn xác tuyệt đối, có đệm lề an toàn cách mép phải
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(1, -113, 1, -32), UDim2.new(0, 105, 0, 26), Color3.fromRGB(55, 12, 40), 0, 0
+ContentContainer.Size, ContentContainer.Position, ContentContainer.BackgroundColor3, ContentContainer.BackgroundTransparency, ContentContainer.BorderSizePixel = UDim2.new(0.68, -4, 1, -34), UDim2.new(0.315, 0, 0, 28), Color3.fromRGB(55, 12, 40), 0, 0
 Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 6)
 local ContentStroke = TrackStroke(Instance.new("UIStroke", ContentContainer))
 ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
@@ -133,15 +133,15 @@ ContentStroke.Color, ContentStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 local ContentHeader = Instance.new("Frame", ContentContainer) ContentHeader.Size, ContentHeader.BackgroundTransparency = UDim2.new(1, 0, 0, 26), 1
 
 local ActiveTabTitle = Instance.new("TextLabel", ContentHeader)
-ActiveTabTitle.Size, ActiveTabTitle.Position, ActiveTabTitle.BackgroundTransparency, ActiveTabTitle.Text, ActiveTabTitle.TextColor3, ActiveTabTitle.TextSize, ActiveTabTitle.Font, ActiveTabTitle.TextXAlignment = UDim2.new(1, -30, 1, 0), UDim2.new(0, 5, 0, 0), 1, "", Color3.fromRGB(255, 255, 255), 10, Enum.Font.GothamBold, Enum.TextXAlignment.Left
+ActiveTabTitle.Size, ActiveTabTitle.Position, ActiveTabTitle.BackgroundTransparency, ActiveTabTitle.Text, ActiveTabTitle.TextColor3, ActiveTabTitle.TextSize, ActiveTabTitle.Font, ActiveTabTitle.TextXAlignment = UDim2.new(1, -30, 1, 0), UDim2.new(0, 6, 0, 0), 1, "", Color3.fromRGB(255, 255, 255), 10, Enum.Font.GothamBold, Enum.TextXAlignment.Left
 
 local SearchInputContent = Instance.new("TextBox", ContentHeader)
-SearchInputContent.Size, SearchInputContent.Position, SearchInputContent.BackgroundColor3, SearchInputContent.BackgroundTransparency, SearchInputContent.TextColor3, SearchInputContent.PlaceholderText, SearchInputContent.PlaceholderColor3, SearchInputContent.TextSize, SearchInputContent.Font, SearchInputContent.Visible = UDim2.new(1, -32, 0, 18), UDim2.new(0, 5, 0.5, -9), Color3.fromRGB(70, 15, 50), 0, Color3.fromRGB(255, 255, 255), "Search features...", Color3.fromRGB(150, 155, 165), 8, Enum.Font.Gotham, false
+SearchInputContent.Size, SearchInputContent.Position, SearchInputContent.BackgroundColor3, SearchInputContent.BackgroundTransparency, SearchInputContent.TextColor3, SearchInputContent.PlaceholderText, SearchInputContent.PlaceholderColor3, SearchInputContent.TextSize, SearchInputContent.Font, SearchInputContent.Visible = UDim2.new(1, -34, 0, 18), UDim2.new(0, 6, 0.5, -9), Color3.fromRGB(70, 15, 50), 0, Color3.fromRGB(255, 255, 255), "Search features...", Color3.fromRGB(150, 155, 165), 8, Enum.Font.Gotham, false
 Instance.new("UICorner", SearchInputContent).CornerRadius = UDim.new(0, 4)
 TrackStroke(Instance.new("UIStroke", SearchInputContent)).Color = Color3.fromRGB(40, 43, 52)
 
 local SearchContentIcon = Instance.new("TextButton", ContentHeader)
-SearchContentIcon.Size, SearchContentIcon.Position, SearchContentIcon.BackgroundTransparency, SearchContentIcon.Text, SearchContentIcon.TextSize, SearchContentIcon.TextColor3 = UDim2.new(0, 20, 0, 20), UDim2.new(1, -22, 0.5, -10), 1, "🔍", 9, Color3.fromRGB(200, 205, 215)
+SearchContentIcon.Size, SearchContentIcon.Position, SearchContentIcon.BackgroundTransparency, SearchContentIcon.Text, SearchContentIcon.TextSize, SearchContentIcon.TextColor3 = UDim2.new(0, 20, 0, 20), UDim2.new(1, -24, 0.5, -10), 1, "🔍", 9, Color3.fromRGB(200, 205, 215)
 
 local searching = false
 SearchContentIcon.MouseButton1Click:Connect(function()
@@ -169,7 +169,7 @@ Instance.new("UICorner", homeIndicator).CornerRadius = UDim.new(0, 2)
 
 local homeScroll = Instance.new("ScrollingFrame", ContentContainer)
 homeScroll.Name = "Container_HOME"
-homeScroll.Size, homeScroll.Position, homeScroll.BackgroundTransparency, homeScroll.BorderSizePixel, homeScroll.ScrollBarThickness, homeScroll.Visible, homeScroll.ClipsDescendants = UDim2.new(1, -10, 1, -27), UDim2.new(0, 5, 0, 27), 1, 0, 3, false, true
+homeScroll.Size, homeScroll.Position, homeScroll.BackgroundTransparency, homeScroll.BorderSizePixel, homeScroll.ScrollBarThickness, homeScroll.Visible, homeScroll.ClipsDescendants = UDim2.new(1, -12, 1, -29), UDim2.new(0, 6, 0, 28), 1, 0, 3, false, true
 local homeLayout = Instance.new("UIListLayout", homeScroll) homeLayout.SortOrder = Enum.SortOrder.LayoutOrder homeLayout.Padding = UDim.new(0, 5)
 
 tabHomeBtn.MouseButton1Click:Connect(function()
@@ -268,7 +268,7 @@ local function CreateCategoryTab(tabName)
     containerFrame.Name = "Container_" .. tabName
     containerFrame.Size, containerFrame.Position, containerFrame.BackgroundTransparency, containerFrame.Visible = UDim2.new(1, 0, 1, -27), UDim2.new(0, 0, 0, 27), 1, false
 
-    local subBar = Instance.new("Frame", containerFrame) subBar.Size, subBar.BackgroundTransparency = UDim2.new(1, -10, 0, 22), UDim2.new(0, 5, 0, 0)
+    local subBar = Instance.new("Frame", containerFrame) subBar.Size, subBar.BackgroundTransparency = UDim2.new(1, -12, 0, 22), UDim2.new(0, 6, 0, 0)
     local subLayout = Instance.new("UIListLayout", subBar) subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 4)
 
     local noKeyBtn = Instance.new("TextButton", subBar)
@@ -283,10 +283,10 @@ local function CreateCategoryTab(tabName)
     local hkStroke = TrackStroke(Instance.new("UIStroke", hasKeyBtn))
     hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(40, 43, 52), 1
 
-    local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) scrollNoKey.Position, scrollNoKey.Size, scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel, scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = UDim2.new(0, 5, 0, 26), UDim2.new(1, -10, 1, -26), 1, 0, 3, true, true
+    local scrollNoKey = Instance.new("ScrollingFrame", containerFrame) scrollNoKey.Position, scrollNoKey.Size, scrollNoKey.BackgroundTransparency, scrollNoKey.BorderSizePixel, scrollNoKey.ScrollBarThickness, scrollNoKey.Visible, scrollNoKey.ClipsDescendants = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26), 1, 0, 3, true, true
     local l1 = Instance.new("UIListLayout", scrollNoKey) l1.Padding = UDim.new(0, 3)
 
-    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) scrollHasKey.Position, scrollHasKey.Size, scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel, scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = UDim2.new(0, 5, 0, 26), UDim2.new(1, -10, 1, -26), 1, 0, 3, false, true
+    local scrollHasKey = Instance.new("ScrollingFrame", containerFrame) scrollHasKey.Position, scrollHasKey.Size, scrollHasKey.BackgroundTransparency, scrollHasKey.BorderSizePixel, scrollHasKey.ScrollBarThickness, scrollHasKey.Visible, scrollHasKey.ClipsDescendants = UDim2.new(0, 6, 0, 26), UDim2.new(1, -12, 1, -26), 1, 0, 3, false, true
     local l2 = Instance.new("UIListLayout", scrollHasKey) l2.Padding = UDim.new(0, 3)
 
     SearchInputContent:GetPropertyChangedSignal("Text"):Connect(function()
@@ -395,7 +395,7 @@ Instance.new("UICorner", miscIndicator).CornerRadius = UDim.new(0, 2)
 
 local miscScroll = Instance.new("ScrollingFrame", ContentContainer)
 miscScroll.Name = "Container_MISC"
-miscScroll.Size, miscScroll.Position, miscScroll.BackgroundTransparency, miscScroll.BorderSizePixel, miscScroll.ScrollBarThickness, miscScroll.Visible, miscScroll.ClipsDescendants = UDim2.new(1, -10, 1, -27), UDim2.new(0, 5, 0, 27), 1, 0, 3, false, true
+miscScroll.Size, miscScroll.Position, miscScroll.BackgroundTransparency, miscScroll.BorderSizePixel, miscScroll.ScrollBarThickness, miscScroll.Visible, miscScroll.ClipsDescendants = UDim2.new(1, -12, 1, -29), UDim2.new(0, 6, 0, 28), 1, 0, 3, false, true
 local miscLayout = Instance.new("UIListLayout", miscScroll) miscLayout.SortOrder = Enum.SortOrder.LayoutOrder miscLayout.Padding = UDim.new(0, 5)
 
 tabMiscBtn.MouseButton1Click:Connect(function()
@@ -745,7 +745,7 @@ Instance.new("UICorner", configIndicator).CornerRadius = UDim.new(0, 2)
 
 local configScroll = Instance.new("ScrollingFrame", ContentContainer)
 configScroll.Name = "Container_CONFIG"
-configScroll.Size, configScroll.Position, configScroll.BackgroundTransparency, configScroll.BorderSizePixel, configScroll.ScrollBarThickness, configScroll.Visible, configScroll.ClipsDescendants = UDim2.new(1, -10, 1, -27), UDim2.new(0, 5, 0, 27), 1, 0, 3, false, true
+configScroll.Size, configScroll.Position, configScroll.BackgroundTransparency, configScroll.BorderSizePixel, configScroll.ScrollBarThickness, configScroll.Visible, configScroll.ClipsDescendants = UDim2.new(1, -12, 1, -29), UDim2.new(0, 6, 0, 28), 1, 0, 3, false, true
 local configLayout = Instance.new("UIListLayout", configScroll) configLayout.SortOrder = Enum.SortOrder.LayoutOrder configLayout.Padding = UDim.new(0, 5)
 
 tabConfigBtn.MouseButton1Click:Connect(function()
