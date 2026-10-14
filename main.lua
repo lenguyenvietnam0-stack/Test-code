@@ -27,7 +27,7 @@ MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 520, 0, 320)
 MainFrame.Position = UDim2.new(0.5, -260, 0.5, -160)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
-MainFrame.BackgroundTransparency = 0.5 -- Luôn luôn trong suốt
+MainFrame.BackgroundTransparency = 0.5
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -39,10 +39,14 @@ OuterStroke.Color, OuterStroke.Thickness = Color3.fromRGB(255, 105, 180), 1.5
 
 local TopBar = Instance.new("Frame", MainFrame) TopBar.Size, TopBar.BackgroundTransparency = UDim2.new(1, 0, 0, 28), 1
 
-local Logo = Instance.new("ImageLabel", TopBar) 
-Logo.Size, Logo.Position, Logo.BackgroundTransparency = UDim2.new(0, 18, 0, 18), UDim2.new(0, 10, 0.5, -9), 1
-Logo.Image = "rbxassetid://15298567397" -- Sử dụng ID ảnh cố định, không dùng avatar thumbnail nữa
-Instance.new("UICorner", Logo).CornerRadius = UDim.new(1, 0)
+-- Nút icon Home thay thế ảnh redz ở góc trên bên trái
+local Logo = Instance.new("Frame", TopBar)
+Logo.Size, Logo.Position, Logo.BackgroundColor3, Logo.BackgroundTransparency, Logo.BorderSizePixel = UDim2.new(0, 20, 0, 20), UDim2.new(0, 8, 0.5, -10), Color3.fromRGB(255, 105, 180), 0.2, 0
+Instance.new("UICorner", Logo).CornerRadius = UDim.new(0, 4)
+TrackStroke(Instance.new("UIStroke", Logo)).Color = Color3.fromRGB(255, 105, 180)
+
+local LogoIcon = Instance.new("TextLabel", Logo)
+LogoIcon.Size, LogoIcon.BackgroundTransparency, LogoIcon.Text, LogoIcon.TextColor3, LogoIcon.TextSize, LogoIcon.Font = UDim2.new(1, 0, 1, 0), 1, "🏠", 11, Enum.Font.GothamBold
 
 local Title = Instance.new("TextLabel", TopBar)
 Title.Size, Title.Position, Title.BackgroundTransparency, Title.Text, Title.TextColor3, Title.TextSize, Title.Font, Title.TextXAlignment = UDim2.new(1, -70, 1, 0), UDim2.new(0, 32, 0, 0), 1, "🌸 VzNam Hub v4 🌸", Color3.fromRGB(255, 105, 180), 12, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -549,14 +553,15 @@ menuColorToggleBtn.MouseButton1Click:Connect(function()
     mcSubLabel.Visible = menuColorContainer.Visible
 end)
 
+-- Nền menu đậm đà, nổi bật rõ ràng hơn
 local menuThemeList = {
-    {Name = "🌸 Hồng Pastel Nhẹ Nhàng", Bg = Color3.fromRGB(35, 20, 28)},
-    {Name = "🌙 Đêm Đen Sâu", Bg = Color3.fromRGB(12, 12, 18)},
-    {Name = "🔥 Đỏ Lửa Đậm", Bg = Color3.fromRGB(35, 12, 15)},
-    {Name = "🌊 Xanh Đại Dương", Bg = Color3.fromRGB(12, 22, 35)}
+    {Name = "🌸 Hồng Pastel Đậm Nổi Bật", Bg = Color3.fromRGB(32, 16, 25)},
+    {Name = "🌙 Đêm Đen Sâu Nổi Bật", Bg = Color3.fromRGB(15, 15, 24)},
+    {Name = "🔥 Đỏ Lửa Đậm Nổi Bật", Bg = Color3.fromRGB(35, 12, 15)},
+    {Name = "🌊 Xanh Đại Dương Nổi Bật", Bg = Color3.fromRGB(12, 22, 35)}
 }
 local themeDropBtn = Instance.new("TextButton", menuColorContainer)
-themeDropBtn.LayoutOrder = 1 themeDropBtn.Size, themeDropBtn.BackgroundColor3, themeDropBtn.BackgroundTransparency, themeDropBtn.Text, themeDropBtn.TextColor3, themeDropBtn.TextSize, themeDropBtn.Font, themeDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0.2, " 🎨 Đã chọn: 🌸 Hồng Pastel Nhẹ Nhàng", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
+themeDropBtn.LayoutOrder = 1 themeDropBtn.Size, themeDropBtn.BackgroundColor3, themeDropBtn.BackgroundTransparency, themeDropBtn.Text, themeDropBtn.TextColor3, themeDropBtn.TextSize, themeDropBtn.Font, themeDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), 0.2, " 🎨 Đã chọn: 🌸 Hồng Pastel Đậm Nổi Bật", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", themeDropBtn).CornerRadius = UDim.new(0, 5)
 TrackStroke(Instance.new("UIStroke", themeDropBtn)).Color = Color3.fromRGB(40, 43, 52)
 
@@ -618,7 +623,7 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Tùy Chọn Viền Rainbow
+-- Tùy Chọn Viền (Sửa lỗi màu xanh bằng cách lưu object màu chuẩn xác)
 local colorList = {
     {Name = "🌈 Cầu Vồng (Rainbow RGB)", Color = "Rainbow"},
     {Name = "🌸 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
@@ -644,21 +649,22 @@ for i, cItem in ipairs(colorList) do
     Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 4)
     TrackStroke(Instance.new("UIStroke", cBtn)).Color = Color3.fromRGB(40, 43, 52)
     cBtn.MouseButton1Click:Connect(function()
-        selectedColorObj = cItem colorDropBtn.Text = " 🎨 Viền: " .. cItem.Name colorDropFrame.Visible = false
+        selectedColorObj = cItem
+        colorDropBtn.Text = " 🎨 Viền: " .. cItem.Name
+        colorDropFrame.Visible = false
+        if cItem.Color ~= "Rainbow" then
+            for _, stroke in ipairs(AllUIStrokes) do
+                if stroke then stroke.Color = cItem.Color end
+            end
+        end
     end)
 end
 colorDropFrame.CanvasSize = UDim2.new(0, 0, 0, #colorList * 30)
 colorDropBtn.MouseButton1Click:Connect(function() colorDropFrame.Visible = not colorDropFrame.Visible end)
 
-local isColorApplied = true
 RunService.RenderStepped:Connect(function()
-    if isColorApplied then
-        local targetColor
-        if selectedColorObj.Color == "Rainbow" then
-            targetColor = Color3.fromHSV(tick() % 5 / 5, 1, 1)
-        else
-            targetColor = selectedColorObj.Color
-        end
+    if selectedColorObj and selectedColorObj.Color == "Rainbow" then
+        local targetColor = Color3.fromHSV(tick() % 5 / 5, 1, 1)
         for _, stroke in ipairs(AllUIStrokes) do
             if stroke then stroke.Color = targetColor end
         end
