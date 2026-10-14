@@ -493,7 +493,9 @@ toggleMusicBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Mục: → màu menu
+-- ============================================================================
+-- 3. MỤC: ĐỔI MÀU GIAO DIỆN (Nền chính giữ tối, đổi màu các nút tab sang tone-sur-tone nhẹ nhàng)
+-- ============================================================================
 local colorToggleBtn = Instance.new("TextButton", miscScroll)
 colorToggleBtn.LayoutOrder = 5
 colorToggleBtn.Size, colorToggleBtn.BackgroundColor3, colorToggleBtn.Text, colorToggleBtn.TextColor3, colorToggleBtn.TextSize, colorToggleBtn.Font, colorToggleBtn.TextXAlignment = UDim2.new(1, -4, 0, 42), Color3.fromRGB(20, 22, 30), "  ↓ màu menu", Color3.fromRGB(255, 255, 255), 13, Enum.Font.GothamBold, Enum.TextXAlignment.Center
@@ -516,14 +518,14 @@ colorToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 local colorList = {
-    {Name = "🖤 Xám Tối", Color = Color3.fromRGB(15, 16, 22)},
-    {Name = "🌸 Hồng Kẹo", Color = Color3.fromRGB(255, 105, 180)},
-    {Name = "🔴 Đỏ Đậm", Color = Color3.fromRGB(220, 20, 60)},
-    {Name = "🔵 Xanh Dương", Color = Color3.fromRGB(0, 191, 255)}
+    {Name = "🖤 Xám Tối Mặc Định", Color = Color3.fromRGB(22, 25, 34)},
+    {Name = "🌸 Hồng Pastel Nhẹ Nhàng", Color = Color3.fromRGB(70, 35, 50)},
+    {Name = "🔴 Đỏ Đậm Trầm", Color = Color3.fromRGB(60, 25, 30)},
+    {Name = "🔵 Xanh Dương Đêm", Color = Color3.fromRGB(25, 40, 65)}
 }
 local selectedColorObj = colorList[1]
 local colorDropBtn = Instance.new("TextButton", colorContainer)
-colorDropBtn.LayoutOrder = 1 colorDropBtn.Size, colorDropBtn.BackgroundColor3, colorDropBtn.Text, colorDropBtn.TextColor3, colorDropBtn.TextSize, colorDropBtn.Font, colorDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 🎨 Đã chọn: 🖤 Xám Tối", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
+colorDropBtn.LayoutOrder = 1 colorDropBtn.Size, colorDropBtn.BackgroundColor3, colorDropBtn.Text, colorDropBtn.TextColor3, colorDropBtn.TextSize, colorDropBtn.Font, colorDropBtn.TextXAlignment = UDim2.new(1, 0, 0, 32), Color3.fromRGB(22, 25, 34), " 🎨 Đã chọn: 🖤 Xám Tối Mặc Định", Color3.fromRGB(255, 255, 255), 11, Enum.Font.Gotham, Enum.TextXAlignment.Left
 Instance.new("UICorner", colorDropBtn).CornerRadius = UDim.new(0, 5)
 
 local colorDropFrame = Instance.new("ScrollingFrame", colorContainer)
@@ -562,14 +564,21 @@ toggleColorBtn.MouseButton1Click:Connect(function()
         toggleColorBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50) colorDot.Position = UDim2.new(1, -18, 0.5, -8)
     else
         toggleColorBtn.BackgroundColor3 = Color3.fromRGB(60, 65, 75) colorDot.Position = UDim2.new(0, 2, 0.5, -8)
-        SidebarPanel.BackgroundColor3 = Color3.fromRGB(15, 16, 22) ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
+        for _, btn in ipairs(SidebarScroll:GetChildren()) do
+            if btn:IsA("TextButton") then btn.BackgroundColor3 = Color3.fromRGB(22, 25, 34) end
+        end
     end
 end)
 
 RunService.RenderStepped:Connect(function()
     if isColorApplied and typeof(selectedColorObj.Color) == "Color3" then
-        SidebarPanel.BackgroundColor3 = selectedColorObj.Color 
-        ContentContainer.BackgroundColor3 = selectedColorObj.Color
+        SidebarPanel.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
+        ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
+        for _, btn in ipairs(SidebarScroll:GetChildren()) do
+            if btn:IsA("TextButton") then
+                btn.BackgroundColor3 = selectedColorObj.Color
+            end
+        end
     end
 end)
 miscScroll.CanvasSize = UDim2.new(0, 0, 0, 1400)
