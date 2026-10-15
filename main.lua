@@ -1,7 +1,13 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 — FIXED (NỀN ĐỘNG ANIME CHẮC CHẮN HIỆN)
+    VzNam Hub v4 — CÓ ẢNH NỀN TĨNH CỦA BẠN
     ═══════════════════════════════════════════════════════
+    • Tab "MAIN STEAL AN EGG" ngay dưới Trang Chủ
+    • Đã xóa: BREAK AN STEAL, Tab 4, Tab 5
+    • Nhạc: y bản gốc
+    • Startup label (Cấu Hình): động theo CurrentConfig
+    • Auto Save + Auto Load: theo Cấu Hình
+    • Đã xóa tính năng "Khởi Động" trong Profiles
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -121,32 +127,22 @@ MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.ClipsDescendants = true
+MainFrame.ClipsDescendants = true -- Giúp ảnh nền không bị tràn ra ngoài góc bo tròn
 MainFrame.Parent = ScreenGui
 
 Corner(MainFrame, UDim.new(0, 8))
 local OuterStroke = Stroke(MainFrame, Color3.fromRGB(0, 191, 255), 2)
 
--- 🌸 [NỀN VIDEO ĐỘNG ANIME MỚI - CHẮC CHẮN HIỆN] 🌸
-local VideoBg = Instance.new("VideoFrame", MainFrame)
-VideoBg.Name = "AnimeVideoBg"
-VideoBg.Size = UDim2.new(1, 0, 1, 0)
-VideoBg.Position = UDim2.new(0, 0, 0, 0)
-VideoBg.BackgroundTransparency = 1
-VideoBg.ZIndex = 0
-VideoBg.Video = "rbxassetid://5608327219" -- ID Video Anime động chính thức trên Roblox
-VideoBg.Looped = true
-VideoBg.Playing = true
-VideoBg.Volume = 0 -- Tắt tiếng video để không trùng nhạc Hub
-Corner(VideoBg, UDim.new(0, 8))
-
--- Lớp đệm đen giúp nổi bật chữ và nút bấm
-local DarkOverlay = Instance.new("Frame", MainFrame)
-DarkOverlay.Size = UDim2.new(1, 0, 1, 0)
-DarkOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-DarkOverlay.BackgroundTransparency = 0.5
-DarkOverlay.ZIndex = 0
-Corner(DarkOverlay, UDim.new(0, 8))
+-- 🌸 [NỀN ẢNH TĨNH CỦA BẠN] 🌸
+local CustomBg = Instance.new("ImageLabel", MainFrame)
+CustomBg.Name = "CustomStaticBg"
+CustomBg.Size = UDim2.new(1, 0, 1, 0)
+CustomBg.Position = UDim2.new(0, 0, 0, 0)
+CustomBg.BackgroundTransparency = 1
+CustomBg.ZIndex = 0
+CustomBg.Image = "rbxassetid://76744644994493"
+CustomBg.ImageTransparency = 0.25 -- Độ mờ ảnh nền (0 là rõ nhất, 1 là ẩn)
+Corner(CustomBg, UDim.new(0, 8))
 
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size, ResizeBtn.Position = UDim2.new(0, 18, 0, 18), UDim2.new(1, -18, 1, -18)
