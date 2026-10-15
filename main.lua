@@ -9,7 +9,7 @@ if PlayerGui:FindFirstChild("VzNamHubV4UI") then
 end
 
 -- ⚠️ THAY ID ANIME CỦA BẠN VÀO ĐÂY:
-local ANIME_IMAGE_ID = "rbxassetid://105797517814493" 
+local ANIME_IMAGE_ID = "rbxassetid://76744644994493" 
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "VzNamHubV4UI"
