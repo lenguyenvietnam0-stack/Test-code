@@ -2,7 +2,6 @@
     ═══════════════════════════════════════════════════════
     VzNam Hub v4 — FIXED
     ═══════════════════════════════════════════════════════
-    • Tab "MAIN STEAL AN EGG" ngay dưới Trang Chủ
     • Đã xóa: BREAK AN STEAL, Tab 4, Tab 5
     • Nhạc: y bản gốc
     • Startup label (Cấu Hình): động theo CurrentConfig
@@ -418,49 +417,6 @@ CreateHomeCard(infoContainer, 3, Color3.fromRGB(45,45,65), "TIKTOK CHANNEL",
     "https://www.tiktok.com/@uttop1gl.ovo",
     "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y",
     Color3.fromRGB(100,100,120), "🎵")
-
--- ═════════════════ TAB 1: MAIN STEAL AN EGG ═════════════════
-local tabMainBtn = Instance.new("TextButton", SidebarScroll)
-tabMainBtn.LayoutOrder = 1
-tabMainBtn.Size, tabMainBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
-tabMainBtn.BackgroundTransparency, tabMainBtn.Text = 0, " 📌 MAIN STEAL AN EGG"
-tabMainBtn.TextColor3, tabMainBtn.TextSize = Color3.fromRGB(255,255,255), 8
-tabMainBtn.Font, tabMainBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-Corner(tabMainBtn)
-RegTheme(tabMainBtn, "Primary")
-
-local mainIndicator = Instance.new("Frame", tabMainBtn)
-mainIndicator.Size, mainIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
-mainIndicator.BackgroundColor3, mainIndicator.BorderSizePixel = Color3.fromRGB(255,105,180), 0
-mainIndicator.Visible = false
-Corner(mainIndicator, UDim.new(0, 2))
-
-local mainScroll = Instance.new("ScrollingFrame", ContentContainer)
-mainScroll.Size, mainScroll.Position = UDim2.new(1, -12, 1, -29), UDim2.new(0, 6, 0, 28)
-mainScroll.BackgroundTransparency, mainScroll.BorderSizePixel = 1, 0
-mainScroll.ScrollBarThickness, mainScroll.Visible, mainScroll.ClipsDescendants = 3, false, true
-local mainLayout = Instance.new("UIListLayout", mainScroll)
-mainLayout.SortOrder, mainLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 5)
-mainLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-local mainPad = Instance.new("UIPadding", mainScroll)
-mainPad.PaddingLeft, mainPad.PaddingRight = UDim.new(0, 4), UDim.new(0, 10)
-mainPad.PaddingTop, mainPad.PaddingBottom = UDim.new(0, 4), UDim.new(0, 4)
-
-Track(mainLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    mainScroll.CanvasSize = UDim2.new(0, 0, 0, mainLayout.AbsoluteContentSize.Y + 15)
-end))
-
-Track(tabMainBtn.MouseButton1Click:Connect(function()
-    for _, t in pairs(Tabs) do
-        t.Container.Visible = false
-        if t.Indicator then t.Indicator.Visible = false end
-    end
-    mainScroll.Visible, mainIndicator.Visible = true, true
-    ActiveTabTitle.Text = "📌 MAIN STEAL AN EGG"
-    SearchInputContent.Text = ""
-end))
-
-table.insert(Tabs, {Container = mainScroll, Indicator = mainIndicator})
 
 -- ═════════════════ TAB TEMPLATE ═════════════════
 local RegisteredScripts = {}
