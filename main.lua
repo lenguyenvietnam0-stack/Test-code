@@ -1,12 +1,7 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 — FIXED
+    VzNam Hub v4 — FIXED (CÓ NỀN ĐỘNG ANIME)
     ═══════════════════════════════════════════════════════
-    • Xóa tính năng "Khởi Động" trong Profiles
-    • Thêm tab "main" ngay dưới "Trang Chủ"
-    • Nhạc: y bản gốc
-    • Startup label (Cấu Hình): động theo CurrentConfig
-    • Auto Save + Auto Load: theo Cấu Hình
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -126,10 +121,46 @@ MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
 Corner(MainFrame, UDim.new(0, 8))
 local OuterStroke = Stroke(MainFrame, Color3.fromRGB(0, 191, 255), 2)
+
+-- 🌸 [NỀN ĐỘNG TEST MẪU] 🌸
+local AnimeBg = Instance.new("ImageLabel", MainFrame)
+AnimeBg.Name = "AnimeAnimatedBg"
+AnimeBg.Size = UDim2.new(1, 0, 1, 0)
+AnimeBg.Position = UDim2.new(0, 0, 0, 0)
+AnimeBg.BackgroundTransparency = 1
+AnimeBg.ZIndex = 0
+AnimeBg.Image = "rbxassetid://6071575925" -- Asset Sprite Sheet mẫu
+AnimeBg.ImageTransparency = 0.3 -- Làm mờ ảnh để dễ nhìn nút
+
+Corner(AnimeBg, UDim.new(0, 8))
+
+-- Lớp phủ tối đệm lên trên ảnh động
+local DarkOverlay = Instance.new("Frame", MainFrame)
+DarkOverlay.Size = UDim2.new(1, 0, 1, 0)
+DarkOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+DarkOverlay.BackgroundTransparency = 0.45
+DarkOverlay.ZIndex = 0
+Corner(DarkOverlay, UDim.new(0, 8))
+
+-- Loop chạy hiệu ứng động cho ImageLabel (5x5 = 25 khung hình)
+local FRAME_SIZE = 1024 / 5
+AnimeBg.ImageRectSize = Vector2.new(FRAME_SIZE, FRAME_SIZE)
+
+task.spawn(function()
+    local frameIndex = 0
+    while MainFrame and MainFrame.Parent do
+        local col = frameIndex % 5
+        local row = math.floor(frameIndex / 5)
+        AnimeBg.ImageRectOffset = Vector2.new(col * FRAME_SIZE, row * FRAME_SIZE)
+        frameIndex = (frameIndex + 1) % 25
+        task.wait(0.04) -- Tốc độ phát (khoảng 25 FPS)
+    end
+end)
 
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size, ResizeBtn.Position = UDim2.new(0, 18, 0, 18), UDim2.new(1, -18, 1, -18)
@@ -278,7 +309,7 @@ HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = Color3.fromRGB(0
 
 local Tabs = {}
 
--- ═════════════════ TAB: TRANG CHỦ ═════════════════
+-- ═════════════════ TAB 0: TRANG CHỦ ═════════════════
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
 tabHomeBtn.Size, tabHomeBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
@@ -418,11 +449,11 @@ CreateHomeCard(infoContainer, 3, Color3.fromRGB(45,45,65), "TIKTOK CHANNEL",
     "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y",
     Color3.fromRGB(100,100,120), "🎵")
 
--- ═════════════════ TAB: MAIN (ngay dưới Trang Chủ) ═════════════════
+-- ═════════════════ TAB 1: MAIN STEAL AN EGG ═════════════════
 local tabMainBtn = Instance.new("TextButton", SidebarScroll)
 tabMainBtn.LayoutOrder = 1
 tabMainBtn.Size, tabMainBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
-tabMainBtn.BackgroundTransparency, tabMainBtn.Text = 0, " 📌 Main"
+tabMainBtn.BackgroundTransparency, tabMainBtn.Text = 0, " 📌 MAIN STEAL AN EGG"
 tabMainBtn.TextColor3, tabMainBtn.TextSize = Color3.fromRGB(255,255,255), 8
 tabMainBtn.Font, tabMainBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
 Corner(tabMainBtn)
@@ -455,7 +486,7 @@ Track(tabMainBtn.MouseButton1Click:Connect(function()
         if t.Indicator then t.Indicator.Visible = false end
     end
     mainScroll.Visible, mainIndicator.Visible = true, true
-    ActiveTabTitle.Text = "📌 Main"
+    ActiveTabTitle.Text = "📌 MAIN STEAL AN EGG"
     SearchInputContent.Text = ""
 end))
 
@@ -596,7 +627,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     return Elements
 end
 
--- ═════════════════ TAB 1: STEAL AN EGG ═════════════════
+-- ═════════════════ TAB 2: STEAL AN EGG ═════════════════
 local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸", 2)
 tab1:AddNoKey("1. Hop sv1 người(nokey)", function() SafeLoad("https://raw.githubusercontent.com/raw-roblox/PrivateServerBypass/refs/heads/main/lua") end)
 tab1:AddNoKey("2. FyyCommunity(lúc có key lúc no key)", function() SafeLoad("https://FyyCommunity.my.id") end)
@@ -611,7 +642,7 @@ tab1:AddHasKey("6. Neohub(có key)", function() SafeLoad("https://raw.githubuser
 tab1:AddHasKey("7. Real kid(có key)", function() SafeLoad("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua") end)
 tab1:AddHasKey("8. Chilli v2(có key)", function() SafeLoad("https://gist.githubusercontent.com/ronnei/1fa67c56dd9af203b192d15e752928e5/raw/4e2d5105640e09a008b4ae6df23f9708cadfef06/chilliv2-stealanegg") end)
 
--- ═════════════════ TAB 2: BLOX FRUIT ═════════════════
+-- ═════════════════ TAB 3: BLOX FRUIT ═════════════════
 local tab2 = CreateCategoryTab("🌸BLOX FRUIT🌸", 3)
 tab2:AddNoKey("1. RedzHub v2 (no key)", function() SafeLoad("https://raw.githubusercontent.com/UCT-hub/main/refs/heads/main/redz-v2") end)
 tab2:AddNoKey("2. Quantumx Hub(nokey)", function() SafeLoad("https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua") end)
@@ -629,18 +660,9 @@ tab2:AddHasKey("6. BananaHub(có key)", function()
     SafeLoad("https://raw.githubusercontent.com/obiyeueim/vthangsitink/main/BananaHub.lua")
 end)
 
--- ═════════════════ TAB 3: BREAK AN STEAL ═════════════════
-local tab3 = CreateCategoryTab("🌸BREAK AN STEAL🌸", 4)
-tab3:AddNoKey("1. break and steal an egg", function()
-    SafeLoad("https://raw.githubusercontent.com/joustingming/Ouroboros/main/loader.lua")
-end)
-
-local tab4 = CreateCategoryTab("Tab 4", 5)
-local tab5 = CreateCategoryTab("Tab 5", 6)
-
--- ═════════════════ TAB MISC ═════════════════
+-- ═════════════════ TAB 4: MISC ═════════════════
 local tabMiscBtn = Instance.new("TextButton", SidebarScroll)
-tabMiscBtn.LayoutOrder = 7
+tabMiscBtn.LayoutOrder = 4
 tabMiscBtn.Size, tabMiscBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
 tabMiscBtn.BackgroundTransparency, tabMiscBtn.Text = 0, " ⚙️ MISC"
 tabMiscBtn.TextColor3, tabMiscBtn.TextSize = Color3.fromRGB(255,255,255), 8
@@ -1235,9 +1257,9 @@ local rainbowConn = RunService.RenderStepped:Connect(function()
 end)
 Track(rainbowConn)
 
--- ═════════════════ TAB CẤU HÌNH ═════════════════
+-- ═════════════════ TAB 5: CẤU HÌNH ═════════════════
 local tabConfigBtn = Instance.new("TextButton", SidebarScroll)
-tabConfigBtn.LayoutOrder = 8
+tabConfigBtn.LayoutOrder = 5
 tabConfigBtn.Size, tabConfigBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
 tabConfigBtn.BackgroundTransparency, tabConfigBtn.Text = 0, " 📦 CẤU HÌNH"
 tabConfigBtn.TextColor3, tabConfigBtn.TextSize = Color3.fromRGB(255,255,255), 8
@@ -1278,7 +1300,6 @@ table.insert(Tabs, {Container = configScroll, Indicator = configIndicator})
 local CONFIG_FOLDER = "VzNamHub_Configs"
 if typeof(makefolder) == "function" then pcall(makefolder, CONFIG_FOLDER) end
 
--- ─── Save / Load / Apply ───
 local function SerializeState(scriptName)
     return {
         Version        = 4,
@@ -1324,7 +1345,6 @@ local function LoadConfigRaw(name)
     return true, data
 end
 
--- ─── UI Cấu Hình ───
 local configToggleBtn = Instance.new("TextButton", configScroll)
 configToggleBtn.LayoutOrder, configToggleBtn.Size = 1, UDim2.new(1, 0, 0, 34)
 configToggleBtn.BackgroundColor3, configToggleBtn.BackgroundTransparency = Color3.fromRGB(55,12,40), 0
@@ -1429,7 +1449,6 @@ alBox.Size, alBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.
 alBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
 Corner(alBox, UDim.new(1, 0))
 
--- ─── Forward declaration assignments ───
 AutoSaveHook = function()
     if not State.Initialized then return end
     if State.AutoSave then
@@ -1503,7 +1522,6 @@ local function LoadConfig(name)
     return true
 end
 
--- ─── Toggles ───
 Track(autoSaveToggle.MouseButton1Click:Connect(function()
     State.AutoSave = not State.AutoSave
     autoSaveToggle.BackgroundColor3 = State.AutoSave and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
