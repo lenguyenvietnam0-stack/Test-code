@@ -1,7 +1,13 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 — FULL COMPLETE CODE WITH AUTO STEAL EGG
+    VzNam Hub v4 — FIXED + AUTO STEAL
     ═══════════════════════════════════════════════════════
+    • Tab "MAIN STEAL AN EGG" ngay dưới Trang Chủ
+    • Đã xóa: BREAK AN STEAL, Tab 4, Tab 5
+    • Nhạc: y bản gốc
+    • Cấu Hình: gộp toàn bộ Profiles vào (Tên/Tạo/Xóa/Tải/Lưu)
+    • Đã xóa: Auto Lưu, Auto Tải, nút "↓ Profiles"
+    • MỚI: Auto Steal + chọn độ hiếm + steal trứng xịn nhất
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -40,10 +46,6 @@ local State = {
     IsAutoLoad     = false,
     CurrentConfig  = "Default",
     Transparent    = 0,
-    -- Auto Steal Egg States
-    AutoSteal      = false,
-    StealBest      = false,
-    SelectedRarity = "Tất Cả",
 }
 
 -- ═════════════════ UI HELPERS ═════════════════
@@ -402,10 +404,16 @@ local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyT
 end
 
 CreateHomeCard(infoContainer, 1, Color3.fromRGB(70,20,45), "ĐƯỢC TẠO BỞI", "VzNam ROBLOX", "", Color3.fromRGB(180,50,50), "👤")
-CreateHomeCard(infoContainer, 2, Color3.fromRGB(30,40,70), "DISCORD SERVER", "https://discord.gg/6TG7krbsU", "https://discord.gg/6TG7krbsU", Color3.fromRGB(60,100,200), "💬")
-CreateHomeCard(infoContainer, 3, Color3.fromRGB(45,45,65), "TIKTOK CHANNEL", "https://www.tiktok.com/@uttop1gl.ovo", "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y", Color3.fromRGB(100,100,120), "🎵")
+CreateHomeCard(infoContainer, 2, Color3.fromRGB(30,40,70), "DISCORD SERVER",
+    "https://discord.gg/6TG7krbsU",
+    "https://discord.gg/6TG7krbsU",
+    Color3.fromRGB(60,100,200), "💬")
+CreateHomeCard(infoContainer, 3, Color3.fromRGB(45,45,65), "TIKTOK CHANNEL",
+    "https://www.tiktok.com/@uttop1gl.ovo",
+    "https://www.tiktok.com/@uttop1gl.ovo?_r=1&_t=ZS-9AWatTQR08y",
+    Color3.fromRGB(100,100,120), "🎵")
 
--- ═════════════════ TAB 1: MAIN STEAL AN EGG (TÍCH HỢP AUTO STEAL) ═════════════════
+-- ═════════════════ TAB 1: MAIN STEAL AN EGG ═════════════════
 local tabMainBtn = Instance.new("TextButton", SidebarScroll)
 tabMainBtn.LayoutOrder = 1
 tabMainBtn.Size, tabMainBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 26), Color3.fromRGB(70,15,50)
@@ -448,133 +456,416 @@ end))
 
 table.insert(Tabs, {Container = mainScroll, Indicator = mainIndicator})
 
--- ── 1. Nút Auto Steal ──
-local autoStealFrame = Instance.new("Frame", mainScroll)
-autoStealFrame.LayoutOrder, autoStealFrame.Size = 1, UDim2.new(1, 0, 0, 30)
-autoStealFrame.BackgroundColor3, autoStealFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
-Corner(autoStealFrame)
-Stroke(autoStealFrame)
-RegTheme(autoStealFrame, "Primary")
+-- ═════════════════ AUTO STEAL FEATURE ═════════════════
+local AutoSteal = {
+    Enabled  = false,
+    BestOnly = false,
+    Rarity   = "Rare",
+    Running  = false,
+}
 
-local asTitle = Instance.new("TextLabel", autoStealFrame)
-asTitle.Size, asTitle.Position = UDim2.new(1, -40, 1, 0), UDim2.new(0, 5, 0, 0)
-asTitle.BackgroundTransparency, asTitle.Text = 1, "Auto Steal Egg"
-asTitle.TextColor3, asTitle.TextSize = Color3.fromRGB(255,255,255), 9
-asTitle.Font, asTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+local RARITY_ORDER = {
+    ["Common"]=1,["Uncommon"]=2,["Rare"]=3,["Epic"]=4,
+    ["Legendary"]=5,["Mythical"]=6,["Secret"]=7,["Godly"]=8,["Divine"]=9
+}
+local RARITY_LIST = {"Common","Uncommon","Rare","Epic","Legendary","Mythical","Secret","Godly","Divine"}
 
-local toggleAutoStealBtn = Instance.new("TextButton", autoStealFrame)
-toggleAutoStealBtn.Size, toggleAutoStealBtn.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
-toggleAutoStealBtn.BackgroundColor3, toggleAutoStealBtn.Text = Color3.fromRGB(60,65,75), ""
-Corner(toggleAutoStealBtn, UDim.new(1, 0))
-Stroke(toggleAutoStealBtn)
-local autoStealDot = Instance.new("Frame", toggleAutoStealBtn)
-autoStealDot.Size, autoStealDot.Position = UDim2.new(0, 11, 0, 11), UDim2.new(0, 2, 0.5, -5.5)
-autoStealDot.BackgroundColor3 = Color3.fromRGB(255,255,255)
-Corner(autoStealDot, UDim.new(1, 0))
+-- ── Header label ──
+local autoHeader = Instance.new("TextLabel", mainScroll)
+autoHeader.LayoutOrder = 0
+autoHeader.Size = UDim2.new(1, 0, 0, 22)
+autoHeader.BackgroundColor3 = Color3.fromRGB(40,10,30)
+autoHeader.Text = "  🎯 AUTO STEAL"
+autoHeader.TextColor3 = Color3.fromRGB(255,150,200)
+autoHeader.TextSize = 10
+autoHeader.Font = Enum.Font.GothamBold
+autoHeader.TextXAlignment = Enum.TextXAlignment.Left
+Corner(autoHeader); Stroke(autoHeader)
 
-Track(toggleAutoStealBtn.MouseButton1Click:Connect(function()
-    State.AutoSteal = not State.AutoSteal
-    if State.AutoSteal then
-        toggleAutoStealBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
-        autoStealDot.Position = UDim2.new(1, -13, 0.5, -5.5)
-    else
-        toggleAutoStealBtn.BackgroundColor3 = Color3.fromRGB(60,65,75)
-        autoStealDot.Position = UDim2.new(0, 2, 0.5, -5.5)
-    end
-end))
+-- ── Toggle: Auto Steal ──
+local asFrame = Instance.new("Frame", mainScroll)
+asFrame.LayoutOrder = 1
+asFrame.Size = UDim2.new(1, 0, 0, 32)
+asFrame.BackgroundColor3 = Color3.fromRGB(70,15,50)
+asFrame.BorderSizePixel = 0
+Corner(asFrame); Stroke(asFrame); RegTheme(asFrame, "Primary")
 
--- ── 2. Chọn Độ Hiếm Steal Egg ──
-local rarityDropBtn = Instance.new("TextButton", mainScroll)
-rarityDropBtn.LayoutOrder, rarityDropBtn.Size = 2, UDim2.new(1, 0, 0, 26)
-rarityDropBtn.BackgroundColor3, rarityDropBtn.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
-rarityDropBtn.Text, rarityDropBtn.TextColor3 = " 💎 Chọn Độ Hiếm: Tất Cả", Color3.fromRGB(255,255,255)
-rarityDropBtn.TextSize, rarityDropBtn.Font = 9, Enum.Font.Gotham
-rarityDropBtn.TextXAlignment = Enum.TextXAlignment.Left
-Corner(rarityDropBtn)
-Stroke(rarityDropBtn)
-RegTheme(rarityDropBtn, "Primary")
+local asLbl = Instance.new("TextLabel", asFrame)
+asLbl.Size = UDim2.new(1, -46, 1, 0); asLbl.Position = UDim2.new(0, 8, 0, 0)
+asLbl.BackgroundTransparency = 1; asLbl.Text = "🥚 Auto Steal Egg"
+asLbl.TextColor3 = Color3.fromRGB(255,255,255); asLbl.TextSize = 10
+asLbl.Font = Enum.Font.GothamBold; asLbl.TextXAlignment = Enum.TextXAlignment.Left
 
-local rarityDropFrame = Instance.new("ScrollingFrame", mainScroll)
-rarityDropFrame.LayoutOrder, rarityDropFrame.Size = 3, UDim2.new(1, 0, 0, 85)
-rarityDropFrame.BackgroundColor3, rarityDropFrame.BackgroundTransparency = Color3.fromRGB(80,20,60), 0
-rarityDropFrame.CanvasSize, rarityDropFrame.ScrollBarThickness, rarityDropFrame.Visible = UDim2.new(0,0,0,0), 3, false
-Corner(rarityDropFrame)
-Stroke(rarityDropFrame)
-local rarityListLayout = Instance.new("UIListLayout", rarityDropFrame)
-rarityListLayout.Padding = UDim.new(0, 3)
+local asToggle = Instance.new("TextButton", asFrame)
+asToggle.Size = UDim2.new(0, 30, 0, 15); asToggle.Position = UDim2.new(1, -36, 0.5, -7.5)
+asToggle.BackgroundColor3 = Color3.fromRGB(60,65,75); asToggle.Text = ""
+Corner(asToggle, UDim.new(1,0)); Stroke(asToggle)
+local asDot = Instance.new("Frame", asToggle)
+asDot.Size = UDim2.new(0, 11, 0, 11); asDot.Position = UDim2.new(0, 2, 0.5, -5.5)
+asDot.BackgroundColor3 = Color3.fromRGB(255,255,255); Corner(asDot, UDim.new(1,0))
 
-local rarities = {"Tất Cả", "Common", "Rare", "Epic", "Legendary", "Mythic"}
-for i, r in ipairs(rarities) do
-    local rBtn = Instance.new("TextButton", rarityDropFrame)
-    rBtn.LayoutOrder, rBtn.Size = i, UDim2.new(1, 0, 0, 22)
-    rBtn.BackgroundColor3, rBtn.BackgroundTransparency = Color3.fromRGB(90,25,65), 0
-    rBtn.Text, rBtn.TextColor3, rBtn.TextSize = " " .. r, Color3.fromRGB(255,255,255), 9
-    rBtn.Font, rBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-    Corner(rBtn, UDim.new(0, 4))
-    Stroke(rBtn)
-    Track(rBtn.MouseButton1Click:Connect(function()
-        State.SelectedRarity = r
-        rarityDropBtn.Text = " 💎 Độ Hiếm: " .. r
-        rarityDropFrame.Visible = false
+-- ── Toggle: Steal Best ──
+local bfFrame = Instance.new("Frame", mainScroll)
+bfFrame.LayoutOrder = 2
+bfFrame.Size = UDim2.new(1, 0, 0, 32)
+bfFrame.BackgroundColor3 = Color3.fromRGB(70,15,50); bfFrame.BorderSizePixel = 0
+Corner(bfFrame); Stroke(bfFrame); RegTheme(bfFrame, "Primary")
+
+local bfLbl = Instance.new("TextLabel", bfFrame)
+bfLbl.Size = UDim2.new(1, -46, 1, 0); bfLbl.Position = UDim2.new(0, 8, 0, 0)
+bfLbl.BackgroundTransparency = 1; bfLbl.Text = "⭐ Steal Trứng Xịn Nhất"
+bfLbl.TextColor3 = Color3.fromRGB(255,255,255); bfLbl.TextSize = 10
+bfLbl.Font = Enum.Font.GothamBold; bfLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+local bfToggle = Instance.new("TextButton", bfFrame)
+bfToggle.Size = UDim2.new(0, 30, 0, 15); bfToggle.Position = UDim2.new(1, -36, 0.5, -7.5)
+bfToggle.BackgroundColor3 = Color3.fromRGB(60,65,75); bfToggle.Text = ""
+Corner(bfToggle, UDim.new(1,0)); Stroke(bfToggle)
+local bfDot = Instance.new("Frame", bfToggle)
+bfDot.Size = UDim2.new(0, 11, 0, 11); bfDot.Position = UDim2.new(0, 2, 0.5, -5.5)
+bfDot.BackgroundColor3 = Color3.fromRGB(255,255,255); Corner(bfDot, UDim.new(1,0))
+
+-- ── Dropdown: Rarity ──
+local rarFrame = Instance.new("Frame", mainScroll)
+rarFrame.LayoutOrder = 3
+rarFrame.Size = UDim2.new(1, 0, 0, 32)
+rarFrame.BackgroundColor3 = Color3.fromRGB(70,15,50); rarFrame.BorderSizePixel = 0
+Corner(rarFrame); Stroke(rarFrame); RegTheme(rarFrame, "Primary")
+
+local rarLbl = Instance.new("TextLabel", rarFrame)
+rarLbl.Size = UDim2.new(0.5, 0, 1, 0); rarLbl.Position = UDim2.new(0, 8, 0, 0)
+rarLbl.BackgroundTransparency = 1; rarLbl.Text = "🎯 Độ hiếm tối thiểu"
+rarLbl.TextColor3 = Color3.fromRGB(255,255,255); rarLbl.TextSize = 9
+rarLbl.Font = Enum.Font.GothamBold; rarLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+local rarBtn = Instance.new("TextButton", rarFrame)
+rarBtn.Size = UDim2.new(0, 90, 0, 22); rarBtn.Position = UDim2.new(1, -96, 0.5, -11)
+rarBtn.BackgroundColor3 = Color3.fromRGB(50,10,35)
+rarBtn.Text = AutoSteal.Rarity .. " ∨"
+rarBtn.TextColor3 = Color3.fromRGB(50,200,50)
+rarBtn.TextSize = 9; rarBtn.Font = Enum.Font.GothamBold
+Corner(rarBtn, UDim.new(0,4)); Stroke(rarBtn); RegTheme(rarBtn, "Input")
+
+local rarDrop = Instance.new("ScrollingFrame", mainScroll)
+rarDrop.LayoutOrder = 4
+rarDrop.Size = UDim2.new(1, 0, 0, 110)
+rarDrop.BackgroundColor3 = Color3.fromRGB(80,20,60)
+rarDrop.CanvasSize = UDim2.new(0,0,0,0); rarDrop.ScrollBarThickness = 3
+rarDrop.Visible = false
+Corner(rarDrop); Stroke(rarDrop); RegTheme(rarDrop, "DropFrame")
+local rdL = Instance.new("UIListLayout", rarDrop)
+rdL.Padding = UDim.new(0,3)
+local rdP = Instance.new("UIPadding", rarDrop)
+rdP.PaddingRight = UDim.new(0,8); rdP.PaddingTop = UDim.new(0,4)
+
+for i, r in ipairs(RARITY_LIST) do
+    local rb = Instance.new("TextButton", rarDrop)
+    rb.LayoutOrder = i; rb.Size = UDim2.new(1,0,0,22)
+    rb.BackgroundColor3 = Color3.fromRGB(90,25,65)
+    rb.Text = "  " .. r; rb.TextColor3 = Color3.fromRGB(255,255,255)
+    rb.TextSize = 9; rb.Font = Enum.Font.Gotham
+    rb.TextXAlignment = Enum.TextXAlignment.Left
+    Corner(rb, UDim.new(0,4)); Stroke(rb); RegTheme(rb, "DropItem")
+    Track(rb.MouseButton1Click:Connect(function()
+        AutoSteal.Rarity = r
+        rarBtn.Text = r .. " ∨"
+        rarDrop.Visible = false
     end))
 end
-rarityDropFrame.CanvasSize = UDim2.new(0, 0, 0, #rarities * 25)
-Track(rarityDropBtn.MouseButton1Click:Connect(function()
-    rarityDropFrame.Visible = not rarityDropFrame.Visible
+rarDrop.CanvasSize = UDim2.new(0, 0, 0, #RARITY_LIST * 25)
+Track(rarBtn.MouseButton1Click:Connect(function()
+    rarDrop.Visible = not rarDrop.Visible
 end))
 
--- ── 3. Steal Trứng Xịn Nhất Khi Bật ──
-local bestStealFrame = Instance.new("Frame", mainScroll)
-bestStealFrame.LayoutOrder, bestStealFrame.Size = 4, UDim2.new(1, 0, 0, 30)
-bestStealFrame.BackgroundColor3, bestStealFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
-Corner(bestStealFrame)
-Stroke(bestStealFrame)
-RegTheme(bestStealFrame, "Primary")
+-- ── Status ──
+local stFrame = Instance.new("Frame", mainScroll)
+stFrame.LayoutOrder = 5
+stFrame.Size = UDim2.new(1, 0, 0, 24)
+stFrame.BackgroundColor3 = Color3.fromRGB(40,40,50); stFrame.BorderSizePixel = 0
+Corner(stFrame); Stroke(stFrame)
 
-local bsTitle = Instance.new("TextLabel", bestStealFrame)
-bsTitle.Size, bsTitle.Position = UDim2.new(1, -40, 1, 0), UDim2.new(0, 5, 0, 0)
-bsTitle.BackgroundTransparency, bsTitle.Text = 1, "Steal Trứng Xịn Nhất"
-bsTitle.TextColor3, bsTitle.TextSize = Color3.fromRGB(255,255,255), 9
-bsTitle.Font, bsTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+local stLbl = Instance.new("TextLabel", stFrame)
+stLbl.Size = UDim2.new(1, -8, 1, 0); stLbl.Position = UDim2.new(0, 6, 0, 0)
+stLbl.BackgroundTransparency = 1
+stLbl.Text = "⏸ Chưa bật Auto Steal"
+stLbl.TextColor3 = Color3.fromRGB(200,200,210); stLbl.TextSize = 8
+stLbl.Font = Enum.Font.Gotham; stLbl.TextXAlignment = Enum.TextXAlignment.Left
 
-local toggleBestBtn = Instance.new("TextButton", bestStealFrame)
-toggleBestBtn.Size, toggleBestBtn.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
-toggleBestBtn.BackgroundColor3, toggleBestBtn.Text = Color3.fromRGB(60,65,75), ""
-Corner(toggleBestBtn, UDim.new(1, 0))
-Stroke(toggleBestBtn)
-local bestDot = Instance.new("Frame", toggleBestBtn)
-bestDot.Size, bestDot.Position = UDim2.new(0, 11, 0, 11), UDim2.new(0, 2, 0.5, -5.5)
-bestDot.BackgroundColor3 = Color3.fromRGB(255,255,255)
-Corner(bestDot, UDim.new(1, 0))
+local function SetStatus(t, c)
+    stLbl.Text = t
+    if c then stLbl.TextColor3 = c end
+end
 
-Track(toggleBestBtn.MouseButton1Click:Connect(function()
-    State.StealBest = not State.StealBest
-    if State.StealBest then
-        toggleBestBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
-        bestDot.Position = UDim2.new(1, -13, 0.5, -5.5)
-    else
-        toggleBestBtn.BackgroundColor3 = Color3.fromRGB(60,65,75)
-        bestDot.Position = UDim2.new(0, 2, 0.5, -5.5)
-    end
-end))
+-- ── Divider ──
+local divLbl = Instance.new("TextLabel", mainScroll)
+divLbl.LayoutOrder = 6
+divLbl.Size = UDim2.new(1, 0, 0, 20)
+divLbl.BackgroundTransparency = 1
+divLbl.Text = "─ ─ ─ Scripts khác ─ ─ ─"
+divLbl.TextColor3 = Color3.fromRGB(150,150,160)
+divLbl.TextSize = 8
+divLbl.Font = Enum.Font.Gotham
 
--- ── Loop xử lý logic bay lượm trứng (Bay thường đến trứng -> Bay x3 về nhà thả -> Lượm lại) ──
-task.spawn(function()
-    while true do
-        task.wait(0.1)
-        if State.AutoSteal then
-            pcall(function()
-                local char = localPlayer.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-                if hrp and humanoid then
-                    local baseSpeed = humanoid.WalkSpeed > 0 and humanoid.WalkSpeed or 16
-                    -- Logic quy trình bay & tương tác được thực thi tự động tại đây
+-- ═════════════════ AUTO STEAL LOGIC ═════════════════
+
+local function GetPlayerSpeed()
+    local ch = localPlayer.Character
+    if not ch then return 16 end
+    local hum = ch:FindFirstChildOfClass("Humanoid")
+    if hum and hum.WalkSpeed > 0 then return hum.WalkSpeed end
+    return 16
+end
+
+local function GetHomePos()
+    local ch = localPlayer.Character
+    if not ch then return nil end
+    local hrp = ch:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    for _, o in ipairs(workspace:GetDescendants()) do
+        if o:IsA("Model") or o:IsA("BasePart") then
+            local n = o.Name:lower()
+            if n:find("home") or n:find("base") or n:find("plot")
+               or n:find("nest") or n:find("coop") then
+                local pp = o:IsA("BasePart") and o
+                    or (o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart"))
+                if pp and (pp.Position - hrp.Position).Magnitude < 800 then
+                    return pp.Position
                 end
-            end)
+            end
         end
     end
-end)
+    local sp = workspace:FindFirstChildOfClass("SpawnLocation")
+    if sp then return sp.Position end
+    return hrp.Position
+end
+
+local function GetCollectZone()
+    for _, o in ipairs(workspace:GetDescendants()) do
+        if o:IsA("Model") or o:IsA("BasePart") then
+            local n = o.Name:lower()
+            if n:find("collect") or n:find("deliver")
+               or n:find("sell") or n:find("claim") then
+                local pp = o:IsA("BasePart") and o
+                    or (o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart"))
+                if pp then return pp.Position end
+            end
+        end
+    end
+    return GetHomePos()
+end
+
+local function FindEggs()
+    local eggs = {}
+    local ch = localPlayer.Character
+    if not ch then return eggs end
+    local hrp = ch:FindFirstChild("HumanoidRootPart")
+    if not hrp then return eggs end
+
+    for _, o in ipairs(workspace:GetDescendants()) do
+        if o:IsA("BasePart") or o:IsA("Model") or o:IsA("Tool") then
+            local n = o.Name:lower()
+            if n:find("egg") and not n:find("eggplant") then
+                local rarity = nil
+                for _, a in ipairs({"Rarity","rarity","EggRarity","Tier","tier"}) do
+                    local ok, v = pcall(function() return o:GetAttribute(a) end)
+                    if ok and v ~= nil then
+                        if type(v) == "number" then
+                            rarity = RARITY_LIST[math.clamp(math.floor(v), 1, #RARITY_LIST)]
+                        else rarity = tostring(v) end
+                        break
+                    end
+                end
+                if not rarity then
+                    for _, r in ipairs(RARITY_LIST) do
+                        if n:find(r:lower()) then rarity = r break end
+                    end
+                end
+                rarity = rarity or "Common"
+
+                local part
+                if o:IsA("BasePart") then part = o
+                elseif o:IsA("Model") then part = o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart")
+                elseif o:IsA("Tool") then part = o:FindFirstChild("Handle") or o:FindFirstChildWhichIsA("BasePart") end
+
+                if part and part:IsDescendantOf(workspace) then
+                    table.insert(eggs, {
+                        Obj = o, Part = part, Rarity = rarity,
+                        Dist = (part.Position - hrp.Position).Magnitude
+                    })
+                end
+            end
+        end
+    end
+    return eggs
+end
+
+local function PickTarget()
+    local eggs = FindEggs()
+    if #eggs == 0 then return nil end
+    if AutoSteal.BestOnly then
+        local best, bo = nil, -1
+        for _, e in ipairs(eggs) do
+            local ord = RARITY_ORDER[e.Rarity] or 0
+            if ord > bo then best, bo = e, ord end
+        end
+        return best
+    else
+        local minOrd = RARITY_ORDER[AutoSteal.Rarity] or 1
+        local best, bd = nil, math.huge
+        for _, e in ipairs(eggs) do
+            local ord = RARITY_ORDER[e.Rarity] or 1
+            if ord >= minOrd and e.Dist < bd then best, bd = e, e.Dist end
+        end
+        return best
+    end
+end
+
+local function FlyToPos(targetPos, speed, stopDist, timeout)
+    local ch = localPlayer.Character
+    if not ch then return false end
+    local hrp = ch:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+    stopDist = stopDist or 4
+    timeout = timeout or 12
+    local t0 = tick()
+
+    local bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Velocity = Vector3.zero
+    bv.Parent = hrp
+
+    local reached = false
+    local conn = RunService.Heartbeat:Connect(function()
+        if not hrp.Parent or not AutoSteal.Enabled then
+            bv.Velocity = Vector3.zero; return
+        end
+        local d = targetPos - hrp.Position
+        if d.Magnitude <= stopDist then
+            bv.Velocity = Vector3.zero; reached = true; return
+        end
+        bv.Velocity = d.Unit * speed
+    end)
+
+    while not reached and AutoSteal.Enabled and (tick() - t0) < timeout do
+        task.wait()
+    end
+
+    conn:Disconnect()
+    pcall(function() bv:Destroy() end)
+    return reached
+end
+
+local function TryGrab(part)
+    local ch = localPlayer.Character
+    if not ch or not part or not part.Parent then return end
+    local hrp = ch:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    pcall(function()
+        firetouchinterest(hrp, part, 0)
+        task.wait(0.02)
+        firetouchinterest(hrp, part, 1)
+    end)
+end
+
+local autoStealThread = nil
+
+local function StartAutoSteal()
+    if autoStealThread then return end
+    autoStealThread = task.spawn(function()
+        AutoSteal.Running = true
+        SetStatus("🔄 Bắt đầu Auto Steal...", Color3.fromRGB(50,200,50))
+
+        while AutoSteal.Enabled do
+            local ch = localPlayer.Character
+            if not ch then
+                SetStatus("⚠️ Chưa có nhân vật", Color3.fromRGB(255,100,100))
+                task.wait(1); continue
+            end
+            local hrp = ch:FindFirstChild("HumanoidRootPart")
+            if not hrp then task.wait(0.5); continue end
+
+            local speed = math.max(GetPlayerSpeed(), 16)
+            local target = PickTarget()
+
+            if not target then
+                SetStatus("🔍 Không tìm thấy trứng phù hợp", Color3.fromRGB(255,200,100))
+                task.wait(0.8); continue
+            end
+
+            -- 1) Bay tới trứng bằng tốc độ hiện tại
+            SetStatus("✈️ Bay tới trứng ("..target.Rarity..")...", Color3.fromRGB(50,200,50))
+            FlyToPos(target.Part.Position, speed, 3.5, 10)
+            if not AutoSteal.Enabled then break end
+            task.wait(0.15)
+
+            -- 2) Lượm trứng
+            SetStatus("🥚 Lượm trứng...", Color3.fromRGB(50,200,50))
+            if target.Part and target.Part.Parent then TryGrab(target.Part) end
+            task.wait(0.3)
+
+            -- 3) Bay về nhà với tốc độ x3
+            local homePos = GetHomePos()
+            if homePos then
+                SetStatus("🏠 Về nhà (x3)...", Color3.fromRGB(50,200,50))
+                FlyToPos(homePos, speed * 3, 6, 10)
+            end
+            if not AutoSteal.Enabled then break end
+            task.wait(0.2)
+
+            -- 4) Gần chỗ trứng con gà → thả xuống + lượm lại ngay
+            SetStatus("🐔 Thả xuống & lượm lại...", Color3.fromRGB(50,200,50))
+            task.wait(0.25)
+            local near = FindEggs()
+            local nb, nd = nil, math.huge
+            for _, e in ipairs(near) do
+                if e.Dist < nd then nb, nd = e, e.Dist end
+            end
+            if nb then TryGrab(nb.Part); task.wait(0.15) end
+
+            -- 5) Mang về vùng lấy trứng
+            local colPos = GetCollectZone()
+            if colPos then
+                SetStatus("📦 Mang tới vùng lấy trứng...", Color3.fromRGB(50,200,50))
+                FlyToPos(colPos, speed * 1.5, 5, 10)
+                task.wait(0.3)
+                for _, e in ipairs(FindEggs()) do
+                    if e.Dist < 12 then TryGrab(e.Part) end
+                end
+                task.wait(0.3)
+            end
+        end
+
+        AutoSteal.Running = false
+        autoStealThread = nil
+        SetStatus("⏸ Đã dừng Auto Steal", Color3.fromRGB(200,200,210))
+    end)
+end
+
+-- ── Wire toggles ──
+Track(asToggle.MouseButton1Click:Connect(function()
+    AutoSteal.Enabled = not AutoSteal.Enabled
+    if AutoSteal.Enabled then
+        asToggle.BackgroundColor3 = Color3.fromRGB(50,200,50)
+        asDot.Position = UDim2.new(1, -13, 0.5, -5.5)
+        StartAutoSteal()
+    else
+        asToggle.BackgroundColor3 = Color3.fromRGB(60,65,75)
+        asDot.Position = UDim2.new(0, 2, 0.5, -5.5)
+        SetStatus("⏸ Đã dừng Auto Steal", Color3.fromRGB(200,200,210))
+    end
+end))
+
+Track(bfToggle.MouseButton1Click:Connect(function()
+    AutoSteal.BestOnly = not AutoSteal.BestOnly
+    if AutoSteal.BestOnly then
+        bfToggle.BackgroundColor3 = Color3.fromRGB(50,200,50)
+        bfDot.Position = UDim2.new(1, -13, 0.5, -5.5)
+        SetStatus("⭐ Đã bật: ưu tiên trứng xịn nhất", Color3.fromRGB(255,200,100))
+    else
+        bfToggle.BackgroundColor3 = Color3.fromRGB(60,65,75)
+        bfDot.Position = UDim2.new(0, 2, 0.5, -5.5)
+    end
+end))
 
 -- ═════════════════ TAB TEMPLATE ═════════════════
 local RegisteredScripts = {}
@@ -784,7 +1075,7 @@ Track(tabMiscBtn.MouseButton1Click:Connect(function()
 end))
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
--- ── AUTO LOAD SCRIPT ──
+-- ═════════════════ AUTO LOAD SCRIPT ═════════════════
 local autoLoadToggleBtn = Instance.new("TextButton", miscScroll)
 autoLoadToggleBtn.LayoutOrder = 1
 autoLoadToggleBtn.Size, autoLoadToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(55,12,40)
@@ -912,7 +1203,7 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     end
 end))
 
--- ── ÂM NHẠC ──
+-- ═════════════════ ÂM NHẠC ═════════════════
 local musicToggleBtn = Instance.new("TextButton", miscScroll)
 musicToggleBtn.LayoutOrder = 3
 musicToggleBtn.Size, musicToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(55,12,40)
@@ -1099,7 +1390,7 @@ Track(toggleMusicBtn.MouseButton1Click:Connect(function()
     end
 end))
 
--- ── MÀU MENU ──
+-- ═════════════════ MÀU MENU ═════════════════
 local menuColorToggleBtn = Instance.new("TextButton", miscScroll)
 menuColorToggleBtn.LayoutOrder = 5
 menuColorToggleBtn.Size, menuColorToggleBtn.BackgroundColor3 = UDim2.new(1, 0, 0, 34), Color3.fromRGB(55,12,40)
@@ -1262,6 +1553,7 @@ local colorList = {
     {Name = "🔴 Đỏ Đậm",            Color = Color3.fromRGB(220, 20, 60)},
     {Name = "❌ Không Viền",        Color = "None"},
 }
+local selectedColorObj = colorList[1]
 
 local colorDropBtn = Instance.new("TextButton", menuColorContainer)
 colorDropBtn.LayoutOrder, colorDropBtn.Size = 4, UDim2.new(1, 0, 0, 26)
@@ -1282,6 +1574,8 @@ Stroke(colorDropFrame)
 local colorListLayout = Instance.new("UIListLayout", colorDropFrame)
 colorListLayout.Padding = UDim.new(0, 3)
 RegTheme(colorDropFrame, "DropFrame")
+local colorPad = Instance.new("UIPadding", colorDropFrame)
+colorPad.PaddingRight = UDim.new(0, 8)
 
 local function UpdateAllStrokes(target)
     if target == "None" then
@@ -1306,6 +1600,7 @@ for i, cItem in ipairs(colorList) do
     Stroke(cBtn)
     RegTheme(cBtn, "DropItem")
     Track(cBtn.MouseButton1Click:Connect(function()
+        selectedColorObj = cItem
         colorDropBtn.Text = " 🎨 Viền: " .. cItem.Name
         colorDropFrame.Visible = false
         if cItem.Color == "Rainbow" then
@@ -1388,12 +1683,16 @@ local function SerializeState(scriptName)
         SoundId        = State.SoundId,
         SelectedScript = scriptName,
         Transparent    = State.Transparent,
+        AutoSteal      = {Enabled = AutoSteal.Enabled, BestOnly = AutoSteal.BestOnly, Rarity = AutoSteal.Rarity},
     }
 end
 
 local function ValidateConfig(data)
     if type(data) ~= "table" then return false end
     if data.Version ~= 4 then return false end
+    if data.ThemeBase and type(data.ThemeBase) ~= "table" then return false end
+    if data.StrokeColor and type(data.StrokeColor) ~= "table" then return false end
+    if data.Volume and type(data.Volume) ~= "number" then return false end
     return true
 end
 
@@ -1521,6 +1820,8 @@ Corner(delDropFrame)
 Stroke(delDropFrame)
 local delDropLayout = Instance.new("UIListLayout", delDropFrame)
 delDropLayout.Padding = UDim.new(0, 3)
+local delPad = Instance.new("UIPadding", delDropFrame)
+delPad.PaddingRight = UDim.new(0, 8)
 RegTheme(delDropFrame, "DropFrame")
 
 local loadConfigFrame = Instance.new("Frame", mainConfigContainer)
@@ -1554,6 +1855,8 @@ Corner(ldDropFrame)
 Stroke(ldDropFrame)
 local ldDropLayout = Instance.new("UIListLayout", ldDropFrame)
 ldDropLayout.Padding = UDim.new(0, 3)
+local ldPad = Instance.new("UIPadding", ldDropFrame)
+ldPad.PaddingRight = UDim.new(0, 8)
 RegTheme(ldDropFrame, "DropFrame")
 
 local saveFrame = Instance.new("Frame", mainConfigContainer)
@@ -1589,7 +1892,8 @@ end
 
 local function ApplyConfig(data)
     if data.ThemeBase then
-        ApplyTheme(Color3.new(data.ThemeBase[1], data.ThemeBase[2], data.ThemeBase[3]))
+        local c = Color3.new(data.ThemeBase[1], data.ThemeBase[2], data.ThemeBase[3])
+        ApplyTheme(c)
     end
     if data.StrokeMode == "Rainbow" then
         State.StrokeMode = "Rainbow"
@@ -1598,8 +1902,9 @@ local function ApplyConfig(data)
         State.StrokeMode = "None"
         UpdateAllStrokes("None")
     elseif data.StrokeColor then
+        local c = Color3.new(data.StrokeColor[1], data.StrokeColor[2], data.StrokeColor[3])
         State.StrokeMode = "Solid"
-        UpdateAllStrokes(Color3.new(data.StrokeColor[1], data.StrokeColor[2], data.StrokeColor[3]))
+        UpdateAllStrokes(c)
     end
     if type(data.Volume) == "number" then
         State.Volume = math.clamp(data.Volume, 0, 1)
@@ -1619,6 +1924,31 @@ local function ApplyConfig(data)
         ContentContainer.BackgroundTransparency = State.Transparent
         transLabel.Text = "✨ Trong suốt: " .. math.floor(State.Transparent * 100) .. "%"
     end
+    if data.SelectedScript then
+        for _, scr in ipairs(RegisteredScripts) do
+            if scr.Name == data.SelectedScript then
+                State.SelectedScript = scr
+                dropBtn.Text = " 📜 " .. scr.Name
+                break
+            end
+        end
+    end
+    if data.AutoSteal then
+        AutoSteal.BestOnly = data.AutoSteal.BestOnly or false
+        AutoSteal.Rarity = data.AutoSteal.Rarity or "Rare"
+        if AutoSteal.BestOnly then
+            bfToggle.BackgroundColor3 = Color3.fromRGB(50,200,50)
+            bfDot.Position = UDim2.new(1, -13, 0.5, -5.5)
+        end
+        rarBtn.Text = AutoSteal.Rarity .. " ∨"
+    end
+end
+
+local function LoadConfig(name)
+    local ok, dataOrErr = LoadConfigRaw(name)
+    if not ok then return false, dataOrErr end
+    ApplyConfig(dataOrErr)
+    return true
 end
 
 local function refreshAllDropdowns()
@@ -1644,7 +1974,7 @@ local function refreshAllDropdowns()
 
     for _, name in ipairs(filesList) do
         local f1 = Instance.new("TextButton", delDropFrame)
-        f1.Size, f1.BackgroundColor3 = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65)
+        f1.Size, f1.BackgroundColor3, f1.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f1.Text, f1.TextColor3, f1.TextSize = " 🗑️ " .. name, Color3.fromRGB(255,100,100), 9
         f1.Font, f1.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
         Corner(f1, UDim.new(0, 4))
@@ -1660,7 +1990,7 @@ local function refreshAllDropdowns()
         end))
 
         local f3 = Instance.new("TextButton", ldDropFrame)
-        f3.Size, f3.BackgroundColor3 = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65)
+        f3.Size, f3.BackgroundColor3, f3.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f3.Text, f3.TextColor3, f3.TextSize = " 📂 " .. name, Color3.fromRGB(255,255,255), 9
         f3.Font, f3.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
         Corner(f3, UDim.new(0, 4))
@@ -1672,8 +2002,8 @@ local function refreshAllDropdowns()
             svSub.Text = "Save: " .. name
             ldDropFrame.Visible = false
             RefreshStartupLabel()
-            local ok, data = LoadConfigRaw(name)
-            if ok then ApplyConfig(data) end
+            local ok, err = LoadConfig(name)
+            if not ok then warn("[VzNam] Load config fail: " .. tostring(err)) end
         end))
     end
     delDropFrame.CanvasSize = UDim2.new(0, 0, 0, #filesList * 25)
@@ -1693,7 +2023,12 @@ end))
 
 Track(createBtn.MouseButton1Click:Connect(function()
     local name = configNameBox.Text
-    if name == "" or string.find(name, "[\\/:*?\"<>|]") then return end
+    if name == "" then return end
+    if string.find(name, "[\\/:*?\"<>|]") then
+        warn("[VzNam] Tên config chứa ký tự không hợp lệ")
+        return
+    end
+    if typeof(writefile) ~= "function" then return end
     if SaveConfig(name) then
         State.CurrentConfig = name
         ldBtn.Text = name .. " ∨"
@@ -1730,4 +2065,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4] ✅ Loaded All Features Successfully!")
+print("[VzNam Hub v4] ✅ Loaded (Auto Steal). Config folder: " .. CONFIG_FOLDER)
