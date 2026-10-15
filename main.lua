@@ -1,11 +1,13 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 — FIXED + AUTO STEAL PRO v3
+    VzNam Hub v4 — FIXED
     ═══════════════════════════════════════════════════════
     • Tab "MAIN STEAL AN EGG" ngay dưới Trang Chủ
-    • Auto Steal + chọn ĐỘ HIẾM TỐI THIỂU (từ đó trở lên)
-    • "Steal Trứng Xịn Nhất" = trứng $/s CAO NHẤT server
-    • Tốc độ bay tùy chỉnh
+    • Đã xóa: BREAK AN STEAL, Tab 4, Tab 5
+    • Nhạc: y bản gốc
+    • Startup label (Cấu Hình): động theo CurrentConfig
+    • Auto Save + Auto Load: theo Cấu Hình
+    • Đã xóa tính năng "Khởi Động" trong Profiles
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -43,8 +45,14 @@ local State = {
     SelectedScript = nil,
     IsAutoLoad     = false,
     CurrentConfig  = "Default",
+    AutoSave       = true,
+    AutoLoadConfig = true,
     Transparent    = 0,
+    Initialized    = false,
 }
+
+local AutoSaveHook        = function() end
+local RefreshStartupLabel = function() end
 
 -- ═════════════════ UI HELPERS ═════════════════
 local function Corner(parent, radius)
@@ -454,560 +462,6 @@ end))
 
 table.insert(Tabs, {Container = mainScroll, Indicator = mainIndicator})
 
--- ═════════════════ AUTO STEAL FEATURE ═════════════════
-local AutoSteal = {
-    Enabled    = false,
-    BestOnly   = false,
-    MinRarity  = "Rare",
-    Speed      = 60,
-    Running    = false,
-}
-
--- ✅ Đúng thứ tự rarity game Steal An Egg
-local RARITY_LIST = {
-    "Common","Uncommon","Rare","Epic","Legendary",
-    "Mythical","Cosmic","Secret","Eternal","Divine"
-}
-local RARITY_ORDER = {}
-for i, r in ipairs(RARITY_LIST) do RARITY_ORDER[r] = i end
-
-local RARITY_ALIAS = {
-    ["mythic"]="Mythical",["mythical"]="Mythical",
-    ["cosmic"]="Cosmic",
-    ["secret"]="Secret",["secrets"]="Secret",
-    ["eternal"]="Eternal",["enternal"]="Eternal",
-    ["divine"]="Divine",
-    ["legendary"]="Legendary",
-    ["epic"]="Epic",["rare"]="Rare",["uncommon"]="Uncommon",["common"]="Common",
-}
-local function NormalizeRarity(s)
-    if not s then return "Common" end
-    local low = string.lower(tostring(s)):gsub("%s+","")
-    return RARITY_ALIAS[low] or (RARITY_ORDER[s] and s) or "Common"
-end
-
--- ── Header ──
-local autoHeader = Instance.new("TextLabel", mainScroll)
-autoHeader.LayoutOrder = 0
-autoHeader.Size = UDim2.new(1, 0, 0, 22)
-autoHeader.BackgroundColor3 = Color3.fromRGB(40,10,30)
-autoHeader.Text = "  🎯 AUTO STEAL"
-autoHeader.TextColor3 = Color3.fromRGB(255,150,200)
-autoHeader.TextSize = 10
-autoHeader.Font = Enum.Font.GothamBold
-autoHeader.TextXAlignment = Enum.TextXAlignment.Left
-Corner(autoHeader); Stroke(autoHeader)
-
--- ── Toggle: Auto Steal ──
-local asFrame = Instance.new("Frame", mainScroll)
-asFrame.LayoutOrder = 1
-asFrame.Size = UDim2.new(1, 0, 0, 32)
-asFrame.BackgroundColor3 = Color3.fromRGB(70,15,50)
-asFrame.BorderSizePixel = 0
-Corner(asFrame); Stroke(asFrame); RegTheme(asFrame, "Primary")
-
-local asLbl = Instance.new("TextLabel", asFrame)
-asLbl.Size = UDim2.new(1, -46, 1, 0); asLbl.Position = UDim2.new(0, 8, 0, 0)
-asLbl.BackgroundTransparency = 1; asLbl.Text = "🥚 Auto Steal Egg"
-asLbl.TextColor3 = Color3.fromRGB(255,255,255); asLbl.TextSize = 10
-asLbl.Font = Enum.Font.GothamBold; asLbl.TextXAlignment = Enum.TextXAlignment.Left
-
-local asToggle = Instance.new("TextButton", asFrame)
-asToggle.Size = UDim2.new(0, 30, 0, 15); asToggle.Position = UDim2.new(1, -36, 0.5, -7.5)
-asToggle.BackgroundColor3 = Color3.fromRGB(60,65,75); asToggle.Text = ""
-Corner(asToggle, UDim.new(1,0)); Stroke(asToggle)
-local asDot = Instance.new("Frame", asToggle)
-asDot.Size = UDim2.new(0, 11, 0, 11); asDot.Position = UDim2.new(0, 2, 0.5, -5.5)
-asDot.BackgroundColor3 = Color3.fromRGB(255,255,255); Corner(asDot, UDim.new(1,0))
-
--- ── Toggle: Steal Best ($/s cao nhất) ──
-local bfFrame = Instance.new("Frame", mainScroll)
-bfFrame.LayoutOrder = 2
-bfFrame.Size = UDim2.new(1, 0, 0, 32)
-bfFrame.BackgroundColor3 = Color3.fromRGB(70,15,50); bfFrame.BorderSizePixel = 0
-Corner(bfFrame); Stroke(bfFrame); RegTheme(bfFrame, "Primary")
-
-local bfLbl = Instance.new("TextLabel", bfFrame)
-bfLbl.Size = UDim2.new(1, -46, 1, 0); bfLbl.Position = UDim2.new(0, 8, 0, 0)
-bfLbl.BackgroundTransparency = 1; bfLbl.Text = "💰 Cướp Trứng $/s Cao Nhất"
-bfLbl.TextColor3 = Color3.fromRGB(255,255,255); bfLbl.TextSize = 9
-bfLbl.Font = Enum.Font.GothamBold; bfLbl.TextXAlignment = Enum.TextXAlignment.Left
-
-local bfToggle = Instance.new("TextButton", bfFrame)
-bfToggle.Size = UDim2.new(0, 30, 0, 15); bfToggle.Position = UDim2.new(1, -36, 0.5, -7.5)
-bfToggle.BackgroundColor3 = Color3.fromRGB(60,65,75); bfToggle.Text = ""
-Corner(bfToggle, UDim.new(1,0)); Stroke(bfToggle)
-local bfDot = Instance.new("Frame", bfToggle)
-bfDot.Size = UDim2.new(0, 11, 0, 11); bfDot.Position = UDim2.new(0, 2, 0.5, -5.5)
-bfDot.BackgroundColor3 = Color3.fromRGB(255,255,255); Corner(bfDot, UDim.new(1,0))
-
--- ── Dropdown: Độ hiếm TỐI THIỂU ──
-local rarFrame = Instance.new("Frame", mainScroll)
-rarFrame.LayoutOrder = 3
-rarFrame.Size = UDim2.new(1, 0, 0, 32)
-rarFrame.BackgroundColor3 = Color3.fromRGB(70,15,50); rarFrame.BorderSizePixel = 0
-Corner(rarFrame); Stroke(rarFrame); RegTheme(rarFrame, "Primary")
-
-local rarLbl = Instance.new("TextLabel", rarFrame)
-rarLbl.Size = UDim2.new(0.5, 0, 1, 0); rarLbl.Position = UDim2.new(0, 8, 0, 0)
-rarLbl.BackgroundTransparency = 1; rarLbl.Text = "🎯 Độ hiếm tối thiểu"
-rarLbl.TextColor3 = Color3.fromRGB(255,255,255); rarLbl.TextSize = 9
-rarLbl.Font = Enum.Font.GothamBold; rarLbl.TextXAlignment = Enum.TextXAlignment.Left
-
-local rarBtn = Instance.new("TextButton", rarFrame)
-rarBtn.Size = UDim2.new(0, 105, 0, 22); rarBtn.Position = UDim2.new(1, -111, 0.5, -11)
-rarBtn.BackgroundColor3 = Color3.fromRGB(50,10,35)
-rarBtn.Text = AutoSteal.MinRarity .. " ∨"
-rarBtn.TextColor3 = Color3.fromRGB(50,200,50)
-rarBtn.TextSize = 9; rarBtn.Font = Enum.Font.GothamBold
-Corner(rarBtn, UDim.new(0,4)); Stroke(rarBtn); RegTheme(rarBtn, "Input")
-
-local rarDrop = Instance.new("ScrollingFrame", mainScroll)
-rarDrop.LayoutOrder = 4
-rarDrop.Size = UDim2.new(1, 0, 0, 115)
-rarDrop.BackgroundColor3 = Color3.fromRGB(80,20,60)
-rarDrop.CanvasSize = UDim2.new(0,0,0,0); rarDrop.ScrollBarThickness = 3
-rarDrop.Visible = false
-Corner(rarDrop); Stroke(rarDrop); RegTheme(rarDrop, "DropFrame")
-local rdL = Instance.new("UIListLayout", rarDrop)
-rdL.Padding = UDim.new(0,3)
-local rdP = Instance.new("UIPadding", rarDrop)
-rdP.PaddingRight = UDim.new(0,8); rdP.PaddingTop = UDim.new(0,4)
-
-for i, r in ipairs(RARITY_LIST) do
-    local rb = Instance.new("TextButton", rarDrop)
-    rb.LayoutOrder = i; rb.Size = UDim2.new(1,0,0,22)
-    rb.BackgroundColor3 = Color3.fromRGB(90,25,65)
-    rb.Text = "  " .. r; rb.TextColor3 = Color3.fromRGB(255,255,255)
-    rb.TextSize = 9; rb.Font = Enum.Font.Gotham
-    rb.TextXAlignment = Enum.TextXAlignment.Left
-    Corner(rb, UDim.new(0,4)); Stroke(rb); RegTheme(rb, "DropItem")
-    Track(rb.MouseButton1Click:Connect(function()
-        AutoSteal.MinRarity = r
-        rarBtn.Text = r .. " ∨"
-        rarDrop.Visible = false
-    end))
-end
-rarDrop.CanvasSize = UDim2.new(0, 0, 0, #RARITY_LIST * 25)
-Track(rarBtn.MouseButton1Click:Connect(function()
-    rarDrop.Visible = not rarDrop.Visible
-end))
-
--- ── Speed Slider ──
-local spdFrame = Instance.new("Frame", mainScroll)
-spdFrame.LayoutOrder = 5
-spdFrame.Size = UDim2.new(1, 0, 0, 30)
-spdFrame.BackgroundColor3 = Color3.fromRGB(70,15,50); spdFrame.BorderSizePixel = 0
-Corner(spdFrame); Stroke(spdFrame); RegTheme(spdFrame, "Primary")
-
-local spdLabel = Instance.new("TextLabel", spdFrame)
-spdLabel.Size = UDim2.new(1, -8, 1, 0); spdLabel.Position = UDim2.new(0, 5, 0, 0)
-spdLabel.BackgroundTransparency = 1
-spdLabel.Text = "⚡ Tốc độ bay: " .. AutoSteal.Speed
-spdLabel.TextColor3 = Color3.fromRGB(255,255,255); spdLabel.TextSize = 9
-spdLabel.Font = Enum.Font.GothamBold; spdLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local spdBarBg = Instance.new("Frame", spdFrame)
-spdBarBg.Size = UDim2.new(0, 100, 0, 8); spdBarBg.Position = UDim2.new(1, -108, 0.5, -4)
-spdBarBg.BackgroundColor3 = Color3.fromRGB(90,25,65)
-Corner(spdBarBg, UDim.new(1, 0)); Stroke(spdBarBg); RegTheme(spdBarBg, "DropItem")
-
-local spdBarFill = Instance.new("Frame", spdBarBg)
-local initP = math.clamp((AutoSteal.Speed - 30) / (500 - 30), 0, 1)
-spdBarFill.Size = UDim2.new(initP, 0, 1, 0)
-spdBarFill.BackgroundColor3 = Color3.fromRGB(255,180,60)
-Corner(spdBarFill, UDim.new(1, 0))
-
-local spdBtn = Instance.new("TextButton", spdBarBg)
-spdBtn.Size = UDim2.new(1, 10, 1, 10); spdBtn.BackgroundTransparency = 1; spdBtn.Text = ""
-
-local adjustingSpd = false
-Track(spdBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-       or input.UserInputType == Enum.UserInputType.Touch then adjustingSpd = true end
-end))
-Track(UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-       or input.UserInputType == Enum.UserInputType.Touch then
-        adjustingSpd = false
-    end
-end))
-Track(UserInputService.InputChanged:Connect(function(input)
-    if adjustingSpd and (input.UserInputType == Enum.UserInputType.MouseMovement
-       or input.UserInputType == Enum.UserInputType.Touch) then
-        local absPos, absSize = spdBarBg.AbsolutePosition.X, spdBarBg.AbsoluteSize.X
-        local p = math.clamp((input.Position.X - absPos) / absSize, 0, 1)
-        spdBarFill.Size = UDim2.new(p, 0, 1, 0)
-        AutoSteal.Speed = math.floor(30 + p * (500 - 30))
-        spdLabel.Text = "⚡ Tốc độ bay: " .. AutoSteal.Speed
-    end
-end))
-
--- ── Status ──
-local stFrame = Instance.new("Frame", mainScroll)
-stFrame.LayoutOrder = 6
-stFrame.Size = UDim2.new(1, 0, 0, 24)
-stFrame.BackgroundColor3 = Color3.fromRGB(40,40,50); stFrame.BorderSizePixel = 0
-Corner(stFrame); Stroke(stFrame)
-
-local stLbl = Instance.new("TextLabel", stFrame)
-stLbl.Size = UDim2.new(1, -8, 1, 0); stLbl.Position = UDim2.new(0, 6, 0, 0)
-stLbl.BackgroundTransparency = 1
-stLbl.Text = "⏸ Chưa bật Auto Steal"
-stLbl.TextColor3 = Color3.fromRGB(200,200,210); stLbl.TextSize = 8
-stLbl.Font = Enum.Font.Gotham; stLbl.TextXAlignment = Enum.TextXAlignment.Left
-
-local function SetStatus(t, c)
-    stLbl.Text = t
-    if c then stLbl.TextColor3 = c end
-end
-
--- ═════════════════ AUTO STEAL LOGIC ═════════════════
-
-local function GetHRP()
-    local ch = localPlayer.Character
-    if not ch then return nil end
-    return ch:FindFirstChild("HumanoidRootPart")
-end
-
-local function GetHomePos()
-    local hrp = GetHRP()
-    if not hrp then return nil end
-    for _, o in ipairs(workspace:GetDescendants()) do
-        if o:IsA("SpawnLocation") then return o.Position end
-    end
-    for _, o in ipairs(workspace:GetDescendants()) do
-        if o:IsA("BasePart") then
-            local n = o.Name:lower()
-            if n:find("base") or n:find("home") or n:find("plot") or n:find("nest") then
-                if (o.Position - hrp.Position).Magnitude < 2000 then
-                    return o.Position
-                end
-            end
-        end
-    end
-    return hrp.Position
-end
-
-local function GetCollectZone()
-    local hrp = GetHRP()
-    if not hrp then return nil end
-    for _, o in ipairs(workspace:GetDescendants()) do
-        if o:IsA("BasePart") then
-            local n = o.Name:lower()
-            if n:find("collect") or n:find("deliver")
-               or n:find("sell") or n:find("claim") or n:find("return") then
-                return o.Position
-            end
-        end
-    end
-    return GetHomePos()
-end
-
--- ⭐ Đọc giá trị $/s của egg từ nhiều nguồn
-local function ParseMoneyString(s)
-    if not s then return nil end
-    s = tostring(s)
-    -- Tìm số có thể kèm suffix K/M/B/T/Q
-    local numStr, suffix = s:match("(%d+%.?%d*)([KkMmBbTtQq]?)")
-    if not numStr then return nil end
-    local num = tonumber(numStr)
-    if not num then return nil end
-    local mult = 1
-    suffix = suffix:lower()
-    if     suffix == "k" then mult = 1e3
-    elseif suffix == "m" then mult = 1e6
-    elseif suffix == "b" then mult = 1e9
-    elseif suffix == "t" then mult = 1e12
-    elseif suffix == "q" then mult = 1e15
-    end
-    return num * mult
-end
-
-local function GetEggValue(obj)
-    -- 1) Attribute trực tiếp
-    local attrNames = {
-        "Value","value","Price","price","Income","income",
-        "Worth","worth","Money","money","DPS","dps",
-        "ValuePerSec","IncomePerSec","DollarPerSecond",
-        "MoneyPerSecond","CashPerSecond","Cash","cash","$/s","PerSec",
-    }
-    for _, a in ipairs(attrNames) do
-        local ok, v = pcall(function() return obj:GetAttribute(a) end)
-        if ok and v ~= nil then
-            if type(v) == "number" then return v end
-            if type(v) == "string" then
-                local n = ParseMoneyString(v)
-                if n then return n end
-            end
-        end
-    end
-
-    -- 2) Child Value objects
-    for _, child in ipairs(obj:GetDescendants()) do
-        if child:IsA("NumberValue") or child:IsA("IntValue") then
-            local n = child.Name:lower()
-            if n:find("value") or n:find("price") or n:find("income")
-               or n:find("worth") or n:find("money") or n:find("dps")
-               or n:find("cash") or n:find("persec") or n:find("per_sec")
-               or n:find("persecond") then
-                return child.Value
-            end
-        elseif child:IsA("StringValue") then
-            local n = child.Name:lower()
-            if n:find("value") or n:find("price") or n:find("income")
-               or n:find("worth") or n:find("money") or n:find("dps")
-               or n:find("cash") or n:find("persec") or n:find("per_sec")
-               or n:find("persecond") then
-                local v = ParseMoneyString(child.Value)
-                if v then return v end
-            end
-        end
-    end
-
-    -- 3) Đọc text UI (BillboardGui, SurfaceGui) — thường hiện "$X/s"
-    for _, child in ipairs(obj:GetDescendants()) do
-        if child:IsA("TextLabel") or child:IsA("TextButton") then
-            local txt = child.Text
-            local low = txt:lower()
-            if low:find("%$") or low:find("per sec") or low:find("/s")
-               or low:find("persec") or low:find("income") then
-                local n = ParseMoneyString(txt)
-                if n and n > 0 then return n end
-            end
-        end
-    end
-
-    return nil
-end
-
-local function FindEggs()
-    local eggs = {}
-    local hrp = GetHRP()
-    if not hrp then return eggs end
-    for _, o in ipairs(workspace:GetDescendants()) do
-        local matched = false
-        local part = nil
-        if o:IsA("BasePart") and (o.Name:lower():find("egg")) then
-            matched, part = true, o
-        elseif o:IsA("Model") and (o.Name:lower():find("egg")) then
-            part = o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart")
-            matched = part ~= nil
-        elseif o:IsA("Tool") and (o.Name:lower():find("egg")) then
-            part = o:FindFirstChild("Handle") or o:FindFirstChildWhichIsA("BasePart")
-            matched = part ~= nil
-        end
-        if matched and part and part:IsDescendantOf(workspace) then
-            -- Rarity
-            local rarity = nil
-            for _, a in ipairs({"Rarity","rarity","EggRarity","Tier","tier"}) do
-                local ok, v = pcall(function() return o:GetAttribute(a) end)
-                if ok and v ~= nil then
-                    rarity = NormalizeRarity(tostring(v)); break
-                end
-            end
-            if not rarity then
-                local low = o.Name:lower()
-                for _, r in ipairs(RARITY_LIST) do
-                    if low:find(r:lower()) then rarity = r break end
-                end
-            end
-            rarity = rarity or "Common"
-
-            -- ⭐ Giá trị $/s
-            local value = GetEggValue(o)
-
-            table.insert(eggs, {
-                Obj = o, Part = part, Rarity = rarity, Value = value,
-                Dist = (part.Position - hrp.Position).Magnitude
-            })
-        end
-    end
-    return eggs
-end
-
-local function FormatMoney(n)
-    if not n then return "?" end
-    if n >= 1e15 then return string.format("%.2fQ", n / 1e15) end
-    if n >= 1e12 then return string.format("%.2fT", n / 1e12) end
-    if n >= 1e9  then return string.format("%.2fB", n / 1e9) end
-    if n >= 1e6  then return string.format("%.2fM", n / 1e6) end
-    if n >= 1e3  then return string.format("%.2fK", n / 1e3) end
-    return tostring(math.floor(n))
-end
-
--- ⭐ PickTarget: nếu BestOnly → tìm $/s cao nhất
-local function PickTarget()
-    local eggs = FindEggs()
-    if #eggs == 0 then return nil end
-
-    if AutoSteal.BestOnly then
-        -- Ưu tiên đọc $/s, ai cao nhất thì chọn
-        local best, bv = nil, -1
-        local hasValue = false
-        for _, e in ipairs(eggs) do
-            if type(e.Value) == "number" and e.Value > bv then
-                best, bv = e, e.Value
-                hasValue = true
-            end
-        end
-        -- Fallback: nếu game không expose giá trị → dùng rarity
-        if not hasValue then
-            for _, e in ipairs(eggs) do
-                local ord = RARITY_ORDER[e.Rarity] or 0
-                if ord > bv then best, bv = e, ord end
-            end
-        end
-        return best
-    else
-        -- Lọc theo độ hiếm tối thiểu
-        local minOrd = RARITY_ORDER[AutoSteal.MinRarity] or 1
-        local best, bd = nil, math.huge
-        for _, e in ipairs(eggs) do
-            local ord = RARITY_ORDER[e.Rarity] or 1
-            if ord >= minOrd and e.Dist < bd then
-                best, bd = e, e.Dist
-            end
-        end
-        return best
-    end
-end
-
-local function FlyToPos(targetPos, speed, stopDist, timeout)
-    local hrp = GetHRP()
-    if not hrp then return false end
-    stopDist = stopDist or 4
-    timeout = timeout or 15
-    local t0 = tick()
-    local oldAnchored = hrp.Anchored
-    hrp.Anchored = true
-    while AutoSteal.Enabled and (tick() - t0) < timeout do
-        if not hrp.Parent then break end
-        local cur = hrp.CFrame.Position
-        local diff = targetPos - cur
-        local dist = diff.Magnitude
-        if dist <= stopDist then break end
-        local step = math.min(speed / 60, dist)
-        local newPos = cur + diff.Unit * step
-        hrp.CFrame = CFrame.new(newPos)
-        RunService.Heartbeat:Wait()
-    end
-    if hrp.Parent then hrp.Anchored = oldAnchored end
-    return true
-end
-
-local function TryGrab(part)
-    local hrp = GetHRP()
-    if not hrp or not part or not part.Parent then return end
-    local savedCF = hrp.CFrame
-    pcall(function()
-        firetouchinterest(hrp, part, 0)
-        task.wait(0.05)
-        firetouchinterest(hrp, part, 1)
-    end)
-    pcall(function()
-        hrp.CFrame = CFrame.new(part.Position)
-        task.wait(0.05)
-        hrp.CFrame = savedCF
-    end)
-end
-
-local autoStealThread = nil
-
-local function StartAutoSteal()
-    if autoStealThread then return end
-    autoStealThread = task.spawn(function()
-        AutoSteal.Running = true
-        SetStatus("🔄 Đang chạy Auto Steal...", Color3.fromRGB(50,200,50))
-
-        while AutoSteal.Enabled do
-            local hrp = GetHRP()
-            if not hrp then
-                SetStatus("⚠️ Chưa có nhân vật", Color3.fromRGB(255,100,100))
-                task.wait(1); continue
-            end
-
-            local speed = AutoSteal.Speed
-            local target = PickTarget()
-
-            if not target then
-                local msg = AutoSteal.BestOnly
-                    and "🔍 Không tìm được trứng ($/s)..."
-                    or ("🔍 Không có trứng ≥ "..AutoSteal.MinRarity)
-                SetStatus(msg, Color3.fromRGB(255,200,100))
-                task.wait(1); continue
-            end
-
-            local valTxt = target.Value and (" | $"..FormatMoney(target.Value).."/s") or ""
-            SetStatus("✈️ Bay tới ["..target.Rarity.."]"..valTxt, Color3.fromRGB(50,200,50))
-            FlyToPos(target.Part.Position, speed, 3, 12)
-            if not AutoSteal.Enabled then break end
-            task.wait(0.1)
-
-            SetStatus("🥚 Lượm trứng...", Color3.fromRGB(50,200,50))
-            if target.Part and target.Part.Parent then TryGrab(target.Part) end
-            task.wait(0.3)
-
-            local homePos = GetHomePos()
-            if homePos then
-                SetStatus("🏠 Về nhà (x3)...", Color3.fromRGB(100,200,255))
-                FlyToPos(homePos, speed * 3, 6, 12)
-            end
-            if not AutoSteal.Enabled then break end
-            task.wait(0.2)
-
-            SetStatus("🐔 Thả xuống & lượm lại...", Color3.fromRGB(255,200,100))
-            task.wait(0.3)
-            local near = FindEggs()
-            local nb, nd = nil, math.huge
-            for _, e in ipairs(near) do
-                if e.Dist < nd then nb, nd = e, e.Dist end
-            end
-            if nb and nb.Dist < 30 then TryGrab(nb.Part); task.wait(0.2) end
-
-            local colPos = GetCollectZone()
-            if colPos then
-                SetStatus("📦 Nộp vùng lấy trứng...", Color3.fromRGB(100,255,150))
-                FlyToPos(colPos, speed * 1.5, 5, 12)
-                task.wait(0.3)
-                for _, e in ipairs(FindEggs()) do
-                    if e.Dist < 15 then TryGrab(e.Part) end
-                end
-                task.wait(0.3)
-            end
-        end
-
-        AutoSteal.Running = false
-        autoStealThread = nil
-        SetStatus("⏸ Đã dừng Auto Steal", Color3.fromRGB(200,200,210))
-    end)
-end
-
-Track(asToggle.MouseButton1Click:Connect(function()
-    AutoSteal.Enabled = not AutoSteal.Enabled
-    if AutoSteal.Enabled then
-        asToggle.BackgroundColor3 = Color3.fromRGB(50,200,50)
-        asDot.Position = UDim2.new(1, -13, 0.5, -5.5)
-        StartAutoSteal()
-    else
-        asToggle.BackgroundColor3 = Color3.fromRGB(60,65,75)
-        asDot.Position = UDim2.new(0, 2, 0.5, -5.5)
-        SetStatus("⏸ Đã dừng Auto Steal", Color3.fromRGB(200,200,210))
-    end
-end))
-
-Track(bfToggle.MouseButton1Click:Connect(function()
-    AutoSteal.BestOnly = not AutoSteal.BestOnly
-    if AutoSteal.BestOnly then
-        bfToggle.BackgroundColor3 = Color3.fromRGB(50,200,50)
-        bfDot.Position = UDim2.new(1, -13, 0.5, -5.5)
-        SetStatus("💰 Bật: cướp trứng $/s cao nhất", Color3.fromRGB(255,200,100))
-    else
-        bfToggle.BackgroundColor3 = Color3.fromRGB(60,65,75)
-        bfDot.Position = UDim2.new(0, 2, 0.5, -5.5)
-    end
-end))
-
 -- ═════════════════ TAB TEMPLATE ═════════════════
 local RegisteredScripts = {}
 local LastSelectedScriptStroke = nil
@@ -1327,7 +781,9 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     if not State.SelectedScript then
         dropBtn.Text = " ⚠️ Chọn script trước!"
         task.delay(1.5, function()
-            if dropBtn.Parent then dropBtn.Text = " 📜 Chọn Script Auto Load..." end
+            if dropBtn.Parent then
+                dropBtn.Text = " 📜 Chọn Script Auto Load..."
+            end
         end)
         return
     end
@@ -1433,6 +889,7 @@ for i, m in ipairs(presetMusics) do
             HubSound.SoundId = "rbxassetid://" .. State.SoundId
             HubSound:Play()
         end
+        AutoSaveHook()
     end))
 end
 musicDropFrame.CanvasSize = UDim2.new(0, 0, 0, #presetMusics * 25)
@@ -1475,7 +932,7 @@ end))
 Track(UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
        or input.UserInputType == Enum.UserInputType.Touch then
-        adjustingVol = false
+        if adjustingVol then adjustingVol = false; AutoSaveHook() end
     end
 end))
 Track(UserInputService.InputChanged:Connect(function(input)
@@ -1589,6 +1046,7 @@ local function ApplyTheme(newBaseColor)
             end
         end
     end
+    AutoSaveHook()
 end
 
 local themeDropBtn = Instance.new("TextButton", menuColorContainer)
@@ -1668,7 +1126,7 @@ end))
 Track(UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
        or input.UserInputType == Enum.UserInputType.Touch then
-        adjustingTrans = false
+        if adjustingTrans then adjustingTrans = false; AutoSaveHook() end
     end
 end))
 Track(UserInputService.InputChanged:Connect(function(input)
@@ -1727,6 +1185,7 @@ local function UpdateAllStrokes(target)
             if s then s.Transparency = 0; s.Color = target end
         end
     end
+    AutoSaveHook()
 end
 
 for i, cItem in ipairs(colorList) do
@@ -1821,12 +1280,9 @@ local function SerializeState(scriptName)
         Volume         = State.Volume,
         SoundId        = State.SoundId,
         SelectedScript = scriptName,
+        AutoSave       = State.AutoSave,
+        AutoLoadConfig = State.AutoLoadConfig,
         Transparent    = State.Transparent,
-        AutoSteal = {
-            BestOnly  = AutoSteal.BestOnly,
-            MinRarity = AutoSteal.MinRarity,
-            Speed     = AutoSteal.Speed,
-        },
     }
 end
 
@@ -1859,14 +1315,35 @@ local function LoadConfigRaw(name)
     return true, data
 end
 
+local configToggleBtn = Instance.new("TextButton", configScroll)
+configToggleBtn.LayoutOrder, configToggleBtn.Size = 1, UDim2.new(1, 0, 0, 34)
+configToggleBtn.BackgroundColor3, configToggleBtn.BackgroundTransparency = Color3.fromRGB(55,12,40), 0
+configToggleBtn.Text, configToggleBtn.TextColor3 = " ↓ Cấu Hình", Color3.fromRGB(255,255,255)
+configToggleBtn.TextSize, configToggleBtn.Font = 10, Enum.Font.GothamBold
+configToggleBtn.TextXAlignment = Enum.TextXAlignment.Center
+Corner(configToggleBtn)
+Stroke(configToggleBtn)
+RegTheme(configToggleBtn, "Secondary")
+
+local configSubLabel = Instance.new("TextLabel", configToggleBtn)
+configSubLabel.Size, configSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
+configSubLabel.BackgroundTransparency, configSubLabel.Text = 1, "Quản lý cấu hình hệ thống"
+configSubLabel.TextColor3, configSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
+configSubLabel.Font, configSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
+
 local mainConfigContainer = Instance.new("Frame", configScroll)
-mainConfigContainer.LayoutOrder = 1
-mainConfigContainer.Size, mainConfigContainer.AutomaticSize = UDim2.new(1, 0, 0, 0), Enum.AutomaticSize.Y
-mainConfigContainer.BackgroundTransparency = 1
+mainConfigContainer.LayoutOrder, mainConfigContainer.Size = 2, UDim2.new(1, 0, 0, 0)
+mainConfigContainer.AutomaticSize, mainConfigContainer.BackgroundTransparency = Enum.AutomaticSize.Y, 1
 mainConfigContainer.Visible = true
 local mainCfgLayout = Instance.new("UIListLayout", mainConfigContainer)
 mainCfgLayout.SortOrder, mainCfgLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 mainCfgLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+Track(configToggleBtn.MouseButton1Click:Connect(function()
+    mainConfigContainer.Visible = not mainConfigContainer.Visible
+    configToggleBtn.Text = mainConfigContainer.Visible and " ↓ Cấu Hình" or " → Cấu Hình"
+    configSubLabel.Visible = mainConfigContainer.Visible
+end))
 
 local startupFrame = Instance.new("Frame", mainConfigContainer)
 startupFrame.LayoutOrder, startupFrame.Size = 1, UDim2.new(1, 0, 0, 30)
@@ -1882,8 +1359,192 @@ startupLabel.Text = "Startup: " .. State.CurrentConfig
 startupLabel.TextColor3, startupLabel.TextSize = Color3.fromRGB(255,255,255), 9
 startupLabel.Font, startupLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
 
-local newConfigFrame = Instance.new("Frame", mainConfigContainer)
-newConfigFrame.LayoutOrder, newConfigFrame.Size = 2, UDim2.new(1, 0, 0, 30)
+local autoSaveFrame = Instance.new("Frame", mainConfigContainer)
+autoSaveFrame.LayoutOrder, autoSaveFrame.Size = 2, UDim2.new(1, 0, 0, 34)
+autoSaveFrame.BackgroundColor3, autoSaveFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
+Corner(autoSaveFrame)
+Stroke(autoSaveFrame)
+RegTheme(autoSaveFrame, "Primary")
+
+local asTitle = Instance.new("TextLabel", autoSaveFrame)
+asTitle.Size, asTitle.Position = UDim2.new(1, -38, 0, 15), UDim2.new(0, 5, 0, 2)
+asTitle.BackgroundTransparency, asTitle.Text = 1, "Auto Lưu Cấu Hình"
+asTitle.TextColor3, asTitle.TextSize = Color3.fromRGB(255,255,255), 9
+asTitle.Font, asTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+
+local asSub = Instance.new("TextLabel", autoSaveFrame)
+asSub.Size, asSub.Position = UDim2.new(1, -38, 0, 14), UDim2.new(0, 5, 0, 17)
+asSub.BackgroundTransparency, asSub.Text = 1, "Save: " .. State.CurrentConfig
+asSub.TextColor3, asSub.TextSize = Color3.fromRGB(140,140,150), 7
+asSub.Font, asSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+
+local autoSaveToggle = Instance.new("TextButton", autoSaveFrame)
+autoSaveToggle.Size, autoSaveToggle.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
+autoSaveToggle.BackgroundColor3, autoSaveToggle.Text = Color3.fromRGB(50,200,50), ""
+Corner(autoSaveToggle, UDim.new(1, 0))
+Stroke(autoSaveToggle)
+
+local asBox = Instance.new("Frame", autoSaveToggle)
+asBox.Size, asBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5)
+asBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Corner(asBox, UDim.new(1, 0))
+
+local autoLoadFrame = Instance.new("Frame", mainConfigContainer)
+autoLoadFrame.LayoutOrder, autoLoadFrame.Size = 3, UDim2.new(1, 0, 0, 34)
+autoLoadFrame.BackgroundColor3, autoLoadFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
+Corner(autoLoadFrame)
+Stroke(autoLoadFrame)
+RegTheme(autoLoadFrame, "Primary")
+
+local alTitle = Instance.new("TextLabel", autoLoadFrame)
+alTitle.Size, alTitle.Position = UDim2.new(1, -38, 0, 15), UDim2.new(0, 5, 0, 2)
+alTitle.BackgroundTransparency, alTitle.Text = 1, "Auto Tải Cấu Hình"
+alTitle.TextColor3, alTitle.TextSize = Color3.fromRGB(255,255,255), 9
+alTitle.Font, alTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+
+local alSub = Instance.new("TextLabel", autoLoadFrame)
+alSub.Size, alSub.Position = UDim2.new(1, -38, 0, 14), UDim2.new(0, 5, 0, 17)
+alSub.BackgroundTransparency, alSub.Text = 1, "Load: " .. State.CurrentConfig
+alSub.TextColor3, alSub.TextSize = Color3.fromRGB(140,140,150), 7
+alSub.Font, alSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+
+local autoLoadToggle = Instance.new("TextButton", autoLoadFrame)
+autoLoadToggle.Size, autoLoadToggle.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
+autoLoadToggle.BackgroundColor3, autoLoadToggle.Text = Color3.fromRGB(50,200,50), ""
+Corner(autoLoadToggle, UDim.new(1, 0))
+Stroke(autoLoadToggle)
+
+local alBox = Instance.new("Frame", autoLoadToggle)
+alBox.Size, alBox.Position = UDim2.new(0, 11, 0, 11), UDim2.new(1, -13, 0.5, -5.5)
+alBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Corner(alBox, UDim.new(1, 0))
+
+AutoSaveHook = function()
+    if not State.Initialized then return end
+    if State.AutoSave then
+        SaveConfig(State.CurrentConfig)
+    end
+end
+
+RefreshStartupLabel = function()
+    startupLabel.Text = "Startup: " .. State.CurrentConfig
+end
+
+local function ApplyConfig(data)
+    if data.ThemeBase then
+        local c = Color3.new(data.ThemeBase[1], data.ThemeBase[2], data.ThemeBase[3])
+        ApplyTheme(c)
+    end
+    if data.StrokeMode == "Rainbow" then
+        State.StrokeMode = "Rainbow"
+        UpdateAllStrokes("Rainbow")
+    elseif data.StrokeMode == "None" then
+        State.StrokeMode = "None"
+        UpdateAllStrokes("None")
+    elseif data.StrokeColor then
+        local c = Color3.new(data.StrokeColor[1], data.StrokeColor[2], data.StrokeColor[3])
+        State.StrokeMode = "Solid"
+        UpdateAllStrokes(c)
+    end
+    if type(data.Volume) == "number" then
+        State.Volume = math.clamp(data.Volume, 0, 1)
+        HubSound.Volume = State.Volume
+        volumeBarFill.Size = UDim2.new(State.Volume, 0, 1, 0)
+        volumeLabel.Text = "🔊 Vol: " .. math.floor(State.Volume * 100) .. "%"
+    end
+    if type(data.SoundId) == "string" then
+        State.SoundId = data.SoundId
+        HubSound.SoundId = "rbxassetid://" .. State.SoundId
+    end
+    if type(data.Transparent) == "number" then
+        State.Transparent = math.clamp(data.Transparent, 0, 1)
+        transBarFill.Size = UDim2.new(State.Transparent, 0, 1, 0)
+        MainFrame.BackgroundTransparency = 0.15 + (State.Transparent * 0.85)
+        SidebarPanel.BackgroundTransparency = State.Transparent
+        ContentContainer.BackgroundTransparency = State.Transparent
+        transLabel.Text = "✨ Trong suốt: " .. math.floor(State.Transparent * 100) .. "%"
+    end
+    if type(data.AutoSave) == "boolean" then
+        State.AutoSave = data.AutoSave
+        autoSaveToggle.BackgroundColor3 = State.AutoSave and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
+        asBox.Position = State.AutoSave and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
+    end
+    if type(data.AutoLoadConfig) == "boolean" then
+        State.AutoLoadConfig = data.AutoLoadConfig
+        autoLoadToggle.BackgroundColor3 = State.AutoLoadConfig and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
+        alBox.Position = State.AutoLoadConfig and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
+    end
+    if data.SelectedScript then
+        for _, scr in ipairs(RegisteredScripts) do
+            if scr.Name == data.SelectedScript then
+                State.SelectedScript = scr
+                dropBtn.Text = " 📜 " .. scr.Name
+                break
+            end
+        end
+    end
+end
+
+local function LoadConfig(name)
+    local ok, dataOrErr = LoadConfigRaw(name)
+    if not ok then return false, dataOrErr end
+    ApplyConfig(dataOrErr)
+    return true
+end
+
+Track(autoSaveToggle.MouseButton1Click:Connect(function()
+    State.AutoSave = not State.AutoSave
+    autoSaveToggle.BackgroundColor3 = State.AutoSave and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
+    asBox.Position = State.AutoSave and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
+    if State.AutoSave then
+        SaveConfig(State.CurrentConfig)
+        svSub.Text = "Save: " .. State.CurrentConfig
+    end
+end))
+
+Track(autoLoadToggle.MouseButton1Click:Connect(function()
+    State.AutoLoadConfig = not State.AutoLoadConfig
+    autoLoadToggle.BackgroundColor3 = State.AutoLoadConfig and Color3.fromRGB(50,200,50) or Color3.fromRGB(60,65,75)
+    alBox.Position = State.AutoLoadConfig and UDim2.new(1,-13,0.5,-5.5) or UDim2.new(0,2,0.5,-5.5)
+    if State.AutoLoadConfig then
+        local ok, err = LoadConfig(State.CurrentConfig)
+        if not ok then warn("[VzNam] Auto Load fail: " .. tostring(err)) end
+    end
+end))
+
+-- ═════════════════ PROFILES ═════════════════
+local profilesToggleBtn = Instance.new("TextButton", configScroll)
+profilesToggleBtn.LayoutOrder, profilesToggleBtn.Size = 3, UDim2.new(1, 0, 0, 34)
+profilesToggleBtn.BackgroundColor3, profilesToggleBtn.BackgroundTransparency = Color3.fromRGB(55,12,40), 0
+profilesToggleBtn.Text, profilesToggleBtn.TextColor3 = " ↓ Profiles", Color3.fromRGB(255,255,255)
+profilesToggleBtn.TextSize, profilesToggleBtn.Font = 10, Enum.Font.GothamBold
+profilesToggleBtn.TextXAlignment = Enum.TextXAlignment.Center
+Corner(profilesToggleBtn)
+Stroke(profilesToggleBtn)
+RegTheme(profilesToggleBtn, "Secondary")
+
+local profilesSubLabel = Instance.new("TextLabel", profilesToggleBtn)
+profilesSubLabel.Size, profilesSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
+profilesSubLabel.BackgroundTransparency, profilesSubLabel.Text = 1, "Quản lý các cấu hình"
+profilesSubLabel.TextColor3, profilesSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
+profilesSubLabel.Font, profilesSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
+
+local profilesContainer = Instance.new("Frame", configScroll)
+profilesContainer.LayoutOrder, profilesContainer.Size = 4, UDim2.new(1, 0, 0, 0)
+profilesContainer.AutomaticSize, profilesContainer.BackgroundTransparency = Enum.AutomaticSize.Y, 1
+profilesContainer.Visible = true
+local profilesSubLayout = Instance.new("UIListLayout", profilesContainer)
+profilesSubLayout.SortOrder, profilesSubLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
+profilesSubLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+Track(profilesToggleBtn.MouseButton1Click:Connect(function()
+    profilesContainer.Visible = not profilesContainer.Visible
+    profilesToggleBtn.Text = profilesContainer.Visible and " ↓ Profiles" or " → Profiles"
+    profilesSubLabel.Visible = profilesContainer.Visible
+end))
+
+local newConfigFrame = Instance.new("Frame", profilesContainer)
+newConfigFrame.LayoutOrder, newConfigFrame.Size = 1, UDim2.new(1, 0, 0, 30)
 newConfigFrame.BackgroundColor3, newConfigFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
 Corner(newConfigFrame)
 Stroke(newConfigFrame)
@@ -1905,8 +1566,8 @@ Corner(configNameBox, UDim.new(0, 4))
 Stroke(configNameBox)
 RegTheme(configNameBox, "Input")
 
-local createFrame = Instance.new("Frame", mainConfigContainer)
-createFrame.LayoutOrder, createFrame.Size = 3, UDim2.new(1, 0, 0, 34)
+local createFrame = Instance.new("Frame", profilesContainer)
+createFrame.LayoutOrder, createFrame.Size = 2, UDim2.new(1, 0, 0, 34)
 createFrame.BackgroundColor3, createFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
 Corner(createFrame)
 Stroke(createFrame)
@@ -1932,8 +1593,8 @@ createBtn.Font = Enum.Font.GothamBold
 Corner(createBtn, UDim.new(0, 4))
 Stroke(createBtn)
 
-local deleteFrame = Instance.new("Frame", mainConfigContainer)
-deleteFrame.LayoutOrder, deleteFrame.Size = 4, UDim2.new(1, 0, 0, 30)
+local deleteFrame = Instance.new("Frame", profilesContainer)
+deleteFrame.LayoutOrder, deleteFrame.Size = 3, UDim2.new(1, 0, 0, 30)
 deleteFrame.BackgroundColor3, deleteFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
 Corner(deleteFrame)
 Stroke(deleteFrame)
@@ -1955,8 +1616,8 @@ Corner(delBtn, UDim.new(0, 4))
 Stroke(delBtn)
 RegTheme(delBtn, "Input")
 
-local delDropFrame = Instance.new("ScrollingFrame", mainConfigContainer)
-delDropFrame.LayoutOrder, delDropFrame.Size = 5, UDim2.new(1, 0, 0, 80)
+local delDropFrame = Instance.new("ScrollingFrame", profilesContainer)
+delDropFrame.LayoutOrder, delDropFrame.Size = 4, UDim2.new(1, 0, 0, 80)
 delDropFrame.BackgroundColor3, delDropFrame.BackgroundTransparency = Color3.fromRGB(80,20,60), 0
 delDropFrame.CanvasSize, delDropFrame.ScrollBarThickness, delDropFrame.Visible = UDim2.new(0,0,0,0), 3, false
 Corner(delDropFrame)
@@ -1967,8 +1628,8 @@ local delPad = Instance.new("UIPadding", delDropFrame)
 delPad.PaddingRight = UDim.new(0, 8)
 RegTheme(delDropFrame, "DropFrame")
 
-local loadConfigFrame = Instance.new("Frame", mainConfigContainer)
-loadConfigFrame.LayoutOrder, loadConfigFrame.Size = 6, UDim2.new(1, 0, 0, 30)
+local loadConfigFrame = Instance.new("Frame", profilesContainer)
+loadConfigFrame.LayoutOrder, loadConfigFrame.Size = 5, UDim2.new(1, 0, 0, 30)
 loadConfigFrame.BackgroundColor3, loadConfigFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
 Corner(loadConfigFrame)
 Stroke(loadConfigFrame)
@@ -1990,8 +1651,8 @@ Corner(ldBtn, UDim.new(0, 4))
 Stroke(ldBtn)
 RegTheme(ldBtn, "Input")
 
-local ldDropFrame = Instance.new("ScrollingFrame", mainConfigContainer)
-ldDropFrame.LayoutOrder, ldDropFrame.Size = 7, UDim2.new(1, 0, 0, 80)
+local ldDropFrame = Instance.new("ScrollingFrame", profilesContainer)
+ldDropFrame.LayoutOrder, ldDropFrame.Size = 6, UDim2.new(1, 0, 0, 80)
 ldDropFrame.BackgroundColor3, ldDropFrame.BackgroundTransparency = Color3.fromRGB(80,20,60), 0
 ldDropFrame.CanvasSize, ldDropFrame.ScrollBarThickness, ldDropFrame.Visible = UDim2.new(0,0,0,0), 3, false
 Corner(ldDropFrame)
@@ -2002,8 +1663,8 @@ local ldPad = Instance.new("UIPadding", ldDropFrame)
 ldPad.PaddingRight = UDim.new(0, 8)
 RegTheme(ldDropFrame, "DropFrame")
 
-local saveFrame = Instance.new("Frame", mainConfigContainer)
-saveFrame.LayoutOrder, saveFrame.Size = 8, UDim2.new(1, 0, 0, 34)
+local saveFrame = Instance.new("Frame", profilesContainer)
+saveFrame.LayoutOrder, saveFrame.Size = 7, UDim2.new(1, 0, 0, 34)
 saveFrame.BackgroundColor3, saveFrame.BackgroundTransparency = Color3.fromRGB(70,15,50), 0
 Corner(saveFrame)
 Stroke(saveFrame)
@@ -2028,76 +1689,6 @@ saveBtn.TextColor3, saveBtn.TextSize = Color3.fromRGB(255,255,255), 9
 saveBtn.Font = Enum.Font.GothamBold
 Corner(saveBtn, UDim.new(0, 4))
 Stroke(saveBtn)
-
-local function RefreshStartupLabel()
-    startupLabel.Text = "Startup: " .. State.CurrentConfig
-end
-
-local function ApplyConfig(data)
-    if data.ThemeBase then
-        local c = Color3.new(data.ThemeBase[1], data.ThemeBase[2], data.ThemeBase[3])
-        ApplyTheme(c)
-    end
-    if data.StrokeMode == "Rainbow" then
-        State.StrokeMode = "Rainbow"; UpdateAllStrokes("Rainbow")
-    elseif data.StrokeMode == "None" then
-        State.StrokeMode = "None"; UpdateAllStrokes("None")
-    elseif data.StrokeColor then
-        local c = Color3.new(data.StrokeColor[1], data.StrokeColor[2], data.StrokeColor[3])
-        State.StrokeMode = "Solid"; UpdateAllStrokes(c)
-    end
-    if type(data.Volume) == "number" then
-        State.Volume = math.clamp(data.Volume, 0, 1)
-        HubSound.Volume = State.Volume
-        volumeBarFill.Size = UDim2.new(State.Volume, 0, 1, 0)
-        volumeLabel.Text = "🔊 Vol: " .. math.floor(State.Volume * 100) .. "%"
-    end
-    if type(data.SoundId) == "string" then
-        State.SoundId = data.SoundId
-        HubSound.SoundId = "rbxassetid://" .. State.SoundId
-    end
-    if type(data.Transparent) == "number" then
-        State.Transparent = math.clamp(data.Transparent, 0, 1)
-        transBarFill.Size = UDim2.new(State.Transparent, 0, 1, 0)
-        MainFrame.BackgroundTransparency = 0.15 + (State.Transparent * 0.85)
-        SidebarPanel.BackgroundTransparency = State.Transparent
-        ContentContainer.BackgroundTransparency = State.Transparent
-        transLabel.Text = "✨ Trong suốt: " .. math.floor(State.Transparent * 100) .. "%"
-    end
-    if data.SelectedScript then
-        for _, scr in ipairs(RegisteredScripts) do
-            if scr.Name == data.SelectedScript then
-                State.SelectedScript = scr
-                dropBtn.Text = " 📜 " .. scr.Name
-                break
-            end
-        end
-    end
-    if data.AutoSteal then
-        AutoSteal.BestOnly = data.AutoSteal.BestOnly or false
-        if data.AutoSteal.MinRarity and RARITY_ORDER[data.AutoSteal.MinRarity] then
-            AutoSteal.MinRarity = data.AutoSteal.MinRarity
-            rarBtn.Text = AutoSteal.MinRarity .. " ∨"
-        end
-        if type(data.AutoSteal.Speed) == "number" then
-            AutoSteal.Speed = math.clamp(data.AutoSteal.Speed, 30, 500)
-            local p = (AutoSteal.Speed - 30) / (500 - 30)
-            spdBarFill.Size = UDim2.new(p, 0, 1, 0)
-            spdLabel.Text = "⚡ Tốc độ bay: " .. AutoSteal.Speed
-        end
-        if AutoSteal.BestOnly then
-            bfToggle.BackgroundColor3 = Color3.fromRGB(50,200,50)
-            bfDot.Position = UDim2.new(1, -13, 0.5, -5.5)
-        end
-    end
-end
-
-local function LoadConfig(name)
-    local ok, dataOrErr = LoadConfigRaw(name)
-    if not ok then return false, dataOrErr end
-    ApplyConfig(dataOrErr)
-    return true
-end
 
 local function refreshAllDropdowns()
     for _, drop in ipairs({delDropFrame, ldDropFrame}) do
@@ -2125,7 +1716,9 @@ local function refreshAllDropdowns()
         f1.Size, f1.BackgroundColor3, f1.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f1.Text, f1.TextColor3, f1.TextSize = " 🗑️ " .. name, Color3.fromRGB(255,100,100), 9
         f1.Font, f1.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-        Corner(f1, UDim.new(0, 4)); Stroke(f1); RegTheme(f1, "DropItem")
+        Corner(f1, UDim.new(0, 4))
+        Stroke(f1)
+        RegTheme(f1, "DropItem")
         Track(f1.MouseButton1Click:Connect(function()
             if typeof(delfile) == "function" then
                 pcall(delfile, CONFIG_FOLDER .. "/" .. name .. ".json")
@@ -2139,11 +1732,15 @@ local function refreshAllDropdowns()
         f3.Size, f3.BackgroundColor3, f3.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f3.Text, f3.TextColor3, f3.TextSize = " 📂 " .. name, Color3.fromRGB(255,255,255), 9
         f3.Font, f3.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-        Corner(f3, UDim.new(0, 4)); Stroke(f3); RegTheme(f3, "DropItem")
+        Corner(f3, UDim.new(0, 4))
+        Stroke(f3)
+        RegTheme(f3, "DropItem")
         Track(f3.MouseButton1Click:Connect(function()
             State.CurrentConfig = name
             ldBtn.Text = name .. " ∨"
             svSub.Text = "Save: " .. name
+            asSub.Text = "Save: " .. name
+            alSub.Text = "Load: " .. name
             ldDropFrame.Visible = false
             RefreshStartupLabel()
             local ok, err = LoadConfig(name)
@@ -2177,6 +1774,8 @@ Track(createBtn.MouseButton1Click:Connect(function()
         State.CurrentConfig = name
         ldBtn.Text = name .. " ∨"
         svSub.Text = "Save: " .. name
+        asSub.Text = "Save: " .. name
+        alSub.Text = "Load: " .. name
         configNameBox.Text = ""
         RefreshStartupLabel()
         refreshAllDropdowns()
@@ -2207,6 +1806,23 @@ end))
 -- ═════════════════ KHỞI TẠO ═════════════════
 ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
+
+if State.AutoLoadConfig and typeof(isfile) == "function" then
+    local path = CONFIG_FOLDER .. "/" .. State.CurrentConfig .. ".json"
+    local ok, exists = pcall(isfile, path)
+    if ok and exists then
+        task.spawn(function()
+            task.wait(0.1)
+            LoadConfig(State.CurrentConfig)
+        end)
+    end
+end
+
 RefreshStartupLabel()
 
-print("[VzNam Hub v4] ✅ Loaded (Auto Steal Pro v3 — $/s). Config folder: " .. CONFIG_FOLDER)
+task.spawn(function()
+    task.wait(0.5)
+    State.Initialized = true
+end)
+
+print("[VzNam Hub v4] ✅ Loaded. Config folder: " .. CONFIG_FOLDER)
