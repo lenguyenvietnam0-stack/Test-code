@@ -1,13 +1,11 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 — FIXED + AUTO STEAL
+    VzNam Hub v4 — FIXED + AUTO STEAL PRO v3
     ═══════════════════════════════════════════════════════
     • Tab "MAIN STEAL AN EGG" ngay dưới Trang Chủ
-    • Đã xóa: BREAK AN STEAL, Tab 4, Tab 5
-    • Nhạc: y bản gốc
-    • Cấu Hình: gộp toàn bộ Profiles vào (Tên/Tạo/Xóa/Tải/Lưu)
-    • Đã xóa: Auto Lưu, Auto Tải, nút "↓ Profiles"
-    • MỚI: Auto Steal + chọn độ hiếm + steal trứng xịn nhất
+    • Auto Steal + chọn ĐỘ HIẾM TỐI THIỂU (từ đó trở lên)
+    • "Steal Trứng Xịn Nhất" = trứng $/s CAO NHẤT server
+    • Tốc độ bay tùy chỉnh
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -458,19 +456,37 @@ table.insert(Tabs, {Container = mainScroll, Indicator = mainIndicator})
 
 -- ═════════════════ AUTO STEAL FEATURE ═════════════════
 local AutoSteal = {
-    Enabled  = false,
-    BestOnly = false,
-    Rarity   = "Rare",
-    Running  = false,
+    Enabled    = false,
+    BestOnly   = false,
+    MinRarity  = "Rare",
+    Speed      = 60,
+    Running    = false,
 }
 
-local RARITY_ORDER = {
-    ["Common"]=1,["Uncommon"]=2,["Rare"]=3,["Epic"]=4,
-    ["Legendary"]=5,["Mythical"]=6,["Secret"]=7,["Godly"]=8,["Divine"]=9
+-- ✅ Đúng thứ tự rarity game Steal An Egg
+local RARITY_LIST = {
+    "Common","Uncommon","Rare","Epic","Legendary",
+    "Mythical","Cosmic","Secret","Eternal","Divine"
 }
-local RARITY_LIST = {"Common","Uncommon","Rare","Epic","Legendary","Mythical","Secret","Godly","Divine"}
+local RARITY_ORDER = {}
+for i, r in ipairs(RARITY_LIST) do RARITY_ORDER[r] = i end
 
--- ── Header label ──
+local RARITY_ALIAS = {
+    ["mythic"]="Mythical",["mythical"]="Mythical",
+    ["cosmic"]="Cosmic",
+    ["secret"]="Secret",["secrets"]="Secret",
+    ["eternal"]="Eternal",["enternal"]="Eternal",
+    ["divine"]="Divine",
+    ["legendary"]="Legendary",
+    ["epic"]="Epic",["rare"]="Rare",["uncommon"]="Uncommon",["common"]="Common",
+}
+local function NormalizeRarity(s)
+    if not s then return "Common" end
+    local low = string.lower(tostring(s)):gsub("%s+","")
+    return RARITY_ALIAS[low] or (RARITY_ORDER[s] and s) or "Common"
+end
+
+-- ── Header ──
 local autoHeader = Instance.new("TextLabel", mainScroll)
 autoHeader.LayoutOrder = 0
 autoHeader.Size = UDim2.new(1, 0, 0, 22)
@@ -504,7 +520,7 @@ local asDot = Instance.new("Frame", asToggle)
 asDot.Size = UDim2.new(0, 11, 0, 11); asDot.Position = UDim2.new(0, 2, 0.5, -5.5)
 asDot.BackgroundColor3 = Color3.fromRGB(255,255,255); Corner(asDot, UDim.new(1,0))
 
--- ── Toggle: Steal Best ──
+-- ── Toggle: Steal Best ($/s cao nhất) ──
 local bfFrame = Instance.new("Frame", mainScroll)
 bfFrame.LayoutOrder = 2
 bfFrame.Size = UDim2.new(1, 0, 0, 32)
@@ -513,8 +529,8 @@ Corner(bfFrame); Stroke(bfFrame); RegTheme(bfFrame, "Primary")
 
 local bfLbl = Instance.new("TextLabel", bfFrame)
 bfLbl.Size = UDim2.new(1, -46, 1, 0); bfLbl.Position = UDim2.new(0, 8, 0, 0)
-bfLbl.BackgroundTransparency = 1; bfLbl.Text = "⭐ Steal Trứng Xịn Nhất"
-bfLbl.TextColor3 = Color3.fromRGB(255,255,255); bfLbl.TextSize = 10
+bfLbl.BackgroundTransparency = 1; bfLbl.Text = "💰 Cướp Trứng $/s Cao Nhất"
+bfLbl.TextColor3 = Color3.fromRGB(255,255,255); bfLbl.TextSize = 9
 bfLbl.Font = Enum.Font.GothamBold; bfLbl.TextXAlignment = Enum.TextXAlignment.Left
 
 local bfToggle = Instance.new("TextButton", bfFrame)
@@ -525,7 +541,7 @@ local bfDot = Instance.new("Frame", bfToggle)
 bfDot.Size = UDim2.new(0, 11, 0, 11); bfDot.Position = UDim2.new(0, 2, 0.5, -5.5)
 bfDot.BackgroundColor3 = Color3.fromRGB(255,255,255); Corner(bfDot, UDim.new(1,0))
 
--- ── Dropdown: Rarity ──
+-- ── Dropdown: Độ hiếm TỐI THIỂU ──
 local rarFrame = Instance.new("Frame", mainScroll)
 rarFrame.LayoutOrder = 3
 rarFrame.Size = UDim2.new(1, 0, 0, 32)
@@ -539,16 +555,16 @@ rarLbl.TextColor3 = Color3.fromRGB(255,255,255); rarLbl.TextSize = 9
 rarLbl.Font = Enum.Font.GothamBold; rarLbl.TextXAlignment = Enum.TextXAlignment.Left
 
 local rarBtn = Instance.new("TextButton", rarFrame)
-rarBtn.Size = UDim2.new(0, 90, 0, 22); rarBtn.Position = UDim2.new(1, -96, 0.5, -11)
+rarBtn.Size = UDim2.new(0, 105, 0, 22); rarBtn.Position = UDim2.new(1, -111, 0.5, -11)
 rarBtn.BackgroundColor3 = Color3.fromRGB(50,10,35)
-rarBtn.Text = AutoSteal.Rarity .. " ∨"
+rarBtn.Text = AutoSteal.MinRarity .. " ∨"
 rarBtn.TextColor3 = Color3.fromRGB(50,200,50)
 rarBtn.TextSize = 9; rarBtn.Font = Enum.Font.GothamBold
 Corner(rarBtn, UDim.new(0,4)); Stroke(rarBtn); RegTheme(rarBtn, "Input")
 
 local rarDrop = Instance.new("ScrollingFrame", mainScroll)
 rarDrop.LayoutOrder = 4
-rarDrop.Size = UDim2.new(1, 0, 0, 110)
+rarDrop.Size = UDim2.new(1, 0, 0, 115)
 rarDrop.BackgroundColor3 = Color3.fromRGB(80,20,60)
 rarDrop.CanvasSize = UDim2.new(0,0,0,0); rarDrop.ScrollBarThickness = 3
 rarDrop.Visible = false
@@ -567,7 +583,7 @@ for i, r in ipairs(RARITY_LIST) do
     rb.TextXAlignment = Enum.TextXAlignment.Left
     Corner(rb, UDim.new(0,4)); Stroke(rb); RegTheme(rb, "DropItem")
     Track(rb.MouseButton1Click:Connect(function()
-        AutoSteal.Rarity = r
+        AutoSteal.MinRarity = r
         rarBtn.Text = r .. " ∨"
         rarDrop.Visible = false
     end))
@@ -577,9 +593,59 @@ Track(rarBtn.MouseButton1Click:Connect(function()
     rarDrop.Visible = not rarDrop.Visible
 end))
 
+-- ── Speed Slider ──
+local spdFrame = Instance.new("Frame", mainScroll)
+spdFrame.LayoutOrder = 5
+spdFrame.Size = UDim2.new(1, 0, 0, 30)
+spdFrame.BackgroundColor3 = Color3.fromRGB(70,15,50); spdFrame.BorderSizePixel = 0
+Corner(spdFrame); Stroke(spdFrame); RegTheme(spdFrame, "Primary")
+
+local spdLabel = Instance.new("TextLabel", spdFrame)
+spdLabel.Size = UDim2.new(1, -8, 1, 0); spdLabel.Position = UDim2.new(0, 5, 0, 0)
+spdLabel.BackgroundTransparency = 1
+spdLabel.Text = "⚡ Tốc độ bay: " .. AutoSteal.Speed
+spdLabel.TextColor3 = Color3.fromRGB(255,255,255); spdLabel.TextSize = 9
+spdLabel.Font = Enum.Font.GothamBold; spdLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local spdBarBg = Instance.new("Frame", spdFrame)
+spdBarBg.Size = UDim2.new(0, 100, 0, 8); spdBarBg.Position = UDim2.new(1, -108, 0.5, -4)
+spdBarBg.BackgroundColor3 = Color3.fromRGB(90,25,65)
+Corner(spdBarBg, UDim.new(1, 0)); Stroke(spdBarBg); RegTheme(spdBarBg, "DropItem")
+
+local spdBarFill = Instance.new("Frame", spdBarBg)
+local initP = math.clamp((AutoSteal.Speed - 30) / (500 - 30), 0, 1)
+spdBarFill.Size = UDim2.new(initP, 0, 1, 0)
+spdBarFill.BackgroundColor3 = Color3.fromRGB(255,180,60)
+Corner(spdBarFill, UDim.new(1, 0))
+
+local spdBtn = Instance.new("TextButton", spdBarBg)
+spdBtn.Size = UDim2.new(1, 10, 1, 10); spdBtn.BackgroundTransparency = 1; spdBtn.Text = ""
+
+local adjustingSpd = false
+Track(spdBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+       or input.UserInputType == Enum.UserInputType.Touch then adjustingSpd = true end
+end))
+Track(UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+       or input.UserInputType == Enum.UserInputType.Touch then
+        adjustingSpd = false
+    end
+end))
+Track(UserInputService.InputChanged:Connect(function(input)
+    if adjustingSpd and (input.UserInputType == Enum.UserInputType.MouseMovement
+       or input.UserInputType == Enum.UserInputType.Touch) then
+        local absPos, absSize = spdBarBg.AbsolutePosition.X, spdBarBg.AbsoluteSize.X
+        local p = math.clamp((input.Position.X - absPos) / absSize, 0, 1)
+        spdBarFill.Size = UDim2.new(p, 0, 1, 0)
+        AutoSteal.Speed = math.floor(30 + p * (500 - 30))
+        spdLabel.Text = "⚡ Tốc độ bay: " .. AutoSteal.Speed
+    end
+end))
+
 -- ── Status ──
 local stFrame = Instance.new("Frame", mainScroll)
-stFrame.LayoutOrder = 5
+stFrame.LayoutOrder = 6
 stFrame.Size = UDim2.new(1, 0, 0, 24)
 stFrame.BackgroundColor3 = Color3.fromRGB(40,40,50); stFrame.BorderSizePixel = 0
 Corner(stFrame); Stroke(stFrame)
@@ -596,174 +662,253 @@ local function SetStatus(t, c)
     if c then stLbl.TextColor3 = c end
 end
 
--- ── Divider ──
-local divLbl = Instance.new("TextLabel", mainScroll)
-divLbl.LayoutOrder = 6
-divLbl.Size = UDim2.new(1, 0, 0, 20)
-divLbl.BackgroundTransparency = 1
-divLbl.Text = "─ ─ ─ Scripts khác ─ ─ ─"
-divLbl.TextColor3 = Color3.fromRGB(150,150,160)
-divLbl.TextSize = 8
-divLbl.Font = Enum.Font.Gotham
-
 -- ═════════════════ AUTO STEAL LOGIC ═════════════════
 
-local function GetPlayerSpeed()
+local function GetHRP()
     local ch = localPlayer.Character
-    if not ch then return 16 end
-    local hum = ch:FindFirstChildOfClass("Humanoid")
-    if hum and hum.WalkSpeed > 0 then return hum.WalkSpeed end
-    return 16
+    if not ch then return nil end
+    return ch:FindFirstChild("HumanoidRootPart")
 end
 
 local function GetHomePos()
-    local ch = localPlayer.Character
-    if not ch then return nil end
-    local hrp = ch:FindFirstChild("HumanoidRootPart")
+    local hrp = GetHRP()
     if not hrp then return nil end
     for _, o in ipairs(workspace:GetDescendants()) do
-        if o:IsA("Model") or o:IsA("BasePart") then
+        if o:IsA("SpawnLocation") then return o.Position end
+    end
+    for _, o in ipairs(workspace:GetDescendants()) do
+        if o:IsA("BasePart") then
             local n = o.Name:lower()
-            if n:find("home") or n:find("base") or n:find("plot")
-               or n:find("nest") or n:find("coop") then
-                local pp = o:IsA("BasePart") and o
-                    or (o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart"))
-                if pp and (pp.Position - hrp.Position).Magnitude < 800 then
-                    return pp.Position
+            if n:find("base") or n:find("home") or n:find("plot") or n:find("nest") then
+                if (o.Position - hrp.Position).Magnitude < 2000 then
+                    return o.Position
                 end
             end
         end
     end
-    local sp = workspace:FindFirstChildOfClass("SpawnLocation")
-    if sp then return sp.Position end
     return hrp.Position
 end
 
 local function GetCollectZone()
+    local hrp = GetHRP()
+    if not hrp then return nil end
     for _, o in ipairs(workspace:GetDescendants()) do
-        if o:IsA("Model") or o:IsA("BasePart") then
+        if o:IsA("BasePart") then
             local n = o.Name:lower()
             if n:find("collect") or n:find("deliver")
-               or n:find("sell") or n:find("claim") then
-                local pp = o:IsA("BasePart") and o
-                    or (o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart"))
-                if pp then return pp.Position end
+               or n:find("sell") or n:find("claim") or n:find("return") then
+                return o.Position
             end
         end
     end
     return GetHomePos()
 end
 
+-- ⭐ Đọc giá trị $/s của egg từ nhiều nguồn
+local function ParseMoneyString(s)
+    if not s then return nil end
+    s = tostring(s)
+    -- Tìm số có thể kèm suffix K/M/B/T/Q
+    local numStr, suffix = s:match("(%d+%.?%d*)([KkMmBbTtQq]?)")
+    if not numStr then return nil end
+    local num = tonumber(numStr)
+    if not num then return nil end
+    local mult = 1
+    suffix = suffix:lower()
+    if     suffix == "k" then mult = 1e3
+    elseif suffix == "m" then mult = 1e6
+    elseif suffix == "b" then mult = 1e9
+    elseif suffix == "t" then mult = 1e12
+    elseif suffix == "q" then mult = 1e15
+    end
+    return num * mult
+end
+
+local function GetEggValue(obj)
+    -- 1) Attribute trực tiếp
+    local attrNames = {
+        "Value","value","Price","price","Income","income",
+        "Worth","worth","Money","money","DPS","dps",
+        "ValuePerSec","IncomePerSec","DollarPerSecond",
+        "MoneyPerSecond","CashPerSecond","Cash","cash","$/s","PerSec",
+    }
+    for _, a in ipairs(attrNames) do
+        local ok, v = pcall(function() return obj:GetAttribute(a) end)
+        if ok and v ~= nil then
+            if type(v) == "number" then return v end
+            if type(v) == "string" then
+                local n = ParseMoneyString(v)
+                if n then return n end
+            end
+        end
+    end
+
+    -- 2) Child Value objects
+    for _, child in ipairs(obj:GetDescendants()) do
+        if child:IsA("NumberValue") or child:IsA("IntValue") then
+            local n = child.Name:lower()
+            if n:find("value") or n:find("price") or n:find("income")
+               or n:find("worth") or n:find("money") or n:find("dps")
+               or n:find("cash") or n:find("persec") or n:find("per_sec")
+               or n:find("persecond") then
+                return child.Value
+            end
+        elseif child:IsA("StringValue") then
+            local n = child.Name:lower()
+            if n:find("value") or n:find("price") or n:find("income")
+               or n:find("worth") or n:find("money") or n:find("dps")
+               or n:find("cash") or n:find("persec") or n:find("per_sec")
+               or n:find("persecond") then
+                local v = ParseMoneyString(child.Value)
+                if v then return v end
+            end
+        end
+    end
+
+    -- 3) Đọc text UI (BillboardGui, SurfaceGui) — thường hiện "$X/s"
+    for _, child in ipairs(obj:GetDescendants()) do
+        if child:IsA("TextLabel") or child:IsA("TextButton") then
+            local txt = child.Text
+            local low = txt:lower()
+            if low:find("%$") or low:find("per sec") or low:find("/s")
+               or low:find("persec") or low:find("income") then
+                local n = ParseMoneyString(txt)
+                if n and n > 0 then return n end
+            end
+        end
+    end
+
+    return nil
+end
+
 local function FindEggs()
     local eggs = {}
-    local ch = localPlayer.Character
-    if not ch then return eggs end
-    local hrp = ch:FindFirstChild("HumanoidRootPart")
+    local hrp = GetHRP()
     if not hrp then return eggs end
-
     for _, o in ipairs(workspace:GetDescendants()) do
-        if o:IsA("BasePart") or o:IsA("Model") or o:IsA("Tool") then
-            local n = o.Name:lower()
-            if n:find("egg") and not n:find("eggplant") then
-                local rarity = nil
-                for _, a in ipairs({"Rarity","rarity","EggRarity","Tier","tier"}) do
-                    local ok, v = pcall(function() return o:GetAttribute(a) end)
-                    if ok and v ~= nil then
-                        if type(v) == "number" then
-                            rarity = RARITY_LIST[math.clamp(math.floor(v), 1, #RARITY_LIST)]
-                        else rarity = tostring(v) end
-                        break
-                    end
-                end
-                if not rarity then
-                    for _, r in ipairs(RARITY_LIST) do
-                        if n:find(r:lower()) then rarity = r break end
-                    end
-                end
-                rarity = rarity or "Common"
-
-                local part
-                if o:IsA("BasePart") then part = o
-                elseif o:IsA("Model") then part = o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart")
-                elseif o:IsA("Tool") then part = o:FindFirstChild("Handle") or o:FindFirstChildWhichIsA("BasePart") end
-
-                if part and part:IsDescendantOf(workspace) then
-                    table.insert(eggs, {
-                        Obj = o, Part = part, Rarity = rarity,
-                        Dist = (part.Position - hrp.Position).Magnitude
-                    })
+        local matched = false
+        local part = nil
+        if o:IsA("BasePart") and (o.Name:lower():find("egg")) then
+            matched, part = true, o
+        elseif o:IsA("Model") and (o.Name:lower():find("egg")) then
+            part = o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart")
+            matched = part ~= nil
+        elseif o:IsA("Tool") and (o.Name:lower():find("egg")) then
+            part = o:FindFirstChild("Handle") or o:FindFirstChildWhichIsA("BasePart")
+            matched = part ~= nil
+        end
+        if matched and part and part:IsDescendantOf(workspace) then
+            -- Rarity
+            local rarity = nil
+            for _, a in ipairs({"Rarity","rarity","EggRarity","Tier","tier"}) do
+                local ok, v = pcall(function() return o:GetAttribute(a) end)
+                if ok and v ~= nil then
+                    rarity = NormalizeRarity(tostring(v)); break
                 end
             end
+            if not rarity then
+                local low = o.Name:lower()
+                for _, r in ipairs(RARITY_LIST) do
+                    if low:find(r:lower()) then rarity = r break end
+                end
+            end
+            rarity = rarity or "Common"
+
+            -- ⭐ Giá trị $/s
+            local value = GetEggValue(o)
+
+            table.insert(eggs, {
+                Obj = o, Part = part, Rarity = rarity, Value = value,
+                Dist = (part.Position - hrp.Position).Magnitude
+            })
         end
     end
     return eggs
 end
 
+local function FormatMoney(n)
+    if not n then return "?" end
+    if n >= 1e15 then return string.format("%.2fQ", n / 1e15) end
+    if n >= 1e12 then return string.format("%.2fT", n / 1e12) end
+    if n >= 1e9  then return string.format("%.2fB", n / 1e9) end
+    if n >= 1e6  then return string.format("%.2fM", n / 1e6) end
+    if n >= 1e3  then return string.format("%.2fK", n / 1e3) end
+    return tostring(math.floor(n))
+end
+
+-- ⭐ PickTarget: nếu BestOnly → tìm $/s cao nhất
 local function PickTarget()
     local eggs = FindEggs()
     if #eggs == 0 then return nil end
+
     if AutoSteal.BestOnly then
-        local best, bo = nil, -1
+        -- Ưu tiên đọc $/s, ai cao nhất thì chọn
+        local best, bv = nil, -1
+        local hasValue = false
         for _, e in ipairs(eggs) do
-            local ord = RARITY_ORDER[e.Rarity] or 0
-            if ord > bo then best, bo = e, ord end
+            if type(e.Value) == "number" and e.Value > bv then
+                best, bv = e, e.Value
+                hasValue = true
+            end
+        end
+        -- Fallback: nếu game không expose giá trị → dùng rarity
+        if not hasValue then
+            for _, e in ipairs(eggs) do
+                local ord = RARITY_ORDER[e.Rarity] or 0
+                if ord > bv then best, bv = e, ord end
+            end
         end
         return best
     else
-        local minOrd = RARITY_ORDER[AutoSteal.Rarity] or 1
+        -- Lọc theo độ hiếm tối thiểu
+        local minOrd = RARITY_ORDER[AutoSteal.MinRarity] or 1
         local best, bd = nil, math.huge
         for _, e in ipairs(eggs) do
             local ord = RARITY_ORDER[e.Rarity] or 1
-            if ord >= minOrd and e.Dist < bd then best, bd = e, e.Dist end
+            if ord >= minOrd and e.Dist < bd then
+                best, bd = e, e.Dist
+            end
         end
         return best
     end
 end
 
 local function FlyToPos(targetPos, speed, stopDist, timeout)
-    local ch = localPlayer.Character
-    if not ch then return false end
-    local hrp = ch:FindFirstChild("HumanoidRootPart")
+    local hrp = GetHRP()
     if not hrp then return false end
     stopDist = stopDist or 4
-    timeout = timeout or 12
+    timeout = timeout or 15
     local t0 = tick()
-
-    local bv = Instance.new("BodyVelocity")
-    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bv.Velocity = Vector3.zero
-    bv.Parent = hrp
-
-    local reached = false
-    local conn = RunService.Heartbeat:Connect(function()
-        if not hrp.Parent or not AutoSteal.Enabled then
-            bv.Velocity = Vector3.zero; return
-        end
-        local d = targetPos - hrp.Position
-        if d.Magnitude <= stopDist then
-            bv.Velocity = Vector3.zero; reached = true; return
-        end
-        bv.Velocity = d.Unit * speed
-    end)
-
-    while not reached and AutoSteal.Enabled and (tick() - t0) < timeout do
-        task.wait()
+    local oldAnchored = hrp.Anchored
+    hrp.Anchored = true
+    while AutoSteal.Enabled and (tick() - t0) < timeout do
+        if not hrp.Parent then break end
+        local cur = hrp.CFrame.Position
+        local diff = targetPos - cur
+        local dist = diff.Magnitude
+        if dist <= stopDist then break end
+        local step = math.min(speed / 60, dist)
+        local newPos = cur + diff.Unit * step
+        hrp.CFrame = CFrame.new(newPos)
+        RunService.Heartbeat:Wait()
     end
-
-    conn:Disconnect()
-    pcall(function() bv:Destroy() end)
-    return reached
+    if hrp.Parent then hrp.Anchored = oldAnchored end
+    return true
 end
 
 local function TryGrab(part)
-    local ch = localPlayer.Character
-    if not ch or not part or not part.Parent then return end
-    local hrp = ch:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    local hrp = GetHRP()
+    if not hrp or not part or not part.Parent then return end
+    local savedCF = hrp.CFrame
     pcall(function()
         firetouchinterest(hrp, part, 0)
-        task.wait(0.02)
+        task.wait(0.05)
         firetouchinterest(hrp, part, 1)
+    end)
+    pcall(function()
+        hrp.CFrame = CFrame.new(part.Position)
+        task.wait(0.05)
+        hrp.CFrame = savedCF
     end)
 end
 
@@ -773,63 +918,60 @@ local function StartAutoSteal()
     if autoStealThread then return end
     autoStealThread = task.spawn(function()
         AutoSteal.Running = true
-        SetStatus("🔄 Bắt đầu Auto Steal...", Color3.fromRGB(50,200,50))
+        SetStatus("🔄 Đang chạy Auto Steal...", Color3.fromRGB(50,200,50))
 
         while AutoSteal.Enabled do
-            local ch = localPlayer.Character
-            if not ch then
+            local hrp = GetHRP()
+            if not hrp then
                 SetStatus("⚠️ Chưa có nhân vật", Color3.fromRGB(255,100,100))
                 task.wait(1); continue
             end
-            local hrp = ch:FindFirstChild("HumanoidRootPart")
-            if not hrp then task.wait(0.5); continue end
 
-            local speed = math.max(GetPlayerSpeed(), 16)
+            local speed = AutoSteal.Speed
             local target = PickTarget()
 
             if not target then
-                SetStatus("🔍 Không tìm thấy trứng phù hợp", Color3.fromRGB(255,200,100))
-                task.wait(0.8); continue
+                local msg = AutoSteal.BestOnly
+                    and "🔍 Không tìm được trứng ($/s)..."
+                    or ("🔍 Không có trứng ≥ "..AutoSteal.MinRarity)
+                SetStatus(msg, Color3.fromRGB(255,200,100))
+                task.wait(1); continue
             end
 
-            -- 1) Bay tới trứng bằng tốc độ hiện tại
-            SetStatus("✈️ Bay tới trứng ("..target.Rarity..")...", Color3.fromRGB(50,200,50))
-            FlyToPos(target.Part.Position, speed, 3.5, 10)
+            local valTxt = target.Value and (" | $"..FormatMoney(target.Value).."/s") or ""
+            SetStatus("✈️ Bay tới ["..target.Rarity.."]"..valTxt, Color3.fromRGB(50,200,50))
+            FlyToPos(target.Part.Position, speed, 3, 12)
             if not AutoSteal.Enabled then break end
-            task.wait(0.15)
+            task.wait(0.1)
 
-            -- 2) Lượm trứng
             SetStatus("🥚 Lượm trứng...", Color3.fromRGB(50,200,50))
             if target.Part and target.Part.Parent then TryGrab(target.Part) end
             task.wait(0.3)
 
-            -- 3) Bay về nhà với tốc độ x3
             local homePos = GetHomePos()
             if homePos then
-                SetStatus("🏠 Về nhà (x3)...", Color3.fromRGB(50,200,50))
-                FlyToPos(homePos, speed * 3, 6, 10)
+                SetStatus("🏠 Về nhà (x3)...", Color3.fromRGB(100,200,255))
+                FlyToPos(homePos, speed * 3, 6, 12)
             end
             if not AutoSteal.Enabled then break end
             task.wait(0.2)
 
-            -- 4) Gần chỗ trứng con gà → thả xuống + lượm lại ngay
-            SetStatus("🐔 Thả xuống & lượm lại...", Color3.fromRGB(50,200,50))
-            task.wait(0.25)
+            SetStatus("🐔 Thả xuống & lượm lại...", Color3.fromRGB(255,200,100))
+            task.wait(0.3)
             local near = FindEggs()
             local nb, nd = nil, math.huge
             for _, e in ipairs(near) do
                 if e.Dist < nd then nb, nd = e, e.Dist end
             end
-            if nb then TryGrab(nb.Part); task.wait(0.15) end
+            if nb and nb.Dist < 30 then TryGrab(nb.Part); task.wait(0.2) end
 
-            -- 5) Mang về vùng lấy trứng
             local colPos = GetCollectZone()
             if colPos then
-                SetStatus("📦 Mang tới vùng lấy trứng...", Color3.fromRGB(50,200,50))
-                FlyToPos(colPos, speed * 1.5, 5, 10)
+                SetStatus("📦 Nộp vùng lấy trứng...", Color3.fromRGB(100,255,150))
+                FlyToPos(colPos, speed * 1.5, 5, 12)
                 task.wait(0.3)
                 for _, e in ipairs(FindEggs()) do
-                    if e.Dist < 12 then TryGrab(e.Part) end
+                    if e.Dist < 15 then TryGrab(e.Part) end
                 end
                 task.wait(0.3)
             end
@@ -841,7 +983,6 @@ local function StartAutoSteal()
     end)
 end
 
--- ── Wire toggles ──
 Track(asToggle.MouseButton1Click:Connect(function()
     AutoSteal.Enabled = not AutoSteal.Enabled
     if AutoSteal.Enabled then
@@ -860,7 +1001,7 @@ Track(bfToggle.MouseButton1Click:Connect(function()
     if AutoSteal.BestOnly then
         bfToggle.BackgroundColor3 = Color3.fromRGB(50,200,50)
         bfDot.Position = UDim2.new(1, -13, 0.5, -5.5)
-        SetStatus("⭐ Đã bật: ưu tiên trứng xịn nhất", Color3.fromRGB(255,200,100))
+        SetStatus("💰 Bật: cướp trứng $/s cao nhất", Color3.fromRGB(255,200,100))
     else
         bfToggle.BackgroundColor3 = Color3.fromRGB(60,65,75)
         bfDot.Position = UDim2.new(0, 2, 0.5, -5.5)
@@ -1186,9 +1327,7 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     if not State.SelectedScript then
         dropBtn.Text = " ⚠️ Chọn script trước!"
         task.delay(1.5, function()
-            if dropBtn.Parent then
-                dropBtn.Text = " 📜 Chọn Script Auto Load..."
-            end
+            if dropBtn.Parent then dropBtn.Text = " 📜 Chọn Script Auto Load..." end
         end)
         return
     end
@@ -1683,7 +1822,11 @@ local function SerializeState(scriptName)
         SoundId        = State.SoundId,
         SelectedScript = scriptName,
         Transparent    = State.Transparent,
-        AutoSteal      = {Enabled = AutoSteal.Enabled, BestOnly = AutoSteal.BestOnly, Rarity = AutoSteal.Rarity},
+        AutoSteal = {
+            BestOnly  = AutoSteal.BestOnly,
+            MinRarity = AutoSteal.MinRarity,
+            Speed     = AutoSteal.Speed,
+        },
     }
 end
 
@@ -1896,15 +2039,12 @@ local function ApplyConfig(data)
         ApplyTheme(c)
     end
     if data.StrokeMode == "Rainbow" then
-        State.StrokeMode = "Rainbow"
-        UpdateAllStrokes("Rainbow")
+        State.StrokeMode = "Rainbow"; UpdateAllStrokes("Rainbow")
     elseif data.StrokeMode == "None" then
-        State.StrokeMode = "None"
-        UpdateAllStrokes("None")
+        State.StrokeMode = "None"; UpdateAllStrokes("None")
     elseif data.StrokeColor then
         local c = Color3.new(data.StrokeColor[1], data.StrokeColor[2], data.StrokeColor[3])
-        State.StrokeMode = "Solid"
-        UpdateAllStrokes(c)
+        State.StrokeMode = "Solid"; UpdateAllStrokes(c)
     end
     if type(data.Volume) == "number" then
         State.Volume = math.clamp(data.Volume, 0, 1)
@@ -1935,12 +2075,20 @@ local function ApplyConfig(data)
     end
     if data.AutoSteal then
         AutoSteal.BestOnly = data.AutoSteal.BestOnly or false
-        AutoSteal.Rarity = data.AutoSteal.Rarity or "Rare"
+        if data.AutoSteal.MinRarity and RARITY_ORDER[data.AutoSteal.MinRarity] then
+            AutoSteal.MinRarity = data.AutoSteal.MinRarity
+            rarBtn.Text = AutoSteal.MinRarity .. " ∨"
+        end
+        if type(data.AutoSteal.Speed) == "number" then
+            AutoSteal.Speed = math.clamp(data.AutoSteal.Speed, 30, 500)
+            local p = (AutoSteal.Speed - 30) / (500 - 30)
+            spdBarFill.Size = UDim2.new(p, 0, 1, 0)
+            spdLabel.Text = "⚡ Tốc độ bay: " .. AutoSteal.Speed
+        end
         if AutoSteal.BestOnly then
             bfToggle.BackgroundColor3 = Color3.fromRGB(50,200,50)
             bfDot.Position = UDim2.new(1, -13, 0.5, -5.5)
         end
-        rarBtn.Text = AutoSteal.Rarity .. " ∨"
     end
 end
 
@@ -1977,9 +2125,7 @@ local function refreshAllDropdowns()
         f1.Size, f1.BackgroundColor3, f1.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f1.Text, f1.TextColor3, f1.TextSize = " 🗑️ " .. name, Color3.fromRGB(255,100,100), 9
         f1.Font, f1.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-        Corner(f1, UDim.new(0, 4))
-        Stroke(f1)
-        RegTheme(f1, "DropItem")
+        Corner(f1, UDim.new(0, 4)); Stroke(f1); RegTheme(f1, "DropItem")
         Track(f1.MouseButton1Click:Connect(function()
             if typeof(delfile) == "function" then
                 pcall(delfile, CONFIG_FOLDER .. "/" .. name .. ".json")
@@ -1993,9 +2139,7 @@ local function refreshAllDropdowns()
         f3.Size, f3.BackgroundColor3, f3.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
         f3.Text, f3.TextColor3, f3.TextSize = " 📂 " .. name, Color3.fromRGB(255,255,255), 9
         f3.Font, f3.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-        Corner(f3, UDim.new(0, 4))
-        Stroke(f3)
-        RegTheme(f3, "DropItem")
+        Corner(f3, UDim.new(0, 4)); Stroke(f3); RegTheme(f3, "DropItem")
         Track(f3.MouseButton1Click:Connect(function()
             State.CurrentConfig = name
             ldBtn.Text = name .. " ∨"
@@ -2065,4 +2209,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4] ✅ Loaded (Auto Steal). Config folder: " .. CONFIG_FOLDER)
+print("[VzNam Hub v4] ✅ Loaded (Auto Steal Pro v3 — $/s). Config folder: " .. CONFIG_FOLDER)
