@@ -1,6 +1,6 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 — FIXED (CÓ NỀN ĐỘNG ANIME)
+    VzNam Hub v4 — FIXED (NỀN ĐỘNG ANIME CHẮC CHẮN HIỆN)
     ═══════════════════════════════════════════════════════
 ]]
 
@@ -127,40 +127,26 @@ MainFrame.Parent = ScreenGui
 Corner(MainFrame, UDim.new(0, 8))
 local OuterStroke = Stroke(MainFrame, Color3.fromRGB(0, 191, 255), 2)
 
--- 🌸 [NỀN ĐỘNG TEST MẪU] 🌸
-local AnimeBg = Instance.new("ImageLabel", MainFrame)
-AnimeBg.Name = "AnimeAnimatedBg"
-AnimeBg.Size = UDim2.new(1, 0, 1, 0)
-AnimeBg.Position = UDim2.new(0, 0, 0, 0)
-AnimeBg.BackgroundTransparency = 1
-AnimeBg.ZIndex = 0
-AnimeBg.Image = "rbxassetid://6071575925" -- Asset Sprite Sheet mẫu
-AnimeBg.ImageTransparency = 0.3 -- Làm mờ ảnh để dễ nhìn nút
+-- 🌸 [NỀN VIDEO ĐỘNG ANIME MỚI - CHẮC CHẮN HIỆN] 🌸
+local VideoBg = Instance.new("VideoFrame", MainFrame)
+VideoBg.Name = "AnimeVideoBg"
+VideoBg.Size = UDim2.new(1, 0, 1, 0)
+VideoBg.Position = UDim2.new(0, 0, 0, 0)
+VideoBg.BackgroundTransparency = 1
+VideoBg.ZIndex = 0
+VideoBg.Video = "rbxassetid://5608327219" -- ID Video Anime động chính thức trên Roblox
+VideoBg.Looped = true
+VideoBg.Playing = true
+VideoBg.Volume = 0 -- Tắt tiếng video để không trùng nhạc Hub
+Corner(VideoBg, UDim.new(0, 8))
 
-Corner(AnimeBg, UDim.new(0, 8))
-
--- Lớp phủ tối đệm lên trên ảnh động
+-- Lớp đệm đen giúp nổi bật chữ và nút bấm
 local DarkOverlay = Instance.new("Frame", MainFrame)
 DarkOverlay.Size = UDim2.new(1, 0, 1, 0)
 DarkOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-DarkOverlay.BackgroundTransparency = 0.45
+DarkOverlay.BackgroundTransparency = 0.5
 DarkOverlay.ZIndex = 0
 Corner(DarkOverlay, UDim.new(0, 8))
-
--- Loop chạy hiệu ứng động cho ImageLabel (5x5 = 25 khung hình)
-local FRAME_SIZE = 1024 / 5
-AnimeBg.ImageRectSize = Vector2.new(FRAME_SIZE, FRAME_SIZE)
-
-task.spawn(function()
-    local frameIndex = 0
-    while MainFrame and MainFrame.Parent do
-        local col = frameIndex % 5
-        local row = math.floor(frameIndex / 5)
-        AnimeBg.ImageRectOffset = Vector2.new(col * FRAME_SIZE, row * FRAME_SIZE)
-        frameIndex = (frameIndex + 1) % 25
-        task.wait(0.04) -- Tốc độ phát (khoảng 25 FPS)
-    end
-end)
 
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size, ResizeBtn.Position = UDim2.new(0, 18, 0, 18), UDim2.new(1, -18, 1, -18)
