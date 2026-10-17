@@ -1,10 +1,10 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Bọc Thép Chống Skid)
+    VzNam Hub v4 : Tổng Hợp (Bản Fix Lỗi Đỏ UI - Cấp 3)
     ═══════════════════════════════════════════════════════
-    • Fix lỗi script ngoài tự đổi tên nút & màu nền
-    • Ẩn UI vào CoreGui (chống quét)
-    • Đổi màu viền highlight sang Xanh Lá
+    • Đã sửa lỗi vòng lặp vô hạn gây đỏ và treo UI
+    • Nhốt UI vào gethui / CoreGui kết hợp protect_gui
+    • Đổi viền Highlight khi chọn script sang Xanh Lá
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -96,23 +96,27 @@ local function SafeLoad(url)
     return ok3
 end
 
--- ═════════════════ ROOT UI (BẢO VỆ) ═════════════════
+-- ═════════════════ ROOT UI (BẢO VỆ TUYỆT ĐỐI) ═════════════════
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "VzNamHubV4UI_" .. tostring(math.random(10000, 99999)) -- Đặt tên ngẫu nhiên chống quét
-ScreenGui.DisplayOrder = 99999
+ScreenGui.Name = "VzNamHubV4UI_" .. tostring(math.random(10000, 99999))
+ScreenGui.DisplayOrder = 999999 
 ScreenGui.ResetOnSpawn = false
 
--- Cơ chế ẩn UI: Ưu tiên CoreGui, syn.protect_gui, hoặc gethui để script khác không thấy
+-- Nhốt vào gethui/CoreGui và dùng khiên chắn của Executor
 local isProtected = false
-if syn and syn.protect_gui then
-    syn.protect_gui(ScreenGui)
-    ScreenGui.Parent = CoreGui
-    isProtected = true
-elseif gethui then
-    ScreenGui.Parent = gethui()
-    isProtected = true
+if gethui then
+    pcall(function()
+        ScreenGui.Parent = gethui()
+        isProtected = true
+    end)
+elseif syn and syn.protect_gui then
+    pcall(function()
+        syn.protect_gui(ScreenGui)
+        ScreenGui.Parent = CoreGui
+        isProtected = true
+    end)
 else
-    ScreenGui.Parent = PlayerGui
+    ScreenGui.Parent = CoreGui
 end
 
 local MainFrame = Instance.new("Frame")
@@ -266,6 +270,47 @@ HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = Color3.fromRGB(0
 
 local Tabs = {}
 
+-- ═════════════════ HÀM BẢO VỆ NÚT (CHỐNG LỖI VÒNG LẶP VÔ HẠN) ═════════════════
+local protectedRegistry = {}
+local function ProtectButton(Btn, originalText, themeType)
+    table.insert(protectedRegistry, {
+        Button = Btn,
+        OriginalText = originalText,
+        OriginalTextColor = Btn.TextColor3,
+        ThemeType = themeType
+    })
+end
+
+-- Vòng lặp bảo vệ chạy mỗi khung hình (RenderStepped - Siêu nhanh, đè bẹp script khác)
+Track(RunService.RenderStepped:Connect(function()
+    for _, data in ipairs(protectedRegistry) do
+        local btn = data.Button
+        if btn and btn.Parent then
+            -- 1. Ép lại Text nếu bị đổi
+            if btn.Text ~= data.OriginalText then
+                btn.Text = data.OriginalText
+            end
+            -- 2. Ép lại màu chữ nếu bị đổi
+            if btn.TextColor3 ~= data.OriginalTextColor then
+                btn.TextColor3 = data.OriginalTextColor
+            end
+            -- 3. Ép lại màu nền nếu bị đổi
+            local base = State.ThemeBase
+            local targetBg
+            if data.ThemeType == "Primary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.08)
+            elseif data.ThemeType == "Secondary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.15)
+            elseif data.ThemeType == "DropFrame" then targetBg = base:Lerp(Color3.new(1,1,1), 0.2)
+            elseif data.ThemeType == "DropItem" then targetBg = base:Lerp(Color3.new(1,1,1), 0.3)
+            elseif data.ThemeType == "Input" then targetBg = base:Lerp(Color3.new(0,0,0), 0.4)
+            end
+
+            if targetBg and btn.BackgroundColor3 ~= targetBg then
+                btn.BackgroundColor3 = targetBg
+            end
+        end
+    end
+end))
+
 -- ═════════════════ TAB 0: TRANG CHỦ ═════════════════
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
 tabHomeBtn.LayoutOrder = 0
@@ -275,6 +320,7 @@ tabHomeBtn.TextColor3, tabHomeBtn.TextSize = Color3.fromRGB(255,255,255), 8
 tabHomeBtn.Font, tabHomeBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
 Corner(tabHomeBtn)
 RegTheme(tabHomeBtn, "Primary")
+ProtectButton(tabHomeBtn, " 🏠 Trang Chủ", "Primary")
 
 local homeIndicator = Instance.new("Frame", tabHomeBtn)
 homeIndicator.Size, homeIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -320,6 +366,7 @@ infoToggleBtn.Font, infoToggleBtn.TextXAlignment = Enum.Font.GothamBold, Enum.Te
 Corner(infoToggleBtn)
 Stroke(infoToggleBtn)
 RegTheme(infoToggleBtn, "Secondary")
+ProtectButton(infoToggleBtn, " → thông tin", "Secondary")
 
 local infoSubLabel = Instance.new("TextLabel", infoToggleBtn)
 infoSubLabel.Size, infoSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
@@ -403,30 +450,6 @@ CreateHomeCard(infoContainer, 3, Color3.fromRGB(45,45,65), "TIKTOK CHANNEL", "ht
 local RegisteredScripts = {}
 local LastSelectedScriptStroke = nil
 
--- Hàm bọc thép bảo vệ Nút khỏi bị Script khác đổi tên/màu
-local function ProtectButton(Btn, originalText, themeType)
-    -- Chống đổi tên
-    Track(Btn:GetPropertyChangedSignal("Text"):Connect(function()
-        if Btn.Text ~= originalText then
-            Btn.Text = originalText
-        end
-    end))
-    
-    -- Chống đổi màu nền (Đặc biệt là màu đỏ của Chilli Hub)
-    Track(Btn:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
-        local c = Btn.BackgroundColor3
-        -- Nếu phát hiện màu đỏ (R cao, G thấp, B thấp) -> Ép về màu Theme
-        if c.R > 0.5 and c.G < 0.3 and c.B < 0.3 then
-            local base = State.ThemeBase
-            if themeType == "Primary" then Btn.BackgroundColor3 = base:Lerp(Color3.new(1,1,1), 0.08)
-            elseif themeType == "Secondary" then Btn.BackgroundColor3 = base:Lerp(Color3.new(1,1,1), 0.15)
-            elseif themeType == "DropItem" then Btn.BackgroundColor3 = base:Lerp(Color3.new(1,1,1), 0.3)
-            elseif themeType == "Input" then Btn.BackgroundColor3 = base:Lerp(Color3.new(0,0,0), 0.4)
-            end
-        end
-    end))
-end
-
 local function CreateCategoryTab(tabName, layoutOrder)
     local tabBtn = Instance.new("TextButton", SidebarScroll)
     tabBtn.LayoutOrder = layoutOrder or 0
@@ -436,6 +459,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     tabBtn.Font, tabBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
     Corner(tabBtn)
     RegTheme(tabBtn, "Primary")
+    ProtectButton(tabBtn, " " .. tabName, "Primary")
 
     local indicator = Instance.new("Frame", tabBtn)
     indicator.Size, indicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -464,6 +488,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     Corner(noKeyBtn)
     local nkStroke = Stroke(noKeyBtn, Color3.fromRGB(255,50,50), 2)
     RegTheme(noKeyBtn, "Primary")
+    ProtectButton(noKeyBtn, "no key", "Primary")
 
     local hasKeyBtn = Instance.new("TextButton", subBar)
     hasKeyBtn.Size, hasKeyBtn.BackgroundColor3 = UDim2.new(0.48, 0, 1, 0), Color3.fromRGB(70,15,50)
@@ -473,6 +498,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     Corner(hasKeyBtn)
     local hkStroke = Stroke(hasKeyBtn, Color3.fromRGB(0,191,255), 1)
     RegTheme(hasKeyBtn, "Primary")
+    ProtectButton(hasKeyBtn, "có key", "Primary")
 
     local function makeScroll()
         local s = Instance.new("ScrollingFrame", containerFrame)
@@ -539,7 +565,6 @@ local function CreateCategoryTab(tabName, layoutOrder)
         Corner(Btn)
         local bStroke = Stroke(Btn, Color3.fromRGB(0,191,255), 1)
         RegTheme(Btn, "Primary")
-        
         ProtectButton(Btn, originalText, "Primary")
 
         Track(Btn.MouseButton1Click:Connect(function()
@@ -547,7 +572,6 @@ local function CreateCategoryTab(tabName, layoutOrder)
                 LastSelectedScriptStroke.Color = Color3.fromRGB(0,191,255)
                 LastSelectedScriptStroke.Thickness = 1
             end
-            -- Đã đổi màu Highlight sang Xanh Lá
             bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
             LastSelectedScriptStroke = bStroke
             pcall(callback)
@@ -572,6 +596,7 @@ local function CreateSimpleTab(tabName, layoutOrder)
     tabBtn.Font, tabBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
     Corner(tabBtn)
     RegTheme(tabBtn, "Primary")
+    ProtectButton(tabBtn, " " .. tabName, "Primary")
 
     local indicator = Instance.new("Frame", tabBtn)
     indicator.Size, indicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -633,7 +658,6 @@ local function CreateSimpleTab(tabName, layoutOrder)
         Corner(Btn)
         local bStroke = Stroke(Btn, Color3.fromRGB(0,191,255), 1)
         RegTheme(Btn, "Primary")
-        
         ProtectButton(Btn, originalText, "Primary")
 
         Track(Btn.MouseButton1Click:Connect(function()
@@ -641,7 +665,6 @@ local function CreateSimpleTab(tabName, layoutOrder)
                 LastSelectedScriptStroke.Color = Color3.fromRGB(0,191,255)
                 LastSelectedScriptStroke.Thickness = 1
             end
-            -- Đã đổi màu Highlight sang Xanh Lá
             bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
             LastSelectedScriptStroke = bStroke
             pcall(callback)
@@ -708,6 +731,7 @@ tabMiscBtn.TextColor3, tabMiscBtn.TextSize = Color3.fromRGB(255,255,255), 8
 tabMiscBtn.Font, tabMiscBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
 Corner(tabMiscBtn)
 RegTheme(tabMiscBtn, "Primary")
+ProtectButton(tabMiscBtn, " ⚙️ MISC", "Primary")
 
 local miscIndicator = Instance.new("Frame", tabMiscBtn)
 miscIndicator.Size, miscIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -749,6 +773,7 @@ autoLoadToggleBtn.Font, autoLoadToggleBtn.TextXAlignment = Enum.Font.GothamBold,
 Corner(autoLoadToggleBtn)
 Stroke(autoLoadToggleBtn)
 RegTheme(autoLoadToggleBtn, "Secondary")
+ProtectButton(autoLoadToggleBtn, " ↓ auto load script", "Secondary")
 
 local alSubLabel = Instance.new("TextLabel", autoLoadToggleBtn)
 alSubLabel.Size, alSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
@@ -780,6 +805,7 @@ dropBtn.Font, dropBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Lef
 Corner(dropBtn)
 Stroke(dropBtn)
 RegTheme(dropBtn, "Primary")
+ProtectButton(dropBtn, " 📜 Chọn Script Auto Load...", "Primary")
 
 local dropFrame = Instance.new("ScrollingFrame", autoLoadContainer)
 dropFrame.LayoutOrder = 2
@@ -813,7 +839,6 @@ local function rebuildScriptDropdown()
         Corner(item, UDim.new(0, 4))
         Stroke(item)
         RegTheme(item, "DropItem")
-        
         ProtectButton(item, originalText, "DropItem")
 
         Track(item.MouseButton1Click:Connect(function()
@@ -882,6 +907,7 @@ musicToggleBtn.Font, musicToggleBtn.TextXAlignment = Enum.Font.GothamBold, Enum.
 Corner(musicToggleBtn)
 Stroke(musicToggleBtn)
 RegTheme(musicToggleBtn, "Secondary")
+ProtectButton(musicToggleBtn, " ↓ âm nhạc", "Secondary")
 
 local muSubLabel = Instance.new("TextLabel", musicToggleBtn)
 muSubLabel.Size, muSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
@@ -926,6 +952,7 @@ musicDropBtn.TextXAlignment = Enum.TextXAlignment.Left
 Corner(musicDropBtn)
 Stroke(musicDropBtn)
 RegTheme(musicDropBtn, "Primary")
+ProtectButton(musicDropBtn, " 🎵 Chọn Nhạc...", "Primary")
 
 local musicDropFrame = Instance.new("ScrollingFrame", musicContainer)
 musicDropFrame.LayoutOrder, musicDropFrame.Size = 3, UDim2.new(1, 0, 0, 95)
@@ -957,7 +984,6 @@ for i, m in ipairs(presetMusics) do
     Corner(mBtn, UDim.new(0, 4))
     Stroke(mBtn)
     RegTheme(mBtn, "DropItem")
-
     ProtectButton(mBtn, originalText, "DropItem")
 
     Track(mBtn.MouseButton1Click:Connect(function()
@@ -1069,6 +1095,7 @@ menuColorToggleBtn.Font, menuColorToggleBtn.TextXAlignment = Enum.Font.GothamBol
 Corner(menuColorToggleBtn)
 Stroke(menuColorToggleBtn)
 RegTheme(menuColorToggleBtn, "Secondary")
+ProtectButton(menuColorToggleBtn, " ↓ màu menu", "Secondary")
 
 local mcSubLabel = Instance.new("TextLabel", menuColorToggleBtn)
 mcSubLabel.Size, mcSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
@@ -1130,6 +1157,7 @@ themeDropBtn.TextXAlignment = Enum.TextXAlignment.Left
 Corner(themeDropBtn)
 Stroke(themeDropBtn)
 RegTheme(themeDropBtn, "Primary")
+ProtectButton(themeDropBtn, " 🎨 Theme: 🌊 Xanh Đại Dương", "Primary")
 
 local themeDropFrame = Instance.new("ScrollingFrame", menuColorContainer)
 themeDropFrame.LayoutOrder, themeDropFrame.Size = 2, UDim2.new(1, 0, 0, 95)
@@ -1154,7 +1182,6 @@ for i, th in ipairs(menuThemeList) do
     Corner(tBtn, UDim.new(0, 4))
     Stroke(tBtn)
     RegTheme(tBtn, "DropItem")
-
     ProtectButton(tBtn, originalText, "DropItem")
 
     Track(tBtn.MouseButton1Click:Connect(function()
@@ -1233,6 +1260,7 @@ colorDropBtn.TextXAlignment = Enum.TextXAlignment.Left
 Corner(colorDropBtn)
 Stroke(colorDropBtn)
 RegTheme(colorDropBtn, "Primary")
+ProtectButton(colorDropBtn, " 🎨 Viền: 🔵 Xanh Dương", "Primary")
 
 local colorDropFrame = Instance.new("ScrollingFrame", menuColorContainer)
 colorDropFrame.LayoutOrder, colorDropFrame.Size = 5, UDim2.new(1, 0, 0, 95)
@@ -1270,7 +1298,6 @@ for i, cItem in ipairs(colorList) do
     Corner(cBtn, UDim.new(0, 4))
     Stroke(cBtn)
     RegTheme(cBtn, "DropItem")
-
     ProtectButton(cBtn, originalText, "DropItem")
 
     Track(cBtn.MouseButton1Click:Connect(function()
@@ -1312,6 +1339,7 @@ tabConfigBtn.TextColor3, tabConfigBtn.TextSize = Color3.fromRGB(255,255,255), 8
 tabConfigBtn.Font, tabConfigBtn.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
 Corner(tabConfigBtn)
 RegTheme(tabConfigBtn, "Primary")
+ProtectButton(tabConfigBtn, " 📦 CẤU HÌNH", "Primary")
 
 local configIndicator = Instance.new("Frame", tabConfigBtn)
 configIndicator.Size, configIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -1482,6 +1510,7 @@ delBtn.TextXAlignment = Enum.TextXAlignment.Center
 Corner(delBtn, UDim.new(0, 4))
 Stroke(delBtn)
 RegTheme(delBtn, "Input")
+ProtectButton(delBtn, "Không có ∨", "Input")
 
 local delDropFrame = Instance.new("ScrollingFrame", mainConfigContainer)
 delDropFrame.LayoutOrder, delDropFrame.Size = 5, UDim2.new(1, 0, 0, 80)
@@ -1517,6 +1546,7 @@ ldBtn.TextXAlignment = Enum.TextXAlignment.Center
 Corner(ldBtn, UDim.new(0, 4))
 Stroke(ldBtn)
 RegTheme(ldBtn, "Input")
+ProtectButton(ldBtn, State.CurrentConfig .. " ∨", "Input")
 
 local ldDropFrame = Instance.new("ScrollingFrame", mainConfigContainer)
 ldDropFrame.LayoutOrder, ldDropFrame.Size = 7, UDim2.new(1, 0, 0, 80)
@@ -1644,7 +1674,6 @@ local function refreshAllDropdowns()
         Corner(f1, UDim.new(0, 4))
         Stroke(f1)
         RegTheme(f1, "DropItem")
-        
         ProtectButton(f1, origT, "DropItem")
 
         Track(f1.MouseButton1Click:Connect(function()
@@ -1663,7 +1692,6 @@ local function refreshAllDropdowns()
         Corner(f3, UDim.new(0, 4))
         Stroke(f3)
         RegTheme(f3, "DropItem")
-        
         ProtectButton(f3, origT2, "DropItem")
 
         Track(f3.MouseButton1Click:Connect(function()
@@ -1732,4 +1760,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded. Config folder: " .. CONFIG_FOLDER)
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Đã fix triệt để lỗi đỏ UI).")
