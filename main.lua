@@ -1,8 +1,8 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Fix Lỗi Đỏ UI - Cấp 3)
+    VzNam Hub v4 : Tổng Hợp (Bản Anti-Skid Tối Thượng)
     ═══════════════════════════════════════════════════════
-    • Đã sửa lỗi vòng lặp vô hạn gây đỏ và treo UI
+    • Fix lỗi đỏ UI bằng BindToRenderStep (Priority 3000)
     • Nhốt UI vào gethui / CoreGui kết hợp protect_gui
     • Đổi viền Highlight khi chọn script sang Xanh Lá
 ]]
@@ -31,6 +31,7 @@ end
 local function DisconnectAll()
     for _, c in ipairs(Connections) do pcall(function() c:Disconnect() end) end
     Connections = {}
+    pcall(function() RunService:UnbindFromRenderStep("VzNamProtect") end)
 end
 
 -- ═════════════════ STATE ═════════════════
@@ -102,19 +103,11 @@ ScreenGui.Name = "VzNamHubV4UI_" .. tostring(math.random(10000, 99999))
 ScreenGui.DisplayOrder = 999999 
 ScreenGui.ResetOnSpawn = false
 
--- Nhốt vào gethui/CoreGui và dùng khiên chắn của Executor
 local isProtected = false
 if gethui then
-    pcall(function()
-        ScreenGui.Parent = gethui()
-        isProtected = true
-    end)
+    pcall(function() ScreenGui.Parent = gethui(); isProtected = true end)
 elseif syn and syn.protect_gui then
-    pcall(function()
-        syn.protect_gui(ScreenGui)
-        ScreenGui.Parent = CoreGui
-        isProtected = true
-    end)
+    pcall(function() syn.protect_gui(ScreenGui); ScreenGui.Parent = CoreGui; isProtected = true end)
 else
     ScreenGui.Parent = CoreGui
 end
@@ -270,31 +263,40 @@ HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = Color3.fromRGB(0
 
 local Tabs = {}
 
--- ═════════════════ HÀM BẢO VỆ NÚT (CHỐNG LỖI VÒNG LẶP VÔ HẠN) ═════════════════
+-- ═════════════════ HÀM BẢO VỆ NÚT (BẢN CUỐI) ═════════════════
 local protectedRegistry = {}
 local function ProtectButton(Btn, originalText, themeType)
     table.insert(protectedRegistry, {
         Button = Btn,
         OriginalText = originalText,
         OriginalTextColor = Btn.TextColor3,
+        OriginalBgColor = Btn.BackgroundColor3,
+        OriginalTransparency = Btn.BackgroundTransparency,
         ThemeType = themeType
     })
 end
 
--- Vòng lặp bảo vệ chạy mỗi khung hình (RenderStepped - Siêu nhanh, đè bẹp script khác)
-Track(RunService.RenderStepped:Connect(function()
+-- Sử dụng BindToRenderStep với Priority 3000 (Chạy SAU CÙNG trong 1 frame)
+RunService:BindToRenderStep("VzNamProtect", 3000, function()
     for _, data in ipairs(protectedRegistry) do
         local btn = data.Button
         if btn and btn.Parent then
-            -- 1. Ép lại Text nếu bị đổi
+            -- Ép lại Text
             if btn.Text ~= data.OriginalText then
                 btn.Text = data.OriginalText
             end
-            -- 2. Ép lại màu chữ nếu bị đổi
+            
+            -- Ép lại màu chữ
             if btn.TextColor3 ~= data.OriginalTextColor then
                 btn.TextColor3 = data.OriginalTextColor
             end
-            -- 3. Ép lại màu nền nếu bị đổi
+
+            -- Ép lại độ trong suốt (nếu Chilli Hub làm mất nền)
+            if btn.BackgroundTransparency ~= data.OriginalTransparency then
+                btn.BackgroundTransparency = data.OriginalTransparency
+            end
+
+            -- Ép lại màu nền dựa theo Theme
             local base = State.ThemeBase
             local targetBg
             if data.ThemeType == "Primary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.08)
@@ -309,7 +311,7 @@ Track(RunService.RenderStepped:Connect(function()
             end
         end
     end
-end))
+end)
 
 -- ═════════════════ TAB 0: TRANG CHỦ ═════════════════
 local tabHomeBtn = Instance.new("TextButton", SidebarScroll)
@@ -1760,4 +1762,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Đã fix triệt để lỗi đỏ UI).")
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Đã fix 100% lỗi đỏ UI).")
