@@ -1,9 +1,7 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Fix 100% Lỗi Đỏ)
+    VzNam Hub v4 : Tổng Hợp (Bản Fix 100% Lỗi Chữ & Tắt Hub)
     ═══════════════════════════════════════════════════════
-    • Chuyển toàn bộ Nút thành Frame (Chống Script khác đổi tên)
-    • Tự động Ẩn Hub khi chạy Script (Chống bị quét)
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -30,6 +28,7 @@ end
 local function DisconnectAll()
     for _, c in ipairs(Connections) do pcall(function() c:Disconnect() end) end
     Connections = {}
+    pcall(function() RunService:UnbindFromRenderStep("VzNamProtect") end)
 end
 
 -- ═════════════════ STATE ═════════════════
@@ -68,7 +67,7 @@ local function RegTheme(el, t)
     return el
 end
 
--- Hàm tạo Nút bằng Frame (Chống Skid quét TextButton)
+-- Tạo Nút bằng Frame bọc TextLabel (Đã fix lỗi ZIndex)
 local function CreateCustomButton(parent, text, themeType)
     local f = Instance.new("Frame", parent)
     f.BackgroundColor3 = Color3.fromRGB(70,15,50)
@@ -87,6 +86,7 @@ local function CreateCustomButton(parent, text, themeType)
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Position = UDim2.new(0, 5, 0, 0)
     lbl.Size = UDim2.new(1, -5, 1, 0)
+    lbl.ZIndex = 10 -- FIX LỖI CHÌM CHỮ
     
     return f, lbl, s
 end
@@ -287,10 +287,43 @@ HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = Color3.fromRGB(0
 
 local Tabs = {}
 
+-- ═════════════════ BẢO VỆ MÀU NỀN (CHỐNG ĐỎ) ═════════════════
+local protectedRegistry = {}
+local function ProtectButton(Btn, themeType)
+    table.insert(protectedRegistry, {
+        Button = Btn,
+        OriginalTransparency = Btn.BackgroundTransparency,
+        ThemeType = themeType
+    })
+end
+
+RunService:BindToRenderStep("VzNamProtect", 3000, function()
+    for _, data in ipairs(protectedRegistry) do
+        local btn = data.Button
+        if btn and btn.Parent and btn.Visible then
+            if btn.BackgroundTransparency ~= data.OriginalTransparency then
+                btn.BackgroundTransparency = data.OriginalTransparency
+            end
+            local base = State.ThemeBase
+            local targetBg
+            if data.ThemeType == "Primary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.08)
+            elseif data.ThemeType == "Secondary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.15)
+            elseif data.ThemeType == "DropFrame" then targetBg = base:Lerp(Color3.new(1,1,1), 0.2)
+            elseif data.ThemeType == "DropItem" then targetBg = base:Lerp(Color3.new(1,1,1), 0.3)
+            elseif data.ThemeType == "Input" then targetBg = base:Lerp(Color3.new(0,0,0), 0.4)
+            end
+            if targetBg and btn.BackgroundColor3 ~= targetBg then
+                btn.BackgroundColor3 = targetBg
+            end
+        end
+    end
+end)
+
 -- ═════════════════ TAB 0: TRANG CHỦ ═════════════════
-local tabHomeFrame, tabHomeLbl, tabHomeStroke = CreateCustomButton(SidebarScroll, " 🏠 Trang Chủ", "Primary")
+local tabHomeFrame, tabHomeLbl, _ = CreateCustomButton(SidebarScroll, " 🏠 Trang Chủ", "Primary")
 tabHomeFrame.LayoutOrder = 0
 tabHomeFrame.Size = UDim2.new(1, 0, 0, 26)
+ProtectButton(tabHomeFrame, "Primary")
 
 local homeIndicator = Instance.new("Frame", tabHomeFrame)
 homeIndicator.Size, homeIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -332,12 +365,14 @@ ActiveTabTitle.Text = "🏠 Trang Chủ"
 local infoToggleFrame, infoToggleLbl, _ = CreateCustomButton(homeScroll, " → thông tin", "Secondary")
 infoToggleFrame.LayoutOrder = 1
 infoToggleFrame.Size = UDim2.new(1, 0, 0, 32)
+ProtectButton(infoToggleFrame, "Secondary")
 
 local infoSubLabel = Instance.new("TextLabel", infoToggleFrame)
 infoSubLabel.Size, infoSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
 infoSubLabel.BackgroundTransparency, infoSubLabel.Text = 1, "Xem các thông tin Hub"
 infoSubLabel.TextColor3, infoSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
 infoSubLabel.Font, infoSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
+infoSubLabel.ZIndex = 10
 
 local infoContainer = Instance.new("Frame", homeScroll)
 infoContainer.LayoutOrder = 2
@@ -373,18 +408,21 @@ local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyT
     iconLbl.Size, iconLbl.BackgroundTransparency = UDim2.new(1,0,1,0), 1
     iconLbl.Text, iconLbl.TextColor3 = iconSymbol, Color3.fromRGB(255,255,255)
     iconLbl.TextSize, iconLbl.Font = 7, Enum.Font.GothamBold
+    iconLbl.ZIndex = 10
 
     local tLbl = Instance.new("TextLabel", card)
     tLbl.Size, tLbl.Position = UDim2.new(1, -70, 0, 10), UDim2.new(0, 24, 0, 1)
     tLbl.BackgroundTransparency, tLbl.Text = 1, titleText
     tLbl.TextColor3, tLbl.TextSize = Color3.fromRGB(255,150,100), 7
     tLbl.Font, tLbl.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+    tLbl.ZIndex = 10
 
     local mLbl = Instance.new("TextLabel", card)
     mLbl.Size, mLbl.Position = UDim2.new(1, -70, 0, 12), UDim2.new(0, 24, 0, 12)
     mLbl.BackgroundTransparency, mLbl.Text = 1, mainText
     mLbl.TextColor3, mLbl.TextSize = Color3.fromRGB(220,220,230), 7
     mLbl.Font, mLbl.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+    mLbl.ZIndex = 10
 
     if copyText ~= "" then
         local copyBtn = Instance.new("TextButton", card)
@@ -392,6 +430,7 @@ local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyT
         copyBtn.BackgroundTransparency, copyBtn.Text = 1, "📋 COPY"
         copyBtn.TextColor3, copyBtn.TextSize = Color3.fromRGB(200,200,210), 7
         copyBtn.Font = Enum.Font.GothamBold
+        copyBtn.ZIndex = 10
 
         local function doCopy()
             if typeof(setclipboard) == "function" then
@@ -421,6 +460,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     local tabFrame, tabLbl, _ = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
     tabFrame.LayoutOrder = layoutOrder or 0
     tabFrame.Size = UDim2.new(1, 0, 0, 26)
+    ProtectButton(tabFrame, "Primary")
 
     local indicator = Instance.new("Frame", tabFrame)
     indicator.Size, indicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -447,12 +487,14 @@ local function CreateCategoryTab(tabName, layoutOrder)
     nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255,50,50), 2
     noKeyLbl.TextXAlignment = Enum.TextXAlignment.Center
     noKeyLbl.Position = UDim2.new(0, 0, 0, 0)
+    ProtectButton(noKeyFrame, "Primary")
 
     local hasKeyFrame, hasKeyLbl, hkStroke = CreateCustomButton(subBar, "có key", "Primary")
     hasKeyFrame.Size = UDim2.new(0.48, 0, 1, 0)
     hasKeyFrame.ZIndex = 6
     hasKeyLbl.TextXAlignment = Enum.TextXAlignment.Center
     hasKeyLbl.Position = UDim2.new(0, 0, 0, 0)
+    ProtectButton(hasKeyFrame, "Primary")
 
     local function makeScroll()
         local s = Instance.new("ScrollingFrame", containerFrame)
@@ -520,6 +562,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     local function AddBtnTo(parent, name, callback)
         local f, lbl, bStroke = CreateCustomButton(parent, " ▶ " .. name, "Primary")
         f.Size = UDim2.new(1, 0, 0, 26)
+        ProtectButton(f, "Primary")
 
         Track(f.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -530,10 +573,10 @@ local function CreateCategoryTab(tabName, layoutOrder)
                 bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
                 LastSelectedScriptStroke = bStroke
                 
-                -- Tự động ẩn Hub khi chạy script để tránh bị Skid đổi màu
+                -- Chỉ ẩn Hub chính, giữ nút 🌸
                 task.spawn(function()
                     task.wait(0.2)
-                    ScreenGui.Enabled = false
+                    MainFrame.Visible = false 
                 end)
                 
                 pcall(callback)
@@ -554,6 +597,7 @@ local function CreateSimpleTab(tabName, layoutOrder)
     local tabFrame, tabLbl, _ = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
     tabFrame.LayoutOrder = layoutOrder or 0
     tabFrame.Size = UDim2.new(1, 0, 0, 26)
+    ProtectButton(tabFrame, "Primary")
 
     local indicator = Instance.new("Frame", tabFrame)
     indicator.Size, indicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -612,6 +656,7 @@ local function CreateSimpleTab(tabName, layoutOrder)
     local function AddBtn(name, callback)
         local f, lbl, bStroke = CreateCustomButton(scroll, " ▶ " .. name, "Primary")
         f.Size = UDim2.new(1, 0, 0, 26)
+        ProtectButton(f, "Primary")
 
         Track(f.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -622,10 +667,9 @@ local function CreateSimpleTab(tabName, layoutOrder)
                 bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
                 LastSelectedScriptStroke = bStroke
                 
-                -- Tự động ẩn Hub khi chạy script
                 task.spawn(function()
                     task.wait(0.2)
-                    ScreenGui.Enabled = false
+                    MainFrame.Visible = false
                 end)
                 
                 pcall(callback)
@@ -688,6 +732,7 @@ end)
 local tabMiscFrame, tabMiscLbl, _ = CreateCustomButton(SidebarScroll, " ⚙️ MISC", "Primary")
 tabMiscFrame.LayoutOrder = 4
 tabMiscFrame.Size = UDim2.new(1, 0, 0, 26)
+ProtectButton(tabMiscFrame, "Primary")
 
 local miscIndicator = Instance.new("Frame", tabMiscFrame)
 miscIndicator.Size, miscIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -725,12 +770,14 @@ table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 local autoLoadToggleFrame, autoLoadToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ auto load script", "Secondary")
 autoLoadToggleFrame.LayoutOrder = 1
 autoLoadToggleFrame.Size = UDim2.new(1, 0, 0, 34)
+ProtectButton(autoLoadToggleFrame, "Secondary")
 
 local alSubLabel = Instance.new("TextLabel", autoLoadToggleFrame)
 alSubLabel.Size, alSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
 alSubLabel.BackgroundTransparency, alSubLabel.Text = 1, "Quản lý auto load script"
 alSubLabel.TextColor3, alSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
 alSubLabel.Font, alSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
+alSubLabel.ZIndex = 10
 
 local autoLoadContainer = Instance.new("Frame", miscScroll)
 autoLoadContainer.LayoutOrder = 2
@@ -752,6 +799,7 @@ end))
 local dropFrame, dropLbl, _ = CreateCustomButton(autoLoadContainer, " 📜 Chọn Script Auto Load...", "Primary")
 dropFrame.LayoutOrder = 1
 dropFrame.Size = UDim2.new(1, 0, 0, 26)
+ProtectButton(dropFrame, "Primary")
 
 local dropListFrame = Instance.new("ScrollingFrame", autoLoadContainer)
 dropListFrame.LayoutOrder = 2
@@ -779,6 +827,7 @@ local function rebuildScriptDropdown()
     for i, scr in ipairs(RegisteredScripts) do
         local f, lbl, _ = CreateCustomButton(dropListFrame, " ▶ " .. scr.Name, "DropItem")
         f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
+        ProtectButton(f, "DropItem")
         
         Track(f.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -786,7 +835,7 @@ local function rebuildScriptDropdown()
                 dropLbl.Text = " 📜 " .. scr.Name
                 dropListFrame.Visible = false
                 if State.IsAutoLoad then 
-                    task.spawn(function() task.wait(0.2); ScreenGui.Enabled = false end)
+                    task.spawn(function() task.wait(0.2); MainFrame.Visible = false end)
                     pcall(scr.Callback) 
                 end
             end
@@ -809,6 +858,7 @@ alsTitle.Size, alsTitle.Position = UDim2.new(1, -40, 1, 0), UDim2.new(0, 5, 0, 0
 alsTitle.BackgroundTransparency, alsTitle.Text = 1, "Auto Load Script Chạy"
 alsTitle.TextColor3, alsTitle.TextSize = Color3.fromRGB(255,255,255), 9
 alsTitle.Font, alsTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+alsTitle.ZIndex = 10
 
 local toggleAutoBtn = Instance.new("TextButton", autoLoadScriptFrame)
 toggleAutoBtn.Size, toggleAutoBtn.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
@@ -834,7 +884,7 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     if State.IsAutoLoad then
         toggleAutoBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
         autoDot.Position = UDim2.new(1, -13, 0.5, -5.5)
-        task.spawn(function() task.wait(0.2); ScreenGui.Enabled = false end)
+        task.spawn(function() task.wait(0.2); MainFrame.Visible = false end)
         pcall(State.SelectedScript.Callback)
     else
         toggleAutoBtn.BackgroundColor3 = Color3.fromRGB(60,65,75)
@@ -846,12 +896,14 @@ end))
 local musicToggleFrame, musicToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ âm nhạc", "Secondary")
 musicToggleFrame.LayoutOrder = 3
 musicToggleFrame.Size = UDim2.new(1, 0, 0, 34)
+ProtectButton(musicToggleFrame, "Secondary")
 
 local muSubLabel = Instance.new("TextLabel", musicToggleFrame)
 muSubLabel.Size, muSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
 muSubLabel.BackgroundTransparency, muSubLabel.Text = 1, "Cài đặt âm nhạc nền"
 muSubLabel.TextColor3, muSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
 muSubLabel.Font, muSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
+muSubLabel.ZIndex = 10
 
 local musicContainer = Instance.new("Frame", miscScroll)
 musicContainer.LayoutOrder, musicContainer.Size = 4, UDim2.new(1, 0, 0, 0)
@@ -885,6 +937,7 @@ RegTheme(customIdBox, "Input")
 
 local musicDropFrame, musicDropLbl, _ = CreateCustomButton(musicContainer, " 🎵 Chọn Nhạc...", "Primary")
 musicDropFrame.LayoutOrder, musicDropFrame.Size = 2, UDim2.new(1, 0, 0, 26)
+ProtectButton(musicDropFrame, "Primary")
 
 local musicDropList = Instance.new("ScrollingFrame", musicContainer)
 musicDropList.LayoutOrder, musicDropList.Size = 3, UDim2.new(1, 0, 0, 95)
@@ -908,6 +961,7 @@ local presetMusics = {
 for i, m in ipairs(presetMusics) do
     local f, lbl, _ = CreateCustomButton(musicDropList, " " .. m.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
+    ProtectButton(f, "DropItem")
 
     Track(f.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -940,6 +994,7 @@ volumeLabel.Size, volumeLabel.Position = UDim2.new(1, -8, 1, 0), UDim2.new(0, 5,
 volumeLabel.BackgroundTransparency, volumeLabel.Text = 1, "🔊 Vol: 50%"
 volumeLabel.TextColor3, volumeLabel.TextSize = Color3.fromRGB(255,255,255), 9
 volumeLabel.Font, volumeLabel.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+volumeLabel.ZIndex = 10
 
 local volumeBarBg = Instance.new("Frame", volumeFrame)
 volumeBarBg.Size, volumeBarBg.Position = UDim2.new(0, 80, 0, 8), UDim2.new(1, -86, 0.5, -4)
@@ -985,6 +1040,7 @@ musicTitle.Size, musicTitle.Position = UDim2.new(1, -40, 1, 0), UDim2.new(0, 5, 
 musicTitle.BackgroundTransparency, musicTitle.Text = 1, "Phát Nhạc Nền"
 musicTitle.TextColor3, musicTitle.TextSize = Color3.fromRGB(255,255,255), 9
 musicTitle.Font, musicTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+musicTitle.ZIndex = 10
 
 local toggleMusicBtn = Instance.new("TextButton", musicToggleFrame2)
 toggleMusicBtn.Size, toggleMusicBtn.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
@@ -1016,12 +1072,14 @@ end))
 local menuColorToggleFrame, menuColorToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ màu menu", "Secondary")
 menuColorToggleFrame.LayoutOrder = 5
 menuColorToggleFrame.Size = UDim2.new(1, 0, 0, 34)
+ProtectButton(menuColorToggleFrame, "Secondary")
 
 local mcSubLabel = Instance.new("TextLabel", menuColorToggleFrame)
 mcSubLabel.Size, mcSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
 mcSubLabel.BackgroundTransparency, mcSubLabel.Text = 1, "Tùy chỉnh màu sắc & độ trong suốt"
 mcSubLabel.TextColor3, mcSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
 mcSubLabel.Font, mcSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
+mcSubLabel.ZIndex = 10
 
 local menuColorContainer = Instance.new("Frame", miscScroll)
 menuColorContainer.LayoutOrder, menuColorContainer.Size = 6, UDim2.new(1, 0, 0, 0)
@@ -1072,6 +1130,7 @@ end
 
 local themeDropFrame, themeDropLbl, _ = CreateCustomButton(menuColorContainer, " 🎨 Theme: 🌊 Xanh Đại Dương", "Primary")
 themeDropFrame.LayoutOrder, themeDropFrame.Size = 1, UDim2.new(1, 0, 0, 26)
+ProtectButton(themeDropFrame, "Primary")
 
 local themeDropList = Instance.new("ScrollingFrame", menuColorContainer)
 themeDropList.LayoutOrder, themeDropList.Size = 2, UDim2.new(1, 0, 0, 95)
@@ -1088,6 +1147,7 @@ themePad.PaddingRight = UDim.new(0, 8)
 for i, th in ipairs(menuThemeList) do
     local f, lbl, _ = CreateCustomButton(themeDropList, " " .. th.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
+    ProtectButton(f, "DropItem")
 
     Track(f.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1116,6 +1176,7 @@ transLabel.Size, transLabel.Position = UDim2.new(1, -8, 1, 0), UDim2.new(0, 5, 0
 transLabel.BackgroundTransparency, transLabel.Text = 1, "✨ Trong suốt: 0%"
 transLabel.TextColor3, transLabel.TextSize = Color3.fromRGB(255,255,255), 9
 transLabel.Font, transLabel.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+transLabel.ZIndex = 10
 
 local transBarBg = Instance.new("Frame", transFrame)
 transBarBg.Size, transBarBg.Position = UDim2.new(0, 80, 0, 8), UDim2.new(1, -86, 0.5, -4)
@@ -1162,6 +1223,7 @@ local selectedColorObj = colorList[1]
 
 local colorDropFrame, colorDropLbl, _ = CreateCustomButton(menuColorContainer, " 🎨 Viền: 🔵 Xanh Dương", "Primary")
 colorDropFrame.LayoutOrder, colorDropFrame.Size = 4, UDim2.new(1, 0, 0, 26)
+ProtectButton(colorDropFrame, "Primary")
 
 local colorDropList = Instance.new("ScrollingFrame", menuColorContainer)
 colorDropList.LayoutOrder, colorDropList.Size = 5, UDim2.new(1, 0, 0, 95)
@@ -1191,6 +1253,7 @@ end
 for i, cItem in ipairs(colorList) do
     local f, lbl, _ = CreateCustomButton(colorDropList, " " .. cItem.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
+    ProtectButton(f, "DropItem")
 
     Track(f.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1230,6 +1293,7 @@ Track(rainbowConn)
 local tabConfigFrame, tabConfigLbl, _ = CreateCustomButton(SidebarScroll, " 📦 CẤU HÌNH", "Primary")
 tabConfigFrame.LayoutOrder = 5
 tabConfigFrame.Size = UDim2.new(1, 0, 0, 26)
+ProtectButton(tabConfigFrame, "Primary")
 
 local configIndicator = Instance.new("Frame", tabConfigFrame)
 configIndicator.Size, configIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -1329,6 +1393,7 @@ startupLabel.BackgroundTransparency = 1
 startupLabel.Text = "Startup: " .. State.CurrentConfig
 startupLabel.TextColor3, startupLabel.TextSize = Color3.fromRGB(255,255,255), 9
 startupLabel.Font, startupLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+startupLabel.ZIndex = 10
 
 local newConfigFrame = Instance.new("Frame", mainConfigContainer)
 newConfigFrame.LayoutOrder, newConfigFrame.Size = 2, UDim2.new(1, 0, 0, 30)
@@ -1342,6 +1407,7 @@ ncLabel.Size, ncLabel.Position = UDim2.new(0, 80, 1, 0), UDim2.new(0, 5, 0, 0)
 ncLabel.BackgroundTransparency, ncLabel.Text = 1, "Tên Config"
 ncLabel.TextColor3, ncLabel.TextSize = Color3.fromRGB(255,255,255), 9
 ncLabel.Font, ncLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+ncLabel.ZIndex = 10
 
 local configNameBox = Instance.new("TextBox", newConfigFrame)
 configNameBox.Size, configNameBox.Position = UDim2.new(1, -95, 0, 20), UDim2.new(0, 85, 0.5, -10)
@@ -1365,12 +1431,14 @@ crTitle.Size, crTitle.Position = UDim2.new(1, -75, 0, 15), UDim2.new(0, 5, 0, 2)
 crTitle.BackgroundTransparency, crTitle.Text = 1, "Tạo Mới Cấu Hình"
 crTitle.TextColor3, crTitle.TextSize = Color3.fromRGB(255,255,255), 9
 crTitle.Font, crTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+crTitle.ZIndex = 10
 
 local crSub = Instance.new("TextLabel", createFrame)
 crSub.Size, crSub.Position = UDim2.new(1, -75, 0, 14), UDim2.new(0, 5, 0, 17)
 crSub.BackgroundTransparency, crSub.Text = 1, "Sao chép cài đặt hiện tại"
 crSub.TextColor3, crSub.TextSize = Color3.fromRGB(140,140,150), 7
 crSub.Font, crSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+crSub.ZIndex = 10
 
 local createBtn = Instance.new("TextButton", createFrame)
 createBtn.Size, createBtn.Position = UDim2.new(0, 65, 0, 22), UDim2.new(1, -70, 0.5, -11)
@@ -1392,6 +1460,7 @@ delLabel.Size, delLabel.Position = UDim2.new(0, 80, 1, 0), UDim2.new(0, 5, 0, 0)
 delLabel.BackgroundTransparency, delLabel.Text = 1, "Xóa Cấu Hình"
 delLabel.TextColor3, delLabel.TextSize = Color3.fromRGB(255,255,255), 9
 delLabel.Font, delLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+delLabel.ZIndex = 10
 
 local delBtn = Instance.new("TextButton", deleteFrame)
 delBtn.Size, delBtn.Position = UDim2.new(0, 85, 0, 20), UDim2.new(1, -90, 0.5, -10)
@@ -1427,6 +1496,7 @@ ldLabel.Size, ldLabel.Position = UDim2.new(0, 80, 1, 0), UDim2.new(0, 5, 0, 0)
 ldLabel.BackgroundTransparency, ldLabel.Text = 1, "Tải Config"
 ldLabel.TextColor3, ldLabel.TextSize = Color3.fromRGB(255,255,255), 9
 ldLabel.Font, ldLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+ldLabel.ZIndex = 10
 
 local ldBtn = Instance.new("TextButton", loadConfigFrame)
 ldBtn.Size, ldBtn.Position = UDim2.new(0, 85, 0, 20), UDim2.new(1, -90, 0.5, -10)
@@ -1462,12 +1532,14 @@ svTitle.Size, svTitle.Position = UDim2.new(1, -75, 0, 15), UDim2.new(0, 5, 0, 2)
 svTitle.BackgroundTransparency, svTitle.Text = 1, "Lưu Cấu Hình"
 svTitle.TextColor3, svTitle.TextSize = Color3.fromRGB(255,255,255), 9
 svTitle.Font, svTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
+svTitle.ZIndex = 10
 
 local svSub = Instance.new("TextLabel", saveFrame)
 svSub.Size, svSub.Position = UDim2.new(1, -75, 0, 14), UDim2.new(0, 5, 0, 17)
 svSub.BackgroundTransparency, svSub.Text = 1, "Save: " .. State.CurrentConfig
 svSub.TextColor3, svSub.TextSize = Color3.fromRGB(140,140,150), 7
 svSub.Font, svSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+svSub.ZIndex = 10
 
 local saveBtn = Instance.new("TextButton", saveFrame)
 saveBtn.Size, saveBtn.Position = UDim2.new(0, 65, 0, 22), UDim2.new(1, -70, 0.5, -11)
@@ -1536,7 +1608,7 @@ end
 local function refreshAllDropdowns()
     for _, drop in ipairs({delDropFrame, ldDropFrame}) do
         for _, child in ipairs(drop:GetChildren()) do
-            if child:IsA("TextButton") then child:Destroy() end
+            if child:IsA("Frame") then child:Destroy() end
         end
     end
 
@@ -1555,41 +1627,34 @@ local function refreshAllDropdowns()
     if #filesList == 0 then delBtn.Text = "Không có ∨" end
 
     for _, name in ipairs(filesList) do
-        local f1 = Instance.new("TextButton", delDropFrame)
-        f1.Size, f1.BackgroundColor3, f1.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
-        local origT = " 🗑️ " .. name
-        f1.Text = origT
-        f1.TextColor3, f1.TextSize = Color3.fromRGB(255,100,100), 9
-        f1.Font, f1.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-        Corner(f1, UDim.new(0, 4))
-        Stroke(f1)
-        RegTheme(f1, "DropItem")
+        local f1, lbl1, _ = CreateCustomButton(delDropFrame, " 🗑️ " .. name, "DropItem")
+        f1.Size = UDim2.new(1, 0, 0, 22)
+        lbl1.TextColor3 = Color3.fromRGB(255,100,100)
+        ProtectButton(f1, "DropItem")
 
-        Track(f1.MouseButton1Click:Connect(function()
-            if typeof(delfile) == "function" then pcall(delfile, CONFIG_FOLDER .. "/" .. name .. ".json") end
-            delBtn.Text = name .. " ∨"
-            delDropFrame.Visible = false
-            refreshAllDropdowns()
+        Track(f1.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                if typeof(delfile) == "function" then pcall(delfile, CONFIG_FOLDER .. "/" .. name .. ".json") end
+                delBtn.Text = name .. " ∨"
+                delDropFrame.Visible = false
+                refreshAllDropdowns()
+            end
         end))
 
-        local f3 = Instance.new("TextButton", ldDropFrame)
-        f3.Size, f3.BackgroundColor3, f3.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
-        local origT2 = " 📂 " .. name
-        f3.Text = origT2
-        f3.TextColor3, f3.TextSize = Color3.fromRGB(255,255,255), 9
-        f3.Font, f3.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-        Corner(f3, UDim.new(0, 4))
-        Stroke(f3)
-        RegTheme(f3, "DropItem")
+        local f3, lbl3, _ = CreateCustomButton(ldDropFrame, " 📂 " .. name, "DropItem")
+        f3.Size = UDim2.new(1, 0, 0, 22)
+        ProtectButton(f3, "DropItem")
 
-        Track(f3.MouseButton1Click:Connect(function()
-            State.CurrentConfig = name
-            ldBtn.Text = name .. " ∨"
-            svSub.Text = "Save: " .. name
-            ldDropFrame.Visible = false
-            RefreshStartupLabel()
-            local ok, err = LoadConfig(name)
-            if not ok then warn("[VzNam] Load config fail: " .. tostring(err)) end
+        Track(f3.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                State.CurrentConfig = name
+                ldBtn.Text = name .. " ∨"
+                svSub.Text = "Save: " .. name
+                ldDropFrame.Visible = false
+                RefreshStartupLabel()
+                local ok, err = LoadConfig(name)
+                if not ok then warn("[VzNam] Load config fail: " .. tostring(err)) end
+            end
         end))
     end
     delDropFrame.CanvasSize = UDim2.new(0, 0, 0, #filesList * 25)
@@ -1641,9 +1706,6 @@ table.insert(AllUIStrokes, OpenStroke)
 
 Track(OpenButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
-    if MainFrame.Visible then
-        ScreenGui.Enabled = true
-    end
 end))
 
 -- ═════════════════ KHỞI TẠO ═════════════════
@@ -1651,4 +1713,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Đã fix lỗi đỏ - Tự động ẩn Hub khi chạy).")
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Đã fix 100% lỗi chữ & nút mở).")
