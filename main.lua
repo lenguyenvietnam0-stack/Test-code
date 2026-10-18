@@ -1,6 +1,6 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Fix Lỗi Vuốt & Click)
+    VzNam Hub v4 : Tổng Hợp (Bản Fix Lỗi Đơ & Vuốt)
     ═══════════════════════════════════════════════════════
 ]]
 
@@ -74,7 +74,7 @@ local function CreateCustomButton(parent, text, themeType)
     local f = Instance.new("Frame", parent)
     f.BackgroundColor3 = Color3.fromRGB(70,15,50)
     f.BorderSizePixel = 0
-    f.Active = false -- FIX LỖI KHÔNG VUỐT ĐƯỢC (Tắt Active để nhường sự kiện cuộn cho ScrollingFrame)
+    f.Active = false -- Tắt Active để không chặn thanh cuộn
     Corner(f)
     local s = Stroke(f, Color3.fromRGB(0,191,255), 1)
     RegTheme(f, themeType)
@@ -91,7 +91,7 @@ local function CreateCustomButton(parent, text, themeType)
     lbl.Size = UDim2.new(1, -5, 1, 0)
     lbl.ZIndex = 2
     
-    -- FIX LỖI TỰ CHẠY KHI VUỐT (Tạo nút ẩn để nhận Click thay vì InputBegan)
+    -- Nút ẩn để nhận Click (không bị kích hoạt khi vuốt)
     local clicker = Instance.new("TextButton", f)
     clicker.Name = "VzNamClicker"
     clicker.BackgroundTransparency = 1
@@ -99,18 +99,26 @@ local function CreateCustomButton(parent, text, themeType)
     clicker.Size = UDim2.new(1, 0, 1, 0)
     clicker.ZIndex = 3
     clicker.AutoButtonColor = false
+
+    -- Chống chèn nút lạ (Việt Hóa) ngay lập tức
+    Track(f.ChildAdded:Connect(function(child)
+        if child:IsA("GuiObject") and child.Name ~= "VzNamTextLabel" and child.Name ~= "VzNamClicker" and child.Name ~= "VzNamTextLabel_Sub" then
+            if not child:IsA("UIStroke") and not child:IsA("UICorner") and not child:IsA("UIPadding") then
+                task.defer(function() pcall(function() child:Destroy() end) end)
+            end
+        end
+    end))
     
     return f, lbl, s, clicker
 end
 
 -- Hàm đăng ký bảo vệ
 local function ProtectButton(Btn, themeType)
+    local lbl = Btn:FindFirstChild("VzNamTextLabel")
     table.insert(ProtectedButtons, {
         Frame = Btn,
         OriginalTransparency = Btn.BackgroundTransparency,
-        OriginalSize = Btn.Size,
-        OriginalPosition = Btn.Position,
-        OriginalText = Btn:FindFirstChild("VzNamTextLabel") and Btn.VzNamTextLabel.Text or "",
+        OriginalText = lbl and lbl.Text or "",
         ThemeType = themeType
     })
 end
@@ -147,15 +155,16 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "VzNamHubV4UI_" .. tostring(math.random(10000, 99999))
 ScreenGui.DisplayOrder = 999999 
 ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui -- Đặt mặc định ở đây để không bị lỗi nếu gethui fail
 
-if gethui then
-    pcall(function() ScreenGui.Parent = gethui() end)
-elseif syn and syn.protect_gui then
-    pcall(function() syn.protect_gui(ScreenGui) end)
-    ScreenGui.Parent = CoreGui
-else
-    ScreenGui.Parent = CoreGui
-end
+pcall(function()
+    if gethui then
+        ScreenGui.Parent = gethui()
+    elseif syn and syn.protect_gui then
+        syn.protect_gui(ScreenGui)
+        ScreenGui.Parent = CoreGui
+    end
+end)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 380, 0, 280)
@@ -311,46 +320,23 @@ HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = Color3.fromRGB(0
 
 local Tabs = {}
 
--- ═════════════════ VÒNG LẶP BẢO VỆ (CHẠY SAU CÙNG) ═════════════════
-RunService:BindToRenderStep("VzNamProtect", 10000, function()
+-- ═════════════════ VÒNG LẶP BẢO VỆ MÀU (CHỈ ÉP MÀU NỀN VÀ CHỮ)
+RunService:BindToRenderStep("VzNamProtect", 3000, function()
     for _, data in ipairs(ProtectedButtons) do
         local btn = data.Frame
         if btn and btn.Parent then
-            -- 0. Bắt buộc tắt Active để vuốt không bị kẹt
-            if btn.Active then
-                btn.Active = false
-            end
-
-            -- 1. Ép lại Kích thước (Chống thu nhỏ)
-            if btn.Size ~= data.OriginalSize then
-                btn.Size = data.OriginalSize
-            end
-            
-            -- 2. Ép lại Vị trí (Chống xô lệch)
-            if btn.Position ~= data.OriginalPosition then
-                btn.Position = data.OriginalPosition
-            end
-
-            -- 3. Quét và tiêu diệt mọi thứ không phải chữ gốc hoặc Nút bấm gốc
-            for _, child in ipairs(btn:GetChildren()) do
-                if child:IsA("GuiObject") and child.Name ~= "VzNamTextLabel" and child.Name ~= "VzNamClicker" and child:IsA("TextButton") == false and child:IsA("TextLabel") == false then
-                    -- không xóa UIStroke và UICorner
-                elseif child:IsA("GuiObject") and child.Name ~= "VzNamTextLabel" and child.Name ~= "VzNamClicker" and (child:IsA("TextButton") or child:IsA("TextLabel") or child:IsA("ImageButton")) then
-                     child:Destroy()
-                end
-            end
-
-            -- 4. Ép lại chữ (Chống đổi tên)
+            -- 1. Ép lại chữ
             local lbl = btn:FindFirstChild("VzNamTextLabel")
             if lbl and lbl.Text ~= data.OriginalText then
                 lbl.Text = data.OriginalText
             end
 
-            -- 5. Ép lại màu nền (Chống đổi màu)
+            -- 2. Ép lại độ trong suốt
             if btn.BackgroundTransparency ~= data.OriginalTransparency then
                 btn.BackgroundTransparency = data.OriginalTransparency
             end
             
+            -- 3. Ép lại màu nền
             local base = State.ThemeBase
             local targetBg
             if data.ThemeType == "Primary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.08)
@@ -1707,4 +1693,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Fix Lỗi Vuốt & Click).")
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Fix Lỗi Vuốt & Đơ).")
