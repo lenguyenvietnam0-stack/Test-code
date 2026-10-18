@@ -1,6 +1,6 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Tối Ưu - Mượt Mà & Không Đơ)
+    VzNam Hub v4 : Tổng Hợp (Bản Fix Lỗi Crash & Vuốt)
     ═══════════════════════════════════════════════════════
 ]]
 
@@ -65,29 +65,34 @@ local function RegTheme(el, t)
     return el
 end
 
--- Hàm tạo nút bằng TextButton thuần (Hỗ trợ vuốt cực mượt)
+-- Hàm tạo nút bằng TextButton thuần (Hỗ trợ vuốt cực mượt, không bị bấm nhầm)
 local function CreateCustomButton(parent, text, themeType)
     local btn = Instance.new("TextButton", parent)
     btn.BackgroundColor3 = Color3.fromRGB(70,15,50)
     btn.BorderSizePixel = 0
-    btn.AutoButtonColor = false -- Tắt hiệu ứng mặc định để không bị lỗi màu
+    btn.AutoButtonColor = false
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255,255,255)
     btn.TextSize = 9
     btn.Font = Enum.Font.Gotham
     btn.TextXAlignment = Enum.TextXAlignment.Left
-    btn.PaddingLeft = UDim.new(0, 5)
+    
+    -- Fix lỗi crash: Dùng UIPadding thay vì thuộc tính không tồn tại
+    local padding = Instance.new("UIPadding", btn)
+    padding.PaddingLeft = UDim.new(0, 5)
+
     Corner(btn)
     local s = Stroke(btn, Color3.fromRGB(0,191,255), 1)
     RegTheme(btn, themeType)
 
-    -- Bảo vệ nút: Nếu bị script khác đổi tên hoặc màu, tự động đổi lại ngay lập tức
+    -- Bảo vệ nút khỏi bị đổi tên
     Track(btn:GetPropertyChangedSignal("Text"):Connect(function()
         if btn.Text ~= text then
             btn.Text = text
         end
     end))
 
+    -- Bảo vệ nút khỏi bị đổi màu
     Track(btn:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
         local base = State.ThemeBase
         local targetBg
@@ -137,8 +142,9 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "VzNamHubV4UI_" .. tostring(math.random(10000, 99999))
 ScreenGui.DisplayOrder = 999999 
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
+ScreenGui.Parent = PlayerGui -- Hiển thị an toàn trên PlayerGui
 
+-- Cố gắng bảo vệ UI (nếu executor hỗ trợ)
 pcall(function()
     if gethui then
         ScreenGui.Parent = gethui()
@@ -1577,4 +1583,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Tối Ưu Mượt Mà).")
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Fix Lỗi Crash).")
