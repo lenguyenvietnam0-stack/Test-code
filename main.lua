@@ -1,7 +1,10 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Fix 100% Lỗi Chữ & Tắt Hub)
+    VzNam Hub v4 : Tổng Hợp (Bản Chống Skid Cấp 5 - Tuyệt Đối)
     ═══════════════════════════════════════════════════════
+    • Chống đổi chữ bằng GetPropertyChangedSignal
+    • Chống chèn nút lạ bằng ChildAdded
+    • Ẩn Hub ngay lập tức khi chạy script
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
@@ -28,7 +31,6 @@ end
 local function DisconnectAll()
     for _, c in ipairs(Connections) do pcall(function() c:Disconnect() end) end
     Connections = {}
-    pcall(function() RunService:UnbindFromRenderStep("VzNamProtect") end)
 end
 
 -- ═════════════════ STATE ═════════════════
@@ -67,7 +69,7 @@ local function RegTheme(el, t)
     return el
 end
 
--- Tạo Nút bằng Frame bọc TextLabel (Đã fix lỗi ZIndex)
+-- Hàm tạo Nút (Bọc thép chống đổi chữ)
 local function CreateCustomButton(parent, text, themeType)
     local f = Instance.new("Frame", parent)
     f.BackgroundColor3 = Color3.fromRGB(70,15,50)
@@ -86,7 +88,24 @@ local function CreateCustomButton(parent, text, themeType)
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Position = UDim2.new(0, 5, 0, 0)
     lbl.Size = UDim2.new(1, -5, 1, 0)
-    lbl.ZIndex = 10 -- FIX LỖI CHÌM CHỮ
+    lbl.ZIndex = 10
+    
+    -- 🔒 BẢO VỆ CHỮ TUYỆT ĐỐI
+    local originalText = text
+    Track(lbl:GetPropertyChangedSignal("Text"):Connect(function()
+        if lbl.Text ~= originalText then
+            lbl.Text = originalText
+        end
+    end))
+
+    -- 🔒 CHỐNG CHÈN NÚT LẠ (Việt Hóa)
+    Track(f.ChildAdded:Connect(function(child)
+        if child:IsA("TextButton") or child:IsA("TextLabel") then
+            if child ~= lbl then
+                task.defer(function() pcall(function() child:Destroy() end) end)
+            end
+        end
+    end))
     
     return f, lbl, s
 end
@@ -287,7 +306,7 @@ HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = Color3.fromRGB(0
 
 local Tabs = {}
 
--- ═════════════════ BẢO VỆ MÀU NỀN (CHỐNG ĐỎ) ═════════════════
+-- ═════════════════ BẢO VỆ MÀU NỀN ═════════════════
 local protectedRegistry = {}
 local function ProtectButton(Btn, themeType)
     table.insert(protectedRegistry, {
@@ -573,12 +592,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
                 bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
                 LastSelectedScriptStroke = bStroke
                 
-                -- Chỉ ẩn Hub chính, giữ nút 🌸
-                task.spawn(function()
-                    task.wait(0.2)
-                    MainFrame.Visible = false 
-                end)
-                
+                MainFrame.Visible = false
                 pcall(callback)
             end
         end))
@@ -667,11 +681,7 @@ local function CreateSimpleTab(tabName, layoutOrder)
                 bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
                 LastSelectedScriptStroke = bStroke
                 
-                task.spawn(function()
-                    task.wait(0.2)
-                    MainFrame.Visible = false
-                end)
-                
+                MainFrame.Visible = false
                 pcall(callback)
             end
         end))
@@ -835,7 +845,7 @@ local function rebuildScriptDropdown()
                 dropLbl.Text = " 📜 " .. scr.Name
                 dropListFrame.Visible = false
                 if State.IsAutoLoad then 
-                    task.spawn(function() task.wait(0.2); MainFrame.Visible = false end)
+                    MainFrame.Visible = false
                     pcall(scr.Callback) 
                 end
             end
@@ -884,7 +894,7 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     if State.IsAutoLoad then
         toggleAutoBtn.BackgroundColor3 = Color3.fromRGB(50,200,50)
         autoDot.Position = UDim2.new(1, -13, 0.5, -5.5)
-        task.spawn(function() task.wait(0.2); MainFrame.Visible = false end)
+        MainFrame.Visible = false
         pcall(State.SelectedScript.Callback)
     else
         toggleAutoBtn.BackgroundColor3 = Color3.fromRGB(60,65,75)
@@ -1713,4 +1723,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Đã fix 100% lỗi chữ & nút mở).")
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Cấp 5 - Đã chống đổi chữ tuyệt đối).")
