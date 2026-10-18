@@ -1,12 +1,11 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Fix Lỗi Đơ & Vuốt)
+    VzNam Hub v4 : Tổng Hợp (Bản Tối Ưu - Mượt Mà & Không Đơ)
     ═══════════════════════════════════════════════════════
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
 local Players   = game:GetService("Players")
-local TweenService    = game:GetService("TweenService")
 local UserInputService= game:GetService("UserInputService")
 local SoundService    = game:GetService("SoundService")
 local HttpService     = game:GetService("HttpService")
@@ -28,7 +27,6 @@ end
 local function DisconnectAll()
     for _, c in ipairs(Connections) do pcall(function() c:Disconnect() end) end
     Connections = {}
-    pcall(function() RunService:UnbindFromRenderStep("VzNamProtect") end)
 end
 
 -- ═════════════════ STATE ═════════════════
@@ -67,60 +65,44 @@ local function RegTheme(el, t)
     return el
 end
 
--- Bộ nhớ đệm chứa các nút để bảo vệ
-local ProtectedButtons = {}
-
+-- Hàm tạo nút bằng TextButton thuần (Hỗ trợ vuốt cực mượt)
 local function CreateCustomButton(parent, text, themeType)
-    local f = Instance.new("Frame", parent)
-    f.BackgroundColor3 = Color3.fromRGB(70,15,50)
-    f.BorderSizePixel = 0
-    f.Active = false -- Tắt Active để không chặn thanh cuộn
-    Corner(f)
-    local s = Stroke(f, Color3.fromRGB(0,191,255), 1)
-    RegTheme(f, themeType)
+    local btn = Instance.new("TextButton", parent)
+    btn.BackgroundColor3 = Color3.fromRGB(70,15,50)
+    btn.BorderSizePixel = 0
+    btn.AutoButtonColor = false -- Tắt hiệu ứng mặc định để không bị lỗi màu
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.TextSize = 9
+    btn.Font = Enum.Font.Gotham
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.PaddingLeft = UDim.new(0, 5)
+    Corner(btn)
+    local s = Stroke(btn, Color3.fromRGB(0,191,255), 1)
+    RegTheme(btn, themeType)
 
-    local lbl = Instance.new("TextLabel", f)
-    lbl.Name = "VzNamTextLabel"
-    lbl.BackgroundTransparency = 1
-    lbl.Text = text
-    lbl.TextColor3 = Color3.fromRGB(255,255,255)
-    lbl.TextSize = 9
-    lbl.Font = Enum.Font.Gotham
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Position = UDim2.new(0, 5, 0, 0)
-    lbl.Size = UDim2.new(1, -5, 1, 0)
-    lbl.ZIndex = 2
-    
-    -- Nút ẩn để nhận Click (không bị kích hoạt khi vuốt)
-    local clicker = Instance.new("TextButton", f)
-    clicker.Name = "VzNamClicker"
-    clicker.BackgroundTransparency = 1
-    clicker.Text = ""
-    clicker.Size = UDim2.new(1, 0, 1, 0)
-    clicker.ZIndex = 3
-    clicker.AutoButtonColor = false
-
-    -- Chống chèn nút lạ (Việt Hóa) ngay lập tức
-    Track(f.ChildAdded:Connect(function(child)
-        if child:IsA("GuiObject") and child.Name ~= "VzNamTextLabel" and child.Name ~= "VzNamClicker" and child.Name ~= "VzNamTextLabel_Sub" then
-            if not child:IsA("UIStroke") and not child:IsA("UICorner") and not child:IsA("UIPadding") then
-                task.defer(function() pcall(function() child:Destroy() end) end)
-            end
+    -- Bảo vệ nút: Nếu bị script khác đổi tên hoặc màu, tự động đổi lại ngay lập tức
+    Track(btn:GetPropertyChangedSignal("Text"):Connect(function()
+        if btn.Text ~= text then
+            btn.Text = text
         end
     end))
-    
-    return f, lbl, s, clicker
-end
 
--- Hàm đăng ký bảo vệ
-local function ProtectButton(Btn, themeType)
-    local lbl = Btn:FindFirstChild("VzNamTextLabel")
-    table.insert(ProtectedButtons, {
-        Frame = Btn,
-        OriginalTransparency = Btn.BackgroundTransparency,
-        OriginalText = lbl and lbl.Text or "",
-        ThemeType = themeType
-    })
+    Track(btn:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
+        local base = State.ThemeBase
+        local targetBg
+        if themeType == "Primary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.08)
+        elseif themeType == "Secondary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.15)
+        elseif themeType == "DropFrame" then targetBg = base:Lerp(Color3.new(1,1,1), 0.2)
+        elseif themeType == "DropItem" then targetBg = base:Lerp(Color3.new(1,1,1), 0.3)
+        elseif themeType == "Input" then targetBg = base:Lerp(Color3.new(0,0,0), 0.4)
+        end
+        if targetBg and btn.BackgroundColor3 ~= targetBg then
+            btn.BackgroundColor3 = targetBg
+        end
+    end))
+
+    return btn, s
 end
 
 -- ═════════════════ SAFE LOAD ═════════════════
@@ -155,7 +137,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "VzNamHubV4UI_" .. tostring(math.random(10000, 99999))
 ScreenGui.DisplayOrder = 999999 
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui -- Đặt mặc định ở đây để không bị lỗi nếu gethui fail
+ScreenGui.Parent = PlayerGui
 
 pcall(function()
     if gethui then
@@ -178,7 +160,7 @@ MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
 Corner(MainFrame, UDim.new(0, 8))
-local OuterStroke = Stroke(MainFrame, Color3.fromRGB(0, 191, 255), 2)
+Stroke(MainFrame, Color3.fromRGB(0, 191, 255), 2)
 
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size, ResizeBtn.Position = UDim2.new(0, 18, 0, 18), UDim2.new(1, -18, 1, -18)
@@ -267,11 +249,8 @@ end))
 Track(SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     local q = string.lower(SearchBoxTab.Text)
     for _, item in ipairs(SidebarScroll:GetChildren()) do
-        if item:IsA("Frame") then
-            local lbl = item:FindFirstChild("VzNamTextLabel")
-            if lbl then
-                item.Visible = (q == "" or string.find(string.lower(lbl.Text), q, 1, true)) and true or false
-            end
+        if item:IsA("TextButton") then
+            item.Visible = (q == "" or string.find(string.lower(item.Text), q, 1, true)) and true or false
         end
     end
 end))
@@ -320,45 +299,12 @@ HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = Color3.fromRGB(0
 
 local Tabs = {}
 
--- ═════════════════ VÒNG LẶP BẢO VỆ MÀU (CHỈ ÉP MÀU NỀN VÀ CHỮ)
-RunService:BindToRenderStep("VzNamProtect", 3000, function()
-    for _, data in ipairs(ProtectedButtons) do
-        local btn = data.Frame
-        if btn and btn.Parent then
-            -- 1. Ép lại chữ
-            local lbl = btn:FindFirstChild("VzNamTextLabel")
-            if lbl and lbl.Text ~= data.OriginalText then
-                lbl.Text = data.OriginalText
-            end
-
-            -- 2. Ép lại độ trong suốt
-            if btn.BackgroundTransparency ~= data.OriginalTransparency then
-                btn.BackgroundTransparency = data.OriginalTransparency
-            end
-            
-            -- 3. Ép lại màu nền
-            local base = State.ThemeBase
-            local targetBg
-            if data.ThemeType == "Primary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.08)
-            elseif data.ThemeType == "Secondary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.15)
-            elseif data.ThemeType == "DropFrame" then targetBg = base:Lerp(Color3.new(1,1,1), 0.2)
-            elseif data.ThemeType == "DropItem" then targetBg = base:Lerp(Color3.new(1,1,1), 0.3)
-            elseif data.ThemeType == "Input" then targetBg = base:Lerp(Color3.new(0,0,0), 0.4)
-            end
-            if targetBg and btn.BackgroundColor3 ~= targetBg then
-                btn.BackgroundColor3 = targetBg
-            end
-        end
-    end
-end)
-
 -- ═════════════════ TAB 0: TRANG CHỦ ═════════════════
-local tabHomeFrame, tabHomeLbl, _, tabHomeClicker = CreateCustomButton(SidebarScroll, " 🏠 Trang Chủ", "Primary")
-tabHomeFrame.LayoutOrder = 0
-tabHomeFrame.Size = UDim2.new(1, 0, 0, 26)
-ProtectButton(tabHomeFrame, "Primary")
+local tabHomeBtn, _ = CreateCustomButton(SidebarScroll, " 🏠 Trang Chủ", "Primary")
+tabHomeBtn.LayoutOrder = 0
+tabHomeBtn.Size = UDim2.new(1, 0, 0, 26)
 
-local homeIndicator = Instance.new("Frame", tabHomeFrame)
+local homeIndicator = Instance.new("Frame", tabHomeBtn)
 homeIndicator.Size, homeIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
 homeIndicator.BackgroundColor3, homeIndicator.BorderSizePixel = Color3.fromRGB(255,105,180), 0
 homeIndicator.Visible = false
@@ -379,7 +325,7 @@ Track(homeLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(functio
     homeScroll.CanvasSize = UDim2.new(0, 0, 0, homeLayout.AbsoluteContentSize.Y + 15)
 end))
 
-Track(tabHomeClicker.Activated:Connect(function()
+Track(tabHomeBtn.MouseButton1Click:Connect(function()
     for _, t in pairs(Tabs) do
         t.Container.Visible = false
         if t.Indicator then t.Indicator.Visible = false end
@@ -393,18 +339,9 @@ table.insert(Tabs, {Container = homeScroll, Indicator = homeIndicator})
 homeScroll.Visible, homeIndicator.Visible = true, true
 ActiveTabTitle.Text = "🏠 Trang Chủ"
 
-local infoToggleFrame, infoToggleLbl, _, infoToggleClicker = CreateCustomButton(homeScroll, " → thông tin", "Secondary")
-infoToggleFrame.LayoutOrder = 1
-infoToggleFrame.Size = UDim2.new(1, 0, 0, 32)
-ProtectButton(infoToggleFrame, "Secondary")
-
-local infoSubLabel = Instance.new("TextLabel", infoToggleFrame)
-infoSubLabel.Name = "VzNamTextLabel_Sub"
-infoSubLabel.Size, infoSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
-infoSubLabel.BackgroundTransparency, infoSubLabel.Text = 1, "Xem các thông tin Hub"
-infoSubLabel.TextColor3, infoSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
-infoSubLabel.Font, infoSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
-infoSubLabel.ZIndex = 10
+local infoToggleBtn, _ = CreateCustomButton(homeScroll, " → thông tin", "Secondary")
+infoToggleBtn.LayoutOrder = 1
+infoToggleBtn.Size = UDim2.new(1, 0, 0, 32)
 
 local infoContainer = Instance.new("Frame", homeScroll)
 infoContainer.LayoutOrder = 2
@@ -415,10 +352,9 @@ local infoLayout = Instance.new("UIListLayout", infoContainer)
 infoLayout.SortOrder, infoLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 infoLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-Track(infoToggleClicker.Activated:Connect(function()
+Track(infoToggleBtn.MouseButton1Click:Connect(function()
     infoContainer.Visible = not infoContainer.Visible
-    infoToggleLbl.Text = infoContainer.Visible and " ↓ thông tin" or " → thông tin"
-    infoSubLabel.Visible = infoContainer.Visible
+    infoToggleBtn.Text = infoContainer.Visible and " ↓ thông tin" or " → thông tin"
 end))
 
 local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyText, borderColor, iconSymbol)
@@ -438,21 +374,18 @@ local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyT
     iconLbl.Size, iconLbl.BackgroundTransparency = UDim2.new(1,0,1,0), 1
     iconLbl.Text, iconLbl.TextColor3 = iconSymbol, Color3.fromRGB(255,255,255)
     iconLbl.TextSize, iconLbl.Font = 7, Enum.Font.GothamBold
-    iconLbl.ZIndex = 10
 
     local tLbl = Instance.new("TextLabel", card)
     tLbl.Size, tLbl.Position = UDim2.new(1, -70, 0, 10), UDim2.new(0, 24, 0, 1)
     tLbl.BackgroundTransparency, tLbl.Text = 1, titleText
     tLbl.TextColor3, tLbl.TextSize = Color3.fromRGB(255,150,100), 7
     tLbl.Font, tLbl.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-    tLbl.ZIndex = 10
 
     local mLbl = Instance.new("TextLabel", card)
     mLbl.Size, mLbl.Position = UDim2.new(1, -70, 0, 12), UDim2.new(0, 24, 0, 12)
     mLbl.BackgroundTransparency, mLbl.Text = 1, mainText
     mLbl.TextColor3, mLbl.TextSize = Color3.fromRGB(220,220,230), 7
     mLbl.Font, mLbl.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-    mLbl.ZIndex = 10
 
     if copyText ~= "" then
         local copyBtn = Instance.new("TextButton", card)
@@ -460,7 +393,6 @@ local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyT
         copyBtn.BackgroundTransparency, copyBtn.Text = 1, "📋 COPY"
         copyBtn.TextColor3, copyBtn.TextSize = Color3.fromRGB(200,200,210), 7
         copyBtn.Font = Enum.Font.GothamBold
-        copyBtn.ZIndex = 10
 
         local function doCopy()
             if typeof(setclipboard) == "function" then
@@ -472,9 +404,6 @@ local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyT
             end
         end
         Track(copyBtn.MouseButton1Click:Connect(doCopy))
-        Track(card.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then doCopy() end
-        end))
     end
 end
 
@@ -487,12 +416,11 @@ local RegisteredScripts = {}
 local LastSelectedScriptStroke = nil
 
 local function CreateCategoryTab(tabName, layoutOrder)
-    local tabFrame, tabLbl, _, tabClicker = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
-    tabFrame.LayoutOrder = layoutOrder or 0
-    tabFrame.Size = UDim2.new(1, 0, 0, 26)
-    ProtectButton(tabFrame, "Primary")
+    local tabBtn, _ = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
+    tabBtn.LayoutOrder = layoutOrder or 0
+    tabBtn.Size = UDim2.new(1, 0, 0, 26)
 
-    local indicator = Instance.new("Frame", tabFrame)
+    local indicator = Instance.new("Frame", tabBtn)
     indicator.Size, indicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
     indicator.BackgroundColor3, indicator.BorderSizePixel = Color3.fromRGB(255,105,180), 0
     indicator.Visible = false
@@ -511,20 +439,16 @@ local function CreateCategoryTab(tabName, layoutOrder)
     local subLayout = Instance.new("UIListLayout", subBar)
     subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 4)
 
-    local noKeyFrame, noKeyLbl, nkStroke, nkClicker = CreateCustomButton(subBar, "no key", "Primary")
-    noKeyFrame.Size = UDim2.new(0.48, 0, 1, 0)
-    noKeyFrame.ZIndex = 6
+    local noKeyBtn, nkStroke = CreateCustomButton(subBar, "no key", "Primary")
+    noKeyBtn.Size = UDim2.new(0.48, 0, 1, 0)
+    noKeyBtn.ZIndex = 6
+    noKeyBtn.TextXAlignment = Enum.TextXAlignment.Center
     nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255,50,50), 2
-    noKeyLbl.TextXAlignment = Enum.TextXAlignment.Center
-    noKeyLbl.Position = UDim2.new(0, 0, 0, 0)
-    ProtectButton(noKeyFrame, "Primary")
 
-    local hasKeyFrame, hasKeyLbl, hkStroke, hkClicker = CreateCustomButton(subBar, "có key", "Primary")
-    hasKeyFrame.Size = UDim2.new(0.48, 0, 1, 0)
-    hasKeyFrame.ZIndex = 6
-    hasKeyLbl.TextXAlignment = Enum.TextXAlignment.Center
-    hasKeyLbl.Position = UDim2.new(0, 0, 0, 0)
-    ProtectButton(hasKeyFrame, "Primary")
+    local hasKeyBtn, hkStroke = CreateCustomButton(subBar, "có key", "Primary")
+    hasKeyBtn.Size = UDim2.new(0.48, 0, 1, 0)
+    hasKeyBtn.ZIndex = 6
+    hasKeyBtn.TextXAlignment = Enum.TextXAlignment.Center
 
     local function makeScroll()
         local s = Instance.new("ScrollingFrame", containerFrame)
@@ -549,28 +473,25 @@ local function CreateCategoryTab(tabName, layoutOrder)
         local q = string.lower(SearchInputContent.Text)
         local target = scrollNoKey.Visible and scrollNoKey or scrollHasKey
         for _, item in ipairs(target:GetChildren()) do
-            if item:IsA("Frame") then
-                local lbl = item:FindFirstChild("VzNamTextLabel")
-                if lbl then
-                    item.Visible = (q == "" or string.find(string.lower(lbl.Text), q, 1, true)) and true or false
-                end
+            if item:IsA("TextButton") then
+                item.Visible = (q == "" or string.find(string.lower(item.Text), q, 1, true)) and true or false
             end
         end
     end
     Track(SearchInputContent:GetPropertyChangedSignal("Text"):Connect(applySearchFilter))
 
-    Track(nkClicker.Activated:Connect(function()
+    Track(noKeyBtn.MouseButton1Click:Connect(function()
         scrollNoKey.Visible, scrollHasKey.Visible = true, false
         nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255,50,50), 2
         hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(0,191,255), 1
     end))
-    Track(hkClicker.Activated:Connect(function()
+    Track(hasKeyBtn.MouseButton1Click:Connect(function()
         scrollNoKey.Visible, scrollHasKey.Visible = false, true
         hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(255,50,50), 2
         nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(0,191,255), 1
     end))
 
-    Track(tabClicker.Activated:Connect(function()
+    Track(tabBtn.MouseButton1Click:Connect(function()
         for _, t in pairs(Tabs) do
             t.Container.Visible = false
             if t.Indicator then t.Indicator.Visible = false end
@@ -584,11 +505,10 @@ local function CreateCategoryTab(tabName, layoutOrder)
 
     local Elements = {}
     local function AddBtnTo(parent, name, callback)
-        local f, lbl, bStroke, clicker = CreateCustomButton(parent, " ▶ " .. name, "Primary")
-        f.Size = UDim2.new(1, 0, 0, 26)
-        ProtectButton(f, "Primary")
+        local btn, bStroke = CreateCustomButton(parent, " ▶ " .. name, "Primary")
+        btn.Size = UDim2.new(1, 0, 0, 26)
 
-        Track(clicker.Activated:Connect(function()
+        Track(btn.MouseButton1Click:Connect(function()
             if LastSelectedScriptStroke then
                 LastSelectedScriptStroke.Color = Color3.fromRGB(0,191,255)
                 LastSelectedScriptStroke.Thickness = 1
@@ -602,7 +522,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
 
         table.insert(RegisteredScripts, {Name = name, Callback = callback})
         if _G.__vznam_rebuildScriptDropdown then _G.__vznam_rebuildScriptDropdown() end
-        return f
+        return btn
     end
 
     function Elements:AddNoKey(name, cb) return AddBtnTo(scrollNoKey, name, cb) end
@@ -611,12 +531,11 @@ local function CreateCategoryTab(tabName, layoutOrder)
 end
 
 local function CreateSimpleTab(tabName, layoutOrder)
-    local tabFrame, tabLbl, _, tabClicker = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
-    tabFrame.LayoutOrder = layoutOrder or 0
-    tabFrame.Size = UDim2.new(1, 0, 0, 26)
-    ProtectButton(tabFrame, "Primary")
+    local tabBtn, _ = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
+    tabBtn.LayoutOrder = layoutOrder or 0
+    tabBtn.Size = UDim2.new(1, 0, 0, 26)
 
-    local indicator = Instance.new("Frame", tabFrame)
+    local indicator = Instance.new("Frame", tabBtn)
     indicator.Size, indicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
     indicator.BackgroundColor3, indicator.BorderSizePixel = Color3.fromRGB(255,105,180), 0
     indicator.Visible = false
@@ -645,17 +564,14 @@ local function CreateSimpleTab(tabName, layoutOrder)
         if not containerFrame.Visible then return end
         local q = string.lower(SearchInputContent.Text)
         for _, item in ipairs(scroll:GetChildren()) do
-            if item:IsA("Frame") then
-                local lbl = item:FindFirstChild("VzNamTextLabel")
-                if lbl then
-                    item.Visible = (q == "" or string.find(string.lower(lbl.Text), q, 1, true)) and true or false
-                end
+            if item:IsA("TextButton") then
+                item.Visible = (q == "" or string.find(string.lower(item.Text), q, 1, true)) and true or false
             end
         end
     end
     Track(SearchInputContent:GetPropertyChangedSignal("Text"):Connect(applySearchFilter))
 
-    Track(tabClicker.Activated:Connect(function()
+    Track(tabBtn.MouseButton1Click:Connect(function()
         for _, t in pairs(Tabs) do
             t.Container.Visible = false
             if t.Indicator then t.Indicator.Visible = false end
@@ -669,11 +585,10 @@ local function CreateSimpleTab(tabName, layoutOrder)
 
     local Elements = {}
     local function AddBtn(name, callback)
-        local f, lbl, bStroke, clicker = CreateCustomButton(scroll, " ▶ " .. name, "Primary")
-        f.Size = UDim2.new(1, 0, 0, 26)
-        ProtectButton(f, "Primary")
+        local btn, bStroke = CreateCustomButton(scroll, " ▶ " .. name, "Primary")
+        btn.Size = UDim2.new(1, 0, 0, 26)
 
-        Track(clicker.Activated:Connect(function()
+        Track(btn.MouseButton1Click:Connect(function()
             if LastSelectedScriptStroke then
                 LastSelectedScriptStroke.Color = Color3.fromRGB(0,191,255)
                 LastSelectedScriptStroke.Thickness = 1
@@ -687,7 +602,7 @@ local function CreateSimpleTab(tabName, layoutOrder)
 
         table.insert(RegisteredScripts, {Name = name, Callback = callback})
         if _G.__vznam_rebuildScriptDropdown then _G.__vznam_rebuildScriptDropdown() end
-        return f
+        return btn
     end
 
     function Elements:AddScript(name, cb) return AddBtn(name, cb) end
@@ -738,12 +653,11 @@ tabMain:AddScript("VzNamHub-Main ❗❗script hiện tại sẽ tắt khi bật"
 end)
 
 -- ═════════════════ TAB: MISC ═════════════════
-local tabMiscFrame, tabMiscLbl, _, tabMiscClicker = CreateCustomButton(SidebarScroll, " ⚙️ MISC", "Primary")
-tabMiscFrame.LayoutOrder = 4
-tabMiscFrame.Size = UDim2.new(1, 0, 0, 26)
-ProtectButton(tabMiscFrame, "Primary")
+local tabMiscBtn, _ = CreateCustomButton(SidebarScroll, " ⚙️ MISC", "Primary")
+tabMiscBtn.LayoutOrder = 4
+tabMiscBtn.Size = UDim2.new(1, 0, 0, 26)
 
-local miscIndicator = Instance.new("Frame", tabMiscFrame)
+local miscIndicator = Instance.new("Frame", tabMiscBtn)
 miscIndicator.Size, miscIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
 miscIndicator.BackgroundColor3, miscIndicator.BorderSizePixel = Color3.fromRGB(255,105,180), 0
 miscIndicator.Visible = false
@@ -763,7 +677,7 @@ Track(miscLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(functio
     miscScroll.CanvasSize = UDim2.new(0, 0, 0, miscLayout.AbsoluteContentSize.Y + 15)
 end))
 
-Track(tabMiscClicker.Activated:Connect(function()
+Track(tabMiscBtn.MouseButton1Click:Connect(function()
     for _, t in pairs(Tabs) do
         t.Container.Visible = false
         if t.Indicator then t.Indicator.Visible = false end
@@ -774,18 +688,9 @@ end))
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
 -- ═════════════════ AUTO LOAD SCRIPT ═════════════════
-local autoLoadToggleFrame, autoLoadToggleLbl, _, autoLoadToggleClicker = CreateCustomButton(miscScroll, " ↓ auto load script", "Secondary")
-autoLoadToggleFrame.LayoutOrder = 1
-autoLoadToggleFrame.Size = UDim2.new(1, 0, 0, 34)
-ProtectButton(autoLoadToggleFrame, "Secondary")
-
-local alSubLabel = Instance.new("TextLabel", autoLoadToggleFrame)
-alSubLabel.Name = "VzNamTextLabel_Sub"
-alSubLabel.Size, alSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
-alSubLabel.BackgroundTransparency, alSubLabel.Text = 1, "Quản lý auto load script"
-alSubLabel.TextColor3, alSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
-alSubLabel.Font, alSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
-alSubLabel.ZIndex = 10
+local autoLoadToggleBtn, _ = CreateCustomButton(miscScroll, " ↓ auto load script", "Secondary")
+autoLoadToggleBtn.LayoutOrder = 1
+autoLoadToggleBtn.Size = UDim2.new(1, 0, 0, 34)
 
 local autoLoadContainer = Instance.new("Frame", miscScroll)
 autoLoadContainer.LayoutOrder = 2
@@ -796,16 +701,14 @@ local alLayout = Instance.new("UIListLayout", autoLoadContainer)
 alLayout.SortOrder, alLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 alLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-Track(autoLoadToggleClicker.Activated:Connect(function()
+Track(autoLoadToggleBtn.MouseButton1Click:Connect(function()
     autoLoadContainer.Visible = not autoLoadContainer.Visible
-    autoLoadToggleLbl.Text = autoLoadContainer.Visible and " ↓ auto load script" or " → auto load script"
-    alSubLabel.Visible = autoLoadContainer.Visible
+    autoLoadToggleBtn.Text = autoLoadContainer.Visible and " ↓ auto load script" or " → auto load script"
 end))
 
-local dropFrame, dropLbl, _, dropClicker = CreateCustomButton(autoLoadContainer, " 📜 Chọn Script Auto Load...", "Primary")
-dropFrame.LayoutOrder = 1
-dropFrame.Size = UDim2.new(1, 0, 0, 26)
-ProtectButton(dropFrame, "Primary")
+local dropBtn, _ = CreateCustomButton(autoLoadContainer, " 📜 Chọn Script Auto Load...", "Primary")
+dropBtn.LayoutOrder = 1
+dropBtn.Size = UDim2.new(1, 0, 0, 26)
 
 local dropListFrame = Instance.new("ScrollingFrame", autoLoadContainer)
 dropListFrame.LayoutOrder = 2
@@ -820,22 +723,21 @@ RegTheme(dropListFrame, "DropFrame")
 local dropPad = Instance.new("UIPadding", dropListFrame)
 dropPad.PaddingRight = UDim.new(0, 8)
 
-Track(dropClicker.Activated:Connect(function()
+Track(dropBtn.MouseButton1Click:Connect(function()
     dropListFrame.Visible = not dropListFrame.Visible
 end))
 
 local function rebuildScriptDropdown()
     for _, c in ipairs(dropListFrame:GetChildren()) do
-        if c:IsA("Frame") then c:Destroy() end
+        if c:IsA("TextButton") then c:Destroy() end
     end
     for i, scr in ipairs(RegisteredScripts) do
-        local f, lbl, _, clicker = CreateCustomButton(dropListFrame, " ▶ " .. scr.Name, "DropItem")
-        f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
-        ProtectButton(f, "DropItem")
+        local btn, _ = CreateCustomButton(dropListFrame, " ▶ " .. scr.Name, "DropItem")
+        btn.LayoutOrder, btn.Size = i, UDim2.new(1, 0, 0, 22)
         
-        Track(clicker.Activated:Connect(function()
+        Track(btn.MouseButton1Click:Connect(function()
             State.SelectedScript = scr
-            dropLbl.Text = " 📜 " .. scr.Name
+            dropBtn.Text = " 📜 " .. scr.Name
             dropListFrame.Visible = false
             if State.IsAutoLoad then 
                 MainFrame.Visible = false
@@ -860,7 +762,6 @@ alsTitle.Size, alsTitle.Position = UDim2.new(1, -40, 1, 0), UDim2.new(0, 5, 0, 0
 alsTitle.BackgroundTransparency, alsTitle.Text = 1, "Auto Load Script Chạy"
 alsTitle.TextColor3, alsTitle.TextSize = Color3.fromRGB(255,255,255), 9
 alsTitle.Font, alsTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-alsTitle.ZIndex = 10
 
 local toggleAutoBtn = Instance.new("TextButton", autoLoadScriptFrame)
 toggleAutoBtn.Size, toggleAutoBtn.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
@@ -874,10 +775,10 @@ Corner(autoDot, UDim.new(1, 0))
 
 Track(toggleAutoBtn.MouseButton1Click:Connect(function()
     if not State.SelectedScript then
-        dropLbl.Text = " ⚠️ Chọn script trước!"
+        dropBtn.Text = " ⚠️ Chọn script trước!"
         task.delay(1.5, function()
-            if dropLbl.Parent then
-                dropLbl.Text = " 📜 Chọn Script Auto Load..."
+            if dropBtn.Parent then
+                dropBtn.Text = " 📜 Chọn Script Auto Load..."
             end
         end)
         return
@@ -895,18 +796,9 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
 end))
 
 -- ═════════════════ ÂM NHẠC ═════════════════
-local musicToggleFrame, musicToggleLbl, _, musicToggleClicker = CreateCustomButton(miscScroll, " ↓ âm nhạc", "Secondary")
-musicToggleFrame.LayoutOrder = 3
-musicToggleFrame.Size = UDim2.new(1, 0, 0, 34)
-ProtectButton(musicToggleFrame, "Secondary")
-
-local muSubLabel = Instance.new("TextLabel", musicToggleFrame)
-muSubLabel.Name = "VzNamTextLabel_Sub"
-muSubLabel.Size, muSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
-muSubLabel.BackgroundTransparency, muSubLabel.Text = 1, "Cài đặt âm nhạc nền"
-muSubLabel.TextColor3, muSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
-muSubLabel.Font, muSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
-muSubLabel.ZIndex = 10
+local musicToggleBtn, _ = CreateCustomButton(miscScroll, " ↓ âm nhạc", "Secondary")
+musicToggleBtn.LayoutOrder = 3
+musicToggleBtn.Size = UDim2.new(1, 0, 0, 34)
 
 local musicContainer = Instance.new("Frame", miscScroll)
 musicContainer.LayoutOrder, musicContainer.Size = 4, UDim2.new(1, 0, 0, 0)
@@ -916,10 +808,9 @@ local muLayout = Instance.new("UIListLayout", musicContainer)
 muLayout.SortOrder, muLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 muLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-Track(musicToggleClicker.Activated:Connect(function()
+Track(musicToggleBtn.MouseButton1Click:Connect(function()
     musicContainer.Visible = not musicContainer.Visible
-    musicToggleLbl.Text = musicContainer.Visible and " ↓ âm nhạc" or " → âm nhạc"
-    muSubLabel.Visible = musicContainer.Visible
+    musicToggleBtn.Text = musicContainer.Visible and " ↓ âm nhạc" or " → âm nhạc"
 end))
 
 local HubSound = Instance.new("Sound", SoundService)
@@ -936,9 +827,8 @@ Corner(customIdBox)
 Stroke(customIdBox)
 RegTheme(customIdBox, "Input")
 
-local musicDropFrame, musicDropLbl, _, musicDropClicker = CreateCustomButton(musicContainer, " 🎵 Chọn Nhạc...", "Primary")
-musicDropFrame.LayoutOrder, musicDropFrame.Size = 2, UDim2.new(1, 0, 0, 26)
-ProtectButton(musicDropFrame, "Primary")
+local musicDropBtn, _ = CreateCustomButton(musicContainer, " 🎵 Chọn Nhạc...", "Primary")
+musicDropBtn.LayoutOrder, musicDropBtn.Size = 2, UDim2.new(1, 0, 0, 26)
 
 local musicDropList = Instance.new("ScrollingFrame", musicContainer)
 musicDropList.LayoutOrder, musicDropList.Size = 3, UDim2.new(1, 0, 0, 95)
@@ -960,13 +850,12 @@ local presetMusics = {
     {Name = "🎶 Như Một Người Dưng",Id = "91897652967267"},
 }
 for i, m in ipairs(presetMusics) do
-    local f, lbl, _, clicker = CreateCustomButton(musicDropList, " " .. m.Name, "DropItem")
-    f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
-    ProtectButton(f, "DropItem")
+    local btn, _ = CreateCustomButton(musicDropList, " " .. m.Name, "DropItem")
+    btn.LayoutOrder, btn.Size = i, UDim2.new(1, 0, 0, 22)
 
-    Track(clicker.Activated:Connect(function()
+    Track(btn.MouseButton1Click:Connect(function()
         State.SoundId = m.Id
-        musicDropLbl.Text = " 🎵 " .. m.Name
+        musicDropBtn.Text = " 🎵 " .. m.Name
         musicDropList.Visible = false
         if HubSound.IsPlaying then
             HubSound.SoundId = "rbxassetid://" .. State.SoundId
@@ -975,7 +864,7 @@ for i, m in ipairs(presetMusics) do
     end))
 end
 musicDropList.CanvasSize = UDim2.new(0, 0, 0, #presetMusics * 25)
-Track(musicDropClicker.Activated:Connect(function()
+Track(musicDropBtn.MouseButton1Click:Connect(function()
     musicDropList.Visible = not musicDropList.Visible
 end))
 
@@ -991,7 +880,6 @@ volumeLabel.Size, volumeLabel.Position = UDim2.new(1, -8, 1, 0), UDim2.new(0, 5,
 volumeLabel.BackgroundTransparency, volumeLabel.Text = 1, "🔊 Vol: 50%"
 volumeLabel.TextColor3, volumeLabel.TextSize = Color3.fromRGB(255,255,255), 9
 volumeLabel.Font, volumeLabel.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-volumeLabel.ZIndex = 10
 
 local volumeBarBg = Instance.new("Frame", volumeFrame)
 volumeBarBg.Size, volumeBarBg.Position = UDim2.new(0, 80, 0, 8), UDim2.new(1, -86, 0.5, -4)
@@ -1037,7 +925,6 @@ musicTitle.Size, musicTitle.Position = UDim2.new(1, -40, 1, 0), UDim2.new(0, 5, 
 musicTitle.BackgroundTransparency, musicTitle.Text = 1, "Phát Nhạc Nền"
 musicTitle.TextColor3, musicTitle.TextSize = Color3.fromRGB(255,255,255), 9
 musicTitle.Font, musicTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-musicTitle.ZIndex = 10
 
 local toggleMusicBtn = Instance.new("TextButton", musicToggleFrame2)
 toggleMusicBtn.Size, toggleMusicBtn.Position = UDim2.new(0, 30, 0, 15), UDim2.new(1, -34, 0.5, -7.5)
@@ -1066,18 +953,9 @@ Track(toggleMusicBtn.MouseButton1Click:Connect(function()
 end))
 
 -- ═════════════════ MÀU MENU ═════════════════
-local menuColorToggleFrame, menuColorToggleLbl, _, menuColorToggleClicker = CreateCustomButton(miscScroll, " ↓ màu menu", "Secondary")
-menuColorToggleFrame.LayoutOrder = 5
-menuColorToggleFrame.Size = UDim2.new(1, 0, 0, 34)
-ProtectButton(menuColorToggleFrame, "Secondary")
-
-local mcSubLabel = Instance.new("TextLabel", menuColorToggleFrame)
-mcSubLabel.Name = "VzNamTextLabel_Sub"
-mcSubLabel.Size, mcSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
-mcSubLabel.BackgroundTransparency, mcSubLabel.Text = 1, "Tùy chỉnh màu sắc & độ trong suốt"
-mcSubLabel.TextColor3, mcSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
-mcSubLabel.Font, mcSubLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Center
-mcSubLabel.ZIndex = 10
+local menuColorToggleBtn, _ = CreateCustomButton(miscScroll, " ↓ màu menu", "Secondary")
+menuColorToggleBtn.LayoutOrder = 5
+menuColorToggleBtn.Size = UDim2.new(1, 0, 0, 34)
 
 local menuColorContainer = Instance.new("Frame", miscScroll)
 menuColorContainer.LayoutOrder, menuColorContainer.Size = 6, UDim2.new(1, 0, 0, 0)
@@ -1087,10 +965,9 @@ local mcLayout = Instance.new("UIListLayout", menuColorContainer)
 mcLayout.SortOrder, mcLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 mcLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-Track(menuColorToggleClicker.Activated:Connect(function()
+Track(menuColorToggleBtn.MouseButton1Click:Connect(function()
     menuColorContainer.Visible = not menuColorContainer.Visible
-    menuColorToggleLbl.Text = menuColorContainer.Visible and " ↓ màu menu" or " → màu menu"
-    mcSubLabel.Visible = menuColorContainer.Visible
+    menuColorToggleBtn.Text = menuColorContainer.Visible and " ↓ màu menu" or " → màu menu"
 end))
 
 local menuThemeList = {
@@ -1124,9 +1001,8 @@ local function ApplyTheme(newBaseColor)
     end
 end
 
-local themeDropFrame, themeDropLbl, _, themeDropClicker = CreateCustomButton(menuColorContainer, " 🎨 Theme: 🌊 Xanh Đại Dương", "Primary")
-themeDropFrame.LayoutOrder, themeDropFrame.Size = 1, UDim2.new(1, 0, 0, 26)
-ProtectButton(themeDropFrame, "Primary")
+local themeDropBtn, _ = CreateCustomButton(menuColorContainer, " 🎨 Theme: 🌊 Xanh Đại Dương", "Primary")
+themeDropBtn.LayoutOrder, themeDropBtn.Size = 1, UDim2.new(1, 0, 0, 26)
 
 local themeDropList = Instance.new("ScrollingFrame", menuColorContainer)
 themeDropList.LayoutOrder, themeDropList.Size = 2, UDim2.new(1, 0, 0, 95)
@@ -1141,18 +1017,17 @@ local themePad = Instance.new("UIPadding", themeDropList)
 themePad.PaddingRight = UDim.new(0, 8)
 
 for i, th in ipairs(menuThemeList) do
-    local f, lbl, _, clicker = CreateCustomButton(themeDropList, " " .. th.Name, "DropItem")
-    f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
-    ProtectButton(f, "DropItem")
+    local btn, _ = CreateCustomButton(themeDropList, " " .. th.Name, "DropItem")
+    btn.LayoutOrder, btn.Size = i, UDim2.new(1, 0, 0, 22)
 
-    Track(clicker.Activated:Connect(function()
-        themeDropLbl.Text = " 🎨 Theme: " .. th.Name
+    Track(btn.MouseButton1Click:Connect(function()
+        themeDropBtn.Text = " 🎨 Theme: " .. th.Name
         themeDropList.Visible = false
         ApplyTheme(th.Bg)
     end))
 end
 themeDropList.CanvasSize = UDim2.new(0, 0, 0, #menuThemeList * 25)
-Track(themeDropClicker.Activated:Connect(function()
+Track(themeDropBtn.MouseButton1Click:Connect(function()
     themeDropList.Visible = not themeDropList.Visible
 end))
 
@@ -1168,7 +1043,6 @@ transLabel.Size, transLabel.Position = UDim2.new(1, -8, 1, 0), UDim2.new(0, 5, 0
 transLabel.BackgroundTransparency, transLabel.Text = 1, "✨ Trong suốt: 0%"
 transLabel.TextColor3, transLabel.TextSize = Color3.fromRGB(255,255,255), 9
 transLabel.Font, transLabel.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-transLabel.ZIndex = 10
 
 local transBarBg = Instance.new("Frame", transFrame)
 transBarBg.Size, transBarBg.Position = UDim2.new(0, 80, 0, 8), UDim2.new(1, -86, 0.5, -4)
@@ -1213,9 +1087,8 @@ local colorList = {
 }
 local selectedColorObj = colorList[1]
 
-local colorDropFrame, colorDropLbl, _, colorDropClicker = CreateCustomButton(menuColorContainer, " 🎨 Viền: 🔵 Xanh Dương", "Primary")
-colorDropFrame.LayoutOrder, colorDropFrame.Size = 4, UDim2.new(1, 0, 0, 26)
-ProtectButton(colorDropFrame, "Primary")
+local colorDropBtn, _ = CreateCustomButton(menuColorContainer, " 🎨 Viền: 🔵 Xanh Dương", "Primary")
+colorDropBtn.LayoutOrder, colorDropBtn.Size = 4, UDim2.new(1, 0, 0, 26)
 
 local colorDropList = Instance.new("ScrollingFrame", menuColorContainer)
 colorDropList.LayoutOrder, colorDropList.Size = 5, UDim2.new(1, 0, 0, 95)
@@ -1243,13 +1116,12 @@ local function UpdateAllStrokes(target)
 end
 
 for i, cItem in ipairs(colorList) do
-    local f, lbl, _, clicker = CreateCustomButton(colorDropList, " " .. cItem.Name, "DropItem")
-    f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
-    ProtectButton(f, "DropItem")
+    local btn, _ = CreateCustomButton(colorDropList, " " .. cItem.Name, "DropItem")
+    btn.LayoutOrder, btn.Size = i, UDim2.new(1, 0, 0, 22)
 
-    Track(clicker.Activated:Connect(function()
+    Track(btn.MouseButton1Click:Connect(function()
         selectedColorObj = cItem
-        colorDropLbl.Text = " 🎨 Viền: " .. cItem.Name
+        colorDropBtn.Text = " 🎨 Viền: " .. cItem.Name
         colorDropList.Visible = false
         if cItem.Color == "Rainbow" then
             State.StrokeMode = "Rainbow"
@@ -1264,7 +1136,7 @@ for i, cItem in ipairs(colorList) do
     end))
 end
 colorDropList.CanvasSize = UDim2.new(0, 0, 0, #colorList * 25)
-Track(colorDropClicker.Activated:Connect(function()
+Track(colorDropBtn.MouseButton1Click:Connect(function()
     colorDropList.Visible = not colorDropList.Visible
 end))
 
@@ -1278,12 +1150,11 @@ end)
 Track(rainbowConn)
 
 -- ═════════════════ TAB: CẤU HÌNH ═════════════════
-local tabConfigFrame, tabConfigLbl, _, tabConfigClicker = CreateCustomButton(SidebarScroll, " 📦 CẤU HÌNH", "Primary")
-tabConfigFrame.LayoutOrder = 5
-tabConfigFrame.Size = UDim2.new(1, 0, 0, 26)
-ProtectButton(tabConfigFrame, "Primary")
+local tabConfigBtn, _ = CreateCustomButton(SidebarScroll, " 📦 CẤU HÌNH", "Primary")
+tabConfigBtn.LayoutOrder = 5
+tabConfigBtn.Size = UDim2.new(1, 0, 0, 26)
 
-local configIndicator = Instance.new("Frame", tabConfigFrame)
+local configIndicator = Instance.new("Frame", tabConfigBtn)
 configIndicator.Size, configIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
 configIndicator.BackgroundColor3, configIndicator.BorderSizePixel = Color3.fromRGB(255,105,180), 0
 configIndicator.Visible = false
@@ -1303,7 +1174,7 @@ Track(configLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(funct
     configScroll.CanvasSize = UDim2.new(0, 0, 0, configLayout.AbsoluteContentSize.Y + 15)
 end))
 
-Track(tabConfigClicker.Activated:Connect(function()
+Track(tabConfigBtn.MouseButton1Click:Connect(function()
     for _, t in pairs(Tabs) do
         t.Container.Visible = false
         if t.Indicator then t.Indicator.Visible = false end
@@ -1379,7 +1250,6 @@ startupLabel.BackgroundTransparency = 1
 startupLabel.Text = "Startup: " .. State.CurrentConfig
 startupLabel.TextColor3, startupLabel.TextSize = Color3.fromRGB(255,255,255), 9
 startupLabel.Font, startupLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-startupLabel.ZIndex = 10
 
 local newConfigFrame = Instance.new("Frame", mainConfigContainer)
 newConfigFrame.LayoutOrder, newConfigFrame.Size = 2, UDim2.new(1, 0, 0, 30)
@@ -1393,7 +1263,6 @@ ncLabel.Size, ncLabel.Position = UDim2.new(0, 80, 1, 0), UDim2.new(0, 5, 0, 0)
 ncLabel.BackgroundTransparency, ncLabel.Text = 1, "Tên Config"
 ncLabel.TextColor3, ncLabel.TextSize = Color3.fromRGB(255,255,255), 9
 ncLabel.Font, ncLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-ncLabel.ZIndex = 10
 
 local configNameBox = Instance.new("TextBox", newConfigFrame)
 configNameBox.Size, configNameBox.Position = UDim2.new(1, -95, 0, 20), UDim2.new(0, 85, 0.5, -10)
@@ -1417,14 +1286,12 @@ crTitle.Size, crTitle.Position = UDim2.new(1, -75, 0, 15), UDim2.new(0, 5, 0, 2)
 crTitle.BackgroundTransparency, crTitle.Text = 1, "Tạo Mới Cấu Hình"
 crTitle.TextColor3, crTitle.TextSize = Color3.fromRGB(255,255,255), 9
 crTitle.Font, crTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-crTitle.ZIndex = 10
 
 local crSub = Instance.new("TextLabel", createFrame)
 crSub.Size, crSub.Position = UDim2.new(1, -75, 0, 14), UDim2.new(0, 5, 0, 17)
 crSub.BackgroundTransparency, crSub.Text = 1, "Sao chép cài đặt hiện tại"
 crSub.TextColor3, crSub.TextSize = Color3.fromRGB(140,140,150), 7
 crSub.Font, crSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-crSub.ZIndex = 10
 
 local createBtn = Instance.new("TextButton", createFrame)
 createBtn.Size, createBtn.Position = UDim2.new(0, 65, 0, 22), UDim2.new(1, -70, 0.5, -11)
@@ -1446,7 +1313,6 @@ delLabel.Size, delLabel.Position = UDim2.new(0, 80, 1, 0), UDim2.new(0, 5, 0, 0)
 delLabel.BackgroundTransparency, delLabel.Text = 1, "Xóa Cấu Hình"
 delLabel.TextColor3, delLabel.TextSize = Color3.fromRGB(255,255,255), 9
 delLabel.Font, delLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-delLabel.ZIndex = 10
 
 local delBtn = Instance.new("TextButton", deleteFrame)
 delBtn.Size, delBtn.Position = UDim2.new(0, 85, 0, 20), UDim2.new(1, -90, 0.5, -10)
@@ -1482,7 +1348,6 @@ ldLabel.Size, ldLabel.Position = UDim2.new(0, 80, 1, 0), UDim2.new(0, 5, 0, 0)
 ldLabel.BackgroundTransparency, ldLabel.Text = 1, "Tải Config"
 ldLabel.TextColor3, ldLabel.TextSize = Color3.fromRGB(255,255,255), 9
 ldLabel.Font, ldLabel.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-ldLabel.ZIndex = 10
 
 local ldBtn = Instance.new("TextButton", loadConfigFrame)
 ldBtn.Size, ldBtn.Position = UDim2.new(0, 85, 0, 20), UDim2.new(1, -90, 0.5, -10)
@@ -1518,14 +1383,12 @@ svTitle.Size, svTitle.Position = UDim2.new(1, -75, 0, 15), UDim2.new(0, 5, 0, 2)
 svTitle.BackgroundTransparency, svTitle.Text = 1, "Lưu Cấu Hình"
 svTitle.TextColor3, svTitle.TextSize = Color3.fromRGB(255,255,255), 9
 svTitle.Font, svTitle.TextXAlignment = Enum.Font.GothamBold, Enum.TextXAlignment.Left
-svTitle.ZIndex = 10
 
 local svSub = Instance.new("TextLabel", saveFrame)
 svSub.Size, svSub.Position = UDim2.new(1, -75, 0, 14), UDim2.new(0, 5, 0, 17)
 svSub.BackgroundTransparency, svSub.Text = 1, "Save: " .. State.CurrentConfig
 svSub.TextColor3, svSub.TextSize = Color3.fromRGB(140,140,150), 7
 svSub.Font, svSub.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
-svSub.ZIndex = 10
 
 local saveBtn = Instance.new("TextButton", saveFrame)
 saveBtn.Size, saveBtn.Position = UDim2.new(0, 65, 0, 22), UDim2.new(1, -70, 0.5, -11)
@@ -1577,7 +1440,7 @@ local function ApplyConfig(data)
         for _, scr in ipairs(RegisteredScripts) do
             if scr.Name == data.SelectedScript then
                 State.SelectedScript = scr
-                dropLbl.Text = " 📜 " .. scr.Name
+                dropBtn.Text = " 📜 " .. scr.Name
                 break
             end
         end
@@ -1594,7 +1457,7 @@ end
 local function refreshAllDropdowns()
     for _, drop in ipairs({delDropFrame, ldDropFrame}) do
         for _, child in ipairs(drop:GetChildren()) do
-            if child:IsA("Frame") then child:Destroy() end
+            if child:IsA("TextButton") then child:Destroy() end
         end
     end
 
@@ -1613,23 +1476,42 @@ local function refreshAllDropdowns()
     if #filesList == 0 then delBtn.Text = "Không có ∨" end
 
     for _, name in ipairs(filesList) do
-        local f1, lbl1, _, clicker1 = CreateCustomButton(delDropFrame, " 🗑️ " .. name, "DropItem")
-        f1.Size = UDim2.new(1, 0, 0, 22)
-        lbl1.TextColor3 = Color3.fromRGB(255,100,100)
-        ProtectButton(f1, "DropItem")
+        local f1 = Instance.new("TextButton", delDropFrame)
+        f1.Size, f1.BackgroundColor3, f1.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
+        local origT = " 🗑️ " .. name
+        f1.Text = origT
+        f1.TextColor3, f1.TextSize = Color3.fromRGB(255,100,100), 9
+        f1.Font, f1.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+        Corner(f1, UDim.new(0, 4))
+        Stroke(f1)
+        RegTheme(f1, "DropItem")
 
-        Track(clicker1.Activated:Connect(function()
+        Track(f1:GetPropertyChangedSignal("Text"):Connect(function()
+            if f1.Text ~= origT then f1.Text = origT end
+        end))
+
+        Track(f1.MouseButton1Click:Connect(function()
             if typeof(delfile) == "function" then pcall(delfile, CONFIG_FOLDER .. "/" .. name .. ".json") end
             delBtn.Text = name .. " ∨"
             delDropFrame.Visible = false
             refreshAllDropdowns()
         end))
 
-        local f3, lbl3, _, clicker3 = CreateCustomButton(ldDropFrame, " 📂 " .. name, "DropItem")
-        f3.Size = UDim2.new(1, 0, 0, 22)
-        ProtectButton(f3, "DropItem")
+        local f3 = Instance.new("TextButton", ldDropFrame)
+        f3.Size, f3.BackgroundColor3, f3.BackgroundTransparency = UDim2.new(1, 0, 0, 22), Color3.fromRGB(90,25,65), 0
+        local origT2 = " 📂 " .. name
+        f3.Text = origT2
+        f3.TextColor3, f3.TextSize = Color3.fromRGB(255,255,255), 9
+        f3.Font, f3.TextXAlignment = Enum.Font.Gotham, Enum.TextXAlignment.Left
+        Corner(f3, UDim.new(0, 4))
+        Stroke(f3)
+        RegTheme(f3, "DropItem")
 
-        Track(clicker3.Activated:Connect(function()
+        Track(f3:GetPropertyChangedSignal("Text"):Connect(function()
+            if f3.Text ~= origT2 then f3.Text = origT2 end
+        end))
+
+        Track(f3.MouseButton1Click:Connect(function()
             State.CurrentConfig = name
             ldBtn.Text = name .. " ∨"
             svSub.Text = "Save: " .. name
@@ -1639,6 +1521,8 @@ local function refreshAllDropdowns()
             if not ok then warn("[VzNam] Load config fail: " .. tostring(err)) end
         end))
     end
+    delDropFrame.CanvasSize = UDim2.new(0, 0, 0, #filesList * 25)
+    ldDropFrame.CanvasSize = UDim2.new(0, 0, 0, #filesList * 25)
 end
 
 Track(delBtn.MouseButton1Click:Connect(function()
@@ -1693,4 +1577,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Fix Lỗi Vuốt & Đơ).")
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Tối Ưu Mượt Mà).")
