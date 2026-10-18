@@ -1,6 +1,6 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Khóa Cứng Kích Thước & Nút)
+    VzNam Hub v4 : Tổng Hợp (Bản Fix Lỗi Vuốt & Click)
     ═══════════════════════════════════════════════════════
 ]]
 
@@ -74,13 +74,13 @@ local function CreateCustomButton(parent, text, themeType)
     local f = Instance.new("Frame", parent)
     f.BackgroundColor3 = Color3.fromRGB(70,15,50)
     f.BorderSizePixel = 0
-    f.Active = true
+    f.Active = false -- FIX LỖI KHÔNG VUỐT ĐƯỢC (Tắt Active để nhường sự kiện cuộn cho ScrollingFrame)
     Corner(f)
     local s = Stroke(f, Color3.fromRGB(0,191,255), 1)
     RegTheme(f, themeType)
 
     local lbl = Instance.new("TextLabel", f)
-    lbl.Name = "VzNamTextLabel" -- Đánh dấu để bảo vệ
+    lbl.Name = "VzNamTextLabel"
     lbl.BackgroundTransparency = 1
     lbl.Text = text
     lbl.TextColor3 = Color3.fromRGB(255,255,255)
@@ -89,12 +89,21 @@ local function CreateCustomButton(parent, text, themeType)
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Position = UDim2.new(0, 5, 0, 0)
     lbl.Size = UDim2.new(1, -5, 1, 0)
-    lbl.ZIndex = 10
+    lbl.ZIndex = 2
     
-    return f, lbl, s
+    -- FIX LỖI TỰ CHẠY KHI VUỐT (Tạo nút ẩn để nhận Click thay vì InputBegan)
+    local clicker = Instance.new("TextButton", f)
+    clicker.Name = "VzNamClicker"
+    clicker.BackgroundTransparency = 1
+    clicker.Text = ""
+    clicker.Size = UDim2.new(1, 0, 1, 0)
+    clicker.ZIndex = 3
+    clicker.AutoButtonColor = false
+    
+    return f, lbl, s, clicker
 end
 
--- Hàm đăng ký bảo vệ sau khi đã set Size chuẩn
+-- Hàm đăng ký bảo vệ
 local function ProtectButton(Btn, themeType)
     table.insert(ProtectedButtons, {
         Frame = Btn,
@@ -307,7 +316,12 @@ RunService:BindToRenderStep("VzNamProtect", 10000, function()
     for _, data in ipairs(ProtectedButtons) do
         local btn = data.Frame
         if btn and btn.Parent then
-            -- 1. Ép lại Kích thước (Chống thu nhỏ để chèn nút)
+            -- 0. Bắt buộc tắt Active để vuốt không bị kẹt
+            if btn.Active then
+                btn.Active = false
+            end
+
+            -- 1. Ép lại Kích thước (Chống thu nhỏ)
             if btn.Size ~= data.OriginalSize then
                 btn.Size = data.OriginalSize
             end
@@ -317,10 +331,12 @@ RunService:BindToRenderStep("VzNamProtect", 10000, function()
                 btn.Position = data.OriginalPosition
             end
 
-            -- 3. Quét và tiêu diệt mọi thứ không phải chữ gốc (Xóa nút Việt Hóa)
+            -- 3. Quét và tiêu diệt mọi thứ không phải chữ gốc hoặc Nút bấm gốc
             for _, child in ipairs(btn:GetChildren()) do
-                if child:IsA("GuiObject") and child.Name ~= "VzNamTextLabel" then
-                    child:Destroy()
+                if child:IsA("GuiObject") and child.Name ~= "VzNamTextLabel" and child.Name ~= "VzNamClicker" and child:IsA("TextButton") == false and child:IsA("TextLabel") == false then
+                    -- không xóa UIStroke và UICorner
+                elseif child:IsA("GuiObject") and child.Name ~= "VzNamTextLabel" and child.Name ~= "VzNamClicker" and (child:IsA("TextButton") or child:IsA("TextLabel") or child:IsA("ImageButton")) then
+                     child:Destroy()
                 end
             end
 
@@ -351,7 +367,7 @@ RunService:BindToRenderStep("VzNamProtect", 10000, function()
 end)
 
 -- ═════════════════ TAB 0: TRANG CHỦ ═════════════════
-local tabHomeFrame, tabHomeLbl, _ = CreateCustomButton(SidebarScroll, " 🏠 Trang Chủ", "Primary")
+local tabHomeFrame, tabHomeLbl, _, tabHomeClicker = CreateCustomButton(SidebarScroll, " 🏠 Trang Chủ", "Primary")
 tabHomeFrame.LayoutOrder = 0
 tabHomeFrame.Size = UDim2.new(1, 0, 0, 26)
 ProtectButton(tabHomeFrame, "Primary")
@@ -377,23 +393,21 @@ Track(homeLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(functio
     homeScroll.CanvasSize = UDim2.new(0, 0, 0, homeLayout.AbsoluteContentSize.Y + 15)
 end))
 
-Track(tabHomeFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        for _, t in pairs(Tabs) do
-            t.Container.Visible = false
-            if t.Indicator then t.Indicator.Visible = false end
-        end
-        homeScroll.Visible, homeIndicator.Visible = true, true
-        ActiveTabTitle.Text = "🏠 Trang Chủ"
-        SearchInputContent.Text = ""
+Track(tabHomeClicker.Activated:Connect(function()
+    for _, t in pairs(Tabs) do
+        t.Container.Visible = false
+        if t.Indicator then t.Indicator.Visible = false end
     end
+    homeScroll.Visible, homeIndicator.Visible = true, true
+    ActiveTabTitle.Text = "🏠 Trang Chủ"
+    SearchInputContent.Text = ""
 end))
 
 table.insert(Tabs, {Container = homeScroll, Indicator = homeIndicator})
 homeScroll.Visible, homeIndicator.Visible = true, true
 ActiveTabTitle.Text = "🏠 Trang Chủ"
 
-local infoToggleFrame, infoToggleLbl, _ = CreateCustomButton(homeScroll, " → thông tin", "Secondary")
+local infoToggleFrame, infoToggleLbl, _, infoToggleClicker = CreateCustomButton(homeScroll, " → thông tin", "Secondary")
 infoToggleFrame.LayoutOrder = 1
 infoToggleFrame.Size = UDim2.new(1, 0, 0, 32)
 ProtectButton(infoToggleFrame, "Secondary")
@@ -415,12 +429,10 @@ local infoLayout = Instance.new("UIListLayout", infoContainer)
 infoLayout.SortOrder, infoLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 infoLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-Track(infoToggleFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        infoContainer.Visible = not infoContainer.Visible
-        infoToggleLbl.Text = infoContainer.Visible and " ↓ thông tin" or " → thông tin"
-        infoSubLabel.Visible = infoContainer.Visible
-    end
+Track(infoToggleClicker.Activated:Connect(function()
+    infoContainer.Visible = not infoContainer.Visible
+    infoToggleLbl.Text = infoContainer.Visible and " ↓ thông tin" or " → thông tin"
+    infoSubLabel.Visible = infoContainer.Visible
 end))
 
 local function CreateHomeCard(parent, order, bgColor, titleText, mainText, copyText, borderColor, iconSymbol)
@@ -489,7 +501,7 @@ local RegisteredScripts = {}
 local LastSelectedScriptStroke = nil
 
 local function CreateCategoryTab(tabName, layoutOrder)
-    local tabFrame, tabLbl, _ = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
+    local tabFrame, tabLbl, _, tabClicker = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
     tabFrame.LayoutOrder = layoutOrder or 0
     tabFrame.Size = UDim2.new(1, 0, 0, 26)
     ProtectButton(tabFrame, "Primary")
@@ -513,7 +525,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     local subLayout = Instance.new("UIListLayout", subBar)
     subLayout.FillDirection, subLayout.Padding = Enum.FillDirection.Horizontal, UDim.new(0, 4)
 
-    local noKeyFrame, noKeyLbl, nkStroke = CreateCustomButton(subBar, "no key", "Primary")
+    local noKeyFrame, noKeyLbl, nkStroke, nkClicker = CreateCustomButton(subBar, "no key", "Primary")
     noKeyFrame.Size = UDim2.new(0.48, 0, 1, 0)
     noKeyFrame.ZIndex = 6
     nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255,50,50), 2
@@ -521,7 +533,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     noKeyLbl.Position = UDim2.new(0, 0, 0, 0)
     ProtectButton(noKeyFrame, "Primary")
 
-    local hasKeyFrame, hasKeyLbl, hkStroke = CreateCustomButton(subBar, "có key", "Primary")
+    local hasKeyFrame, hasKeyLbl, hkStroke, hkClicker = CreateCustomButton(subBar, "có key", "Primary")
     hasKeyFrame.Size = UDim2.new(0.48, 0, 1, 0)
     hasKeyFrame.ZIndex = 6
     hasKeyLbl.TextXAlignment = Enum.TextXAlignment.Center
@@ -561,53 +573,45 @@ local function CreateCategoryTab(tabName, layoutOrder)
     end
     Track(SearchInputContent:GetPropertyChangedSignal("Text"):Connect(applySearchFilter))
 
-    Track(noKeyFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            scrollNoKey.Visible, scrollHasKey.Visible = true, false
-            nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255,50,50), 2
-            hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(0,191,255), 1
-        end
+    Track(nkClicker.Activated:Connect(function()
+        scrollNoKey.Visible, scrollHasKey.Visible = true, false
+        nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255,50,50), 2
+        hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(0,191,255), 1
     end))
-    Track(hasKeyFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            scrollNoKey.Visible, scrollHasKey.Visible = false, true
-            hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(255,50,50), 2
-            nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(0,191,255), 1
-        end
+    Track(hkClicker.Activated:Connect(function()
+        scrollNoKey.Visible, scrollHasKey.Visible = false, true
+        hkStroke.Color, hkStroke.Thickness = Color3.fromRGB(255,50,50), 2
+        nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(0,191,255), 1
     end))
 
-    Track(tabFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            for _, t in pairs(Tabs) do
-                t.Container.Visible = false
-                if t.Indicator then t.Indicator.Visible = false end
-            end
-            containerFrame.Visible, indicator.Visible = true, true
-            ActiveTabTitle.Text = tabName
-            SearchInputContent.Text = ""
+    Track(tabClicker.Activated:Connect(function()
+        for _, t in pairs(Tabs) do
+            t.Container.Visible = false
+            if t.Indicator then t.Indicator.Visible = false end
         end
+        containerFrame.Visible, indicator.Visible = true, true
+        ActiveTabTitle.Text = tabName
+        SearchInputContent.Text = ""
     end))
 
     table.insert(Tabs, {Container = containerFrame, Indicator = indicator})
 
     local Elements = {}
     local function AddBtnTo(parent, name, callback)
-        local f, lbl, bStroke = CreateCustomButton(parent, " ▶ " .. name, "Primary")
+        local f, lbl, bStroke, clicker = CreateCustomButton(parent, " ▶ " .. name, "Primary")
         f.Size = UDim2.new(1, 0, 0, 26)
         ProtectButton(f, "Primary")
 
-        Track(f.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if LastSelectedScriptStroke then
-                    LastSelectedScriptStroke.Color = Color3.fromRGB(0,191,255)
-                    LastSelectedScriptStroke.Thickness = 1
-                end
-                bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
-                LastSelectedScriptStroke = bStroke
-                
-                MainFrame.Visible = false
-                pcall(callback)
+        Track(clicker.Activated:Connect(function()
+            if LastSelectedScriptStroke then
+                LastSelectedScriptStroke.Color = Color3.fromRGB(0,191,255)
+                LastSelectedScriptStroke.Thickness = 1
             end
+            bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
+            LastSelectedScriptStroke = bStroke
+            
+            MainFrame.Visible = false
+            pcall(callback)
         end))
 
         table.insert(RegisteredScripts, {Name = name, Callback = callback})
@@ -621,7 +625,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
 end
 
 local function CreateSimpleTab(tabName, layoutOrder)
-    local tabFrame, tabLbl, _ = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
+    local tabFrame, tabLbl, _, tabClicker = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
     tabFrame.LayoutOrder = layoutOrder or 0
     tabFrame.Size = UDim2.new(1, 0, 0, 26)
     ProtectButton(tabFrame, "Primary")
@@ -665,38 +669,34 @@ local function CreateSimpleTab(tabName, layoutOrder)
     end
     Track(SearchInputContent:GetPropertyChangedSignal("Text"):Connect(applySearchFilter))
 
-    Track(tabFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            for _, t in pairs(Tabs) do
-                t.Container.Visible = false
-                if t.Indicator then t.Indicator.Visible = false end
-            end
-            containerFrame.Visible, indicator.Visible = true, true
-            ActiveTabTitle.Text = tabName
-            SearchInputContent.Text = ""
+    Track(tabClicker.Activated:Connect(function()
+        for _, t in pairs(Tabs) do
+            t.Container.Visible = false
+            if t.Indicator then t.Indicator.Visible = false end
         end
+        containerFrame.Visible, indicator.Visible = true, true
+        ActiveTabTitle.Text = tabName
+        SearchInputContent.Text = ""
     end))
 
     table.insert(Tabs, {Container = containerFrame, Indicator = indicator})
 
     local Elements = {}
     local function AddBtn(name, callback)
-        local f, lbl, bStroke = CreateCustomButton(scroll, " ▶ " .. name, "Primary")
+        local f, lbl, bStroke, clicker = CreateCustomButton(scroll, " ▶ " .. name, "Primary")
         f.Size = UDim2.new(1, 0, 0, 26)
         ProtectButton(f, "Primary")
 
-        Track(f.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if LastSelectedScriptStroke then
-                    LastSelectedScriptStroke.Color = Color3.fromRGB(0,191,255)
-                    LastSelectedScriptStroke.Thickness = 1
-                end
-                bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
-                LastSelectedScriptStroke = bStroke
-                
-                MainFrame.Visible = false
-                pcall(callback)
+        Track(clicker.Activated:Connect(function()
+            if LastSelectedScriptStroke then
+                LastSelectedScriptStroke.Color = Color3.fromRGB(0,191,255)
+                LastSelectedScriptStroke.Thickness = 1
             end
+            bStroke.Color, bStroke.Thickness = Color3.fromRGB(50,200,50), 2
+            LastSelectedScriptStroke = bStroke
+            
+            MainFrame.Visible = false
+            pcall(callback)
         end))
 
         table.insert(RegisteredScripts, {Name = name, Callback = callback})
@@ -752,7 +752,7 @@ tabMain:AddScript("VzNamHub-Main ❗❗script hiện tại sẽ tắt khi bật"
 end)
 
 -- ═════════════════ TAB: MISC ═════════════════
-local tabMiscFrame, tabMiscLbl, _ = CreateCustomButton(SidebarScroll, " ⚙️ MISC", "Primary")
+local tabMiscFrame, tabMiscLbl, _, tabMiscClicker = CreateCustomButton(SidebarScroll, " ⚙️ MISC", "Primary")
 tabMiscFrame.LayoutOrder = 4
 tabMiscFrame.Size = UDim2.new(1, 0, 0, 26)
 ProtectButton(tabMiscFrame, "Primary")
@@ -777,20 +777,18 @@ Track(miscLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(functio
     miscScroll.CanvasSize = UDim2.new(0, 0, 0, miscLayout.AbsoluteContentSize.Y + 15)
 end))
 
-Track(tabMiscFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        for _, t in pairs(Tabs) do
-            t.Container.Visible = false
-            if t.Indicator then t.Indicator.Visible = false end
-        end
-        miscScroll.Visible, miscIndicator.Visible = true, true
-        ActiveTabTitle.Text = "⚙️ MISC"
+Track(tabMiscClicker.Activated:Connect(function()
+    for _, t in pairs(Tabs) do
+        t.Container.Visible = false
+        if t.Indicator then t.Indicator.Visible = false end
     end
+    miscScroll.Visible, miscIndicator.Visible = true, true
+    ActiveTabTitle.Text = "⚙️ MISC"
 end))
 table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 
 -- ═════════════════ AUTO LOAD SCRIPT ═════════════════
-local autoLoadToggleFrame, autoLoadToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ auto load script", "Secondary")
+local autoLoadToggleFrame, autoLoadToggleLbl, _, autoLoadToggleClicker = CreateCustomButton(miscScroll, " ↓ auto load script", "Secondary")
 autoLoadToggleFrame.LayoutOrder = 1
 autoLoadToggleFrame.Size = UDim2.new(1, 0, 0, 34)
 ProtectButton(autoLoadToggleFrame, "Secondary")
@@ -812,15 +810,13 @@ local alLayout = Instance.new("UIListLayout", autoLoadContainer)
 alLayout.SortOrder, alLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 alLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-Track(autoLoadToggleFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        autoLoadContainer.Visible = not autoLoadContainer.Visible
-        autoLoadToggleLbl.Text = autoLoadContainer.Visible and " ↓ auto load script" or " → auto load script"
-        alSubLabel.Visible = autoLoadContainer.Visible
-    end
+Track(autoLoadToggleClicker.Activated:Connect(function()
+    autoLoadContainer.Visible = not autoLoadContainer.Visible
+    autoLoadToggleLbl.Text = autoLoadContainer.Visible and " ↓ auto load script" or " → auto load script"
+    alSubLabel.Visible = autoLoadContainer.Visible
 end))
 
-local dropFrame, dropLbl, _ = CreateCustomButton(autoLoadContainer, " 📜 Chọn Script Auto Load...", "Primary")
+local dropFrame, dropLbl, _, dropClicker = CreateCustomButton(autoLoadContainer, " 📜 Chọn Script Auto Load...", "Primary")
 dropFrame.LayoutOrder = 1
 dropFrame.Size = UDim2.new(1, 0, 0, 26)
 ProtectButton(dropFrame, "Primary")
@@ -838,10 +834,8 @@ RegTheme(dropListFrame, "DropFrame")
 local dropPad = Instance.new("UIPadding", dropListFrame)
 dropPad.PaddingRight = UDim.new(0, 8)
 
-Track(dropFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dropListFrame.Visible = not dropListFrame.Visible
-    end
+Track(dropClicker.Activated:Connect(function()
+    dropListFrame.Visible = not dropListFrame.Visible
 end))
 
 local function rebuildScriptDropdown()
@@ -849,19 +843,17 @@ local function rebuildScriptDropdown()
         if c:IsA("Frame") then c:Destroy() end
     end
     for i, scr in ipairs(RegisteredScripts) do
-        local f, lbl, _ = CreateCustomButton(dropListFrame, " ▶ " .. scr.Name, "DropItem")
+        local f, lbl, _, clicker = CreateCustomButton(dropListFrame, " ▶ " .. scr.Name, "DropItem")
         f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
         ProtectButton(f, "DropItem")
         
-        Track(f.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                State.SelectedScript = scr
-                dropLbl.Text = " 📜 " .. scr.Name
-                dropListFrame.Visible = false
-                if State.IsAutoLoad then 
-                    MainFrame.Visible = false
-                    pcall(scr.Callback) 
-                end
+        Track(clicker.Activated:Connect(function()
+            State.SelectedScript = scr
+            dropLbl.Text = " 📜 " .. scr.Name
+            dropListFrame.Visible = false
+            if State.IsAutoLoad then 
+                MainFrame.Visible = false
+                pcall(scr.Callback) 
             end
         end))
     end
@@ -917,7 +909,7 @@ Track(toggleAutoBtn.MouseButton1Click:Connect(function()
 end))
 
 -- ═════════════════ ÂM NHẠC ═════════════════
-local musicToggleFrame, musicToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ âm nhạc", "Secondary")
+local musicToggleFrame, musicToggleLbl, _, musicToggleClicker = CreateCustomButton(miscScroll, " ↓ âm nhạc", "Secondary")
 musicToggleFrame.LayoutOrder = 3
 musicToggleFrame.Size = UDim2.new(1, 0, 0, 34)
 ProtectButton(musicToggleFrame, "Secondary")
@@ -938,12 +930,10 @@ local muLayout = Instance.new("UIListLayout", musicContainer)
 muLayout.SortOrder, muLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 muLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-Track(musicToggleFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        musicContainer.Visible = not musicContainer.Visible
-        musicToggleLbl.Text = musicContainer.Visible and " ↓ âm nhạc" or " → âm nhạc"
-        muSubLabel.Visible = musicContainer.Visible
-    end
+Track(musicToggleClicker.Activated:Connect(function()
+    musicContainer.Visible = not musicContainer.Visible
+    musicToggleLbl.Text = musicContainer.Visible and " ↓ âm nhạc" or " → âm nhạc"
+    muSubLabel.Visible = musicContainer.Visible
 end))
 
 local HubSound = Instance.new("Sound", SoundService)
@@ -960,7 +950,7 @@ Corner(customIdBox)
 Stroke(customIdBox)
 RegTheme(customIdBox, "Input")
 
-local musicDropFrame, musicDropLbl, _ = CreateCustomButton(musicContainer, " 🎵 Chọn Nhạc...", "Primary")
+local musicDropFrame, musicDropLbl, _, musicDropClicker = CreateCustomButton(musicContainer, " 🎵 Chọn Nhạc...", "Primary")
 musicDropFrame.LayoutOrder, musicDropFrame.Size = 2, UDim2.new(1, 0, 0, 26)
 ProtectButton(musicDropFrame, "Primary")
 
@@ -984,27 +974,23 @@ local presetMusics = {
     {Name = "🎶 Như Một Người Dưng",Id = "91897652967267"},
 }
 for i, m in ipairs(presetMusics) do
-    local f, lbl, _ = CreateCustomButton(musicDropList, " " .. m.Name, "DropItem")
+    local f, lbl, _, clicker = CreateCustomButton(musicDropList, " " .. m.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
     ProtectButton(f, "DropItem")
 
-    Track(f.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            State.SoundId = m.Id
-            musicDropLbl.Text = " 🎵 " .. m.Name
-            musicDropList.Visible = false
-            if HubSound.IsPlaying then
-                HubSound.SoundId = "rbxassetid://" .. State.SoundId
-                HubSound:Play()
-            end
+    Track(clicker.Activated:Connect(function()
+        State.SoundId = m.Id
+        musicDropLbl.Text = " 🎵 " .. m.Name
+        musicDropList.Visible = false
+        if HubSound.IsPlaying then
+            HubSound.SoundId = "rbxassetid://" .. State.SoundId
+            HubSound:Play()
         end
     end))
 end
 musicDropList.CanvasSize = UDim2.new(0, 0, 0, #presetMusics * 25)
-Track(musicDropFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        musicDropList.Visible = not musicDropList.Visible
-    end
+Track(musicDropClicker.Activated:Connect(function()
+    musicDropList.Visible = not musicDropList.Visible
 end))
 
 local volumeFrame = Instance.new("Frame", musicContainer)
@@ -1094,7 +1080,7 @@ Track(toggleMusicBtn.MouseButton1Click:Connect(function()
 end))
 
 -- ═════════════════ MÀU MENU ═════════════════
-local menuColorToggleFrame, menuColorToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ màu menu", "Secondary")
+local menuColorToggleFrame, menuColorToggleLbl, _, menuColorToggleClicker = CreateCustomButton(miscScroll, " ↓ màu menu", "Secondary")
 menuColorToggleFrame.LayoutOrder = 5
 menuColorToggleFrame.Size = UDim2.new(1, 0, 0, 34)
 ProtectButton(menuColorToggleFrame, "Secondary")
@@ -1115,12 +1101,10 @@ local mcLayout = Instance.new("UIListLayout", menuColorContainer)
 mcLayout.SortOrder, mcLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 4)
 mcLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-Track(menuColorToggleFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        menuColorContainer.Visible = not menuColorContainer.Visible
-        menuColorToggleLbl.Text = menuColorContainer.Visible and " ↓ màu menu" or " → màu menu"
-        mcSubLabel.Visible = menuColorContainer.Visible
-    end
+Track(menuColorToggleClicker.Activated:Connect(function()
+    menuColorContainer.Visible = not menuColorContainer.Visible
+    menuColorToggleLbl.Text = menuColorContainer.Visible and " ↓ màu menu" or " → màu menu"
+    mcSubLabel.Visible = menuColorContainer.Visible
 end))
 
 local menuThemeList = {
@@ -1154,7 +1138,7 @@ local function ApplyTheme(newBaseColor)
     end
 end
 
-local themeDropFrame, themeDropLbl, _ = CreateCustomButton(menuColorContainer, " 🎨 Theme: 🌊 Xanh Đại Dương", "Primary")
+local themeDropFrame, themeDropLbl, _, themeDropClicker = CreateCustomButton(menuColorContainer, " 🎨 Theme: 🌊 Xanh Đại Dương", "Primary")
 themeDropFrame.LayoutOrder, themeDropFrame.Size = 1, UDim2.new(1, 0, 0, 26)
 ProtectButton(themeDropFrame, "Primary")
 
@@ -1171,23 +1155,19 @@ local themePad = Instance.new("UIPadding", themeDropList)
 themePad.PaddingRight = UDim.new(0, 8)
 
 for i, th in ipairs(menuThemeList) do
-    local f, lbl, _ = CreateCustomButton(themeDropList, " " .. th.Name, "DropItem")
+    local f, lbl, _, clicker = CreateCustomButton(themeDropList, " " .. th.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
     ProtectButton(f, "DropItem")
 
-    Track(f.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            themeDropLbl.Text = " 🎨 Theme: " .. th.Name
-            themeDropList.Visible = false
-            ApplyTheme(th.Bg)
-        end
+    Track(clicker.Activated:Connect(function()
+        themeDropLbl.Text = " 🎨 Theme: " .. th.Name
+        themeDropList.Visible = false
+        ApplyTheme(th.Bg)
     end))
 end
 themeDropList.CanvasSize = UDim2.new(0, 0, 0, #menuThemeList * 25)
-Track(themeDropFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        themeDropList.Visible = not themeDropList.Visible
-    end
+Track(themeDropClicker.Activated:Connect(function()
+    themeDropList.Visible = not themeDropList.Visible
 end))
 
 local transFrame = Instance.new("Frame", menuColorContainer)
@@ -1247,7 +1227,7 @@ local colorList = {
 }
 local selectedColorObj = colorList[1]
 
-local colorDropFrame, colorDropLbl, _ = CreateCustomButton(menuColorContainer, " 🎨 Viền: 🔵 Xanh Dương", "Primary")
+local colorDropFrame, colorDropLbl, _, colorDropClicker = CreateCustomButton(menuColorContainer, " 🎨 Viền: 🔵 Xanh Dương", "Primary")
 colorDropFrame.LayoutOrder, colorDropFrame.Size = 4, UDim2.new(1, 0, 0, 26)
 ProtectButton(colorDropFrame, "Primary")
 
@@ -1277,33 +1257,29 @@ local function UpdateAllStrokes(target)
 end
 
 for i, cItem in ipairs(colorList) do
-    local f, lbl, _ = CreateCustomButton(colorDropList, " " .. cItem.Name, "DropItem")
+    local f, lbl, _, clicker = CreateCustomButton(colorDropList, " " .. cItem.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
     ProtectButton(f, "DropItem")
 
-    Track(f.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            selectedColorObj = cItem
-            colorDropLbl.Text = " 🎨 Viền: " .. cItem.Name
-            colorDropList.Visible = false
-            if cItem.Color == "Rainbow" then
-                State.StrokeMode = "Rainbow"
-                UpdateAllStrokes("Rainbow")
-            elseif cItem.Color == "None" then
-                State.StrokeMode = "None"
-                UpdateAllStrokes("None")
-            else
-                State.StrokeMode = "Solid"
-                UpdateAllStrokes(cItem.Color)
-            end
+    Track(clicker.Activated:Connect(function()
+        selectedColorObj = cItem
+        colorDropLbl.Text = " 🎨 Viền: " .. cItem.Name
+        colorDropList.Visible = false
+        if cItem.Color == "Rainbow" then
+            State.StrokeMode = "Rainbow"
+            UpdateAllStrokes("Rainbow")
+        elseif cItem.Color == "None" then
+            State.StrokeMode = "None"
+            UpdateAllStrokes("None")
+        else
+            State.StrokeMode = "Solid"
+            UpdateAllStrokes(cItem.Color)
         end
     end))
 end
 colorDropList.CanvasSize = UDim2.new(0, 0, 0, #colorList * 25)
-Track(colorDropFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        colorDropList.Visible = not colorDropList.Visible
-    end
+Track(colorDropClicker.Activated:Connect(function()
+    colorDropList.Visible = not colorDropList.Visible
 end))
 
 local rainbowConn = RunService.RenderStepped:Connect(function()
@@ -1316,7 +1292,7 @@ end)
 Track(rainbowConn)
 
 -- ═════════════════ TAB: CẤU HÌNH ═════════════════
-local tabConfigFrame, tabConfigLbl, _ = CreateCustomButton(SidebarScroll, " 📦 CẤU HÌNH", "Primary")
+local tabConfigFrame, tabConfigLbl, _, tabConfigClicker = CreateCustomButton(SidebarScroll, " 📦 CẤU HÌNH", "Primary")
 tabConfigFrame.LayoutOrder = 5
 tabConfigFrame.Size = UDim2.new(1, 0, 0, 26)
 ProtectButton(tabConfigFrame, "Primary")
@@ -1341,15 +1317,13 @@ Track(configLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(funct
     configScroll.CanvasSize = UDim2.new(0, 0, 0, configLayout.AbsoluteContentSize.Y + 15)
 end))
 
-Track(tabConfigFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        for _, t in pairs(Tabs) do
-            t.Container.Visible = false
-            if t.Indicator then t.Indicator.Visible = false end
-        end
-        configScroll.Visible, configIndicator.Visible = true, true
-        ActiveTabTitle.Text = "📦 CẤU HÌNH"
+Track(tabConfigClicker.Activated:Connect(function()
+    for _, t in pairs(Tabs) do
+        t.Container.Visible = false
+        if t.Indicator then t.Indicator.Visible = false end
     end
+    configScroll.Visible, configIndicator.Visible = true, true
+    ActiveTabTitle.Text = "📦 CẤU HÌNH"
 end))
 table.insert(Tabs, {Container = configScroll, Indicator = configIndicator})
 
@@ -1653,34 +1627,30 @@ local function refreshAllDropdowns()
     if #filesList == 0 then delBtn.Text = "Không có ∨" end
 
     for _, name in ipairs(filesList) do
-        local f1, lbl1, _ = CreateCustomButton(delDropFrame, " 🗑️ " .. name, "DropItem")
+        local f1, lbl1, _, clicker1 = CreateCustomButton(delDropFrame, " 🗑️ " .. name, "DropItem")
         f1.Size = UDim2.new(1, 0, 0, 22)
         lbl1.TextColor3 = Color3.fromRGB(255,100,100)
         ProtectButton(f1, "DropItem")
 
-        Track(f1.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if typeof(delfile) == "function" then pcall(delfile, CONFIG_FOLDER .. "/" .. name .. ".json") end
-                delBtn.Text = name .. " ∨"
-                delDropFrame.Visible = false
-                refreshAllDropdowns()
-            end
+        Track(clicker1.Activated:Connect(function()
+            if typeof(delfile) == "function" then pcall(delfile, CONFIG_FOLDER .. "/" .. name .. ".json") end
+            delBtn.Text = name .. " ∨"
+            delDropFrame.Visible = false
+            refreshAllDropdowns()
         end))
 
-        local f3, lbl3, _ = CreateCustomButton(ldDropFrame, " 📂 " .. name, "DropItem")
+        local f3, lbl3, _, clicker3 = CreateCustomButton(ldDropFrame, " 📂 " .. name, "DropItem")
         f3.Size = UDim2.new(1, 0, 0, 22)
         ProtectButton(f3, "DropItem")
 
-        Track(f3.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                State.CurrentConfig = name
-                ldBtn.Text = name .. " ∨"
-                svSub.Text = "Save: " .. name
-                ldDropFrame.Visible = false
-                RefreshStartupLabel()
-                local ok, err = LoadConfig(name)
-                if not ok then warn("[VzNam] Load config fail: " .. tostring(err)) end
-            end
+        Track(clicker3.Activated:Connect(function()
+            State.CurrentConfig = name
+            ldBtn.Text = name .. " ∨"
+            svSub.Text = "Save: " .. name
+            ldDropFrame.Visible = false
+            RefreshStartupLabel()
+            local ok, err = LoadConfig(name)
+            if not ok then warn("[VzNam] Load config fail: " .. tostring(err)) end
         end))
     end
 end
@@ -1737,4 +1707,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Khóa Cứng - Chống chèn nút).")
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Fix Lỗi Vuốt & Click).")
