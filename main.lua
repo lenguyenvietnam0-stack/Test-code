@@ -711,11 +711,11 @@ end
 -- ═════════════════ TAB: STEAL AN EGG ═════════════════
 local tab1 = CreateCategoryTab("🌸STEAL AN EGG🌸", 1)
 tab1:AddNoKey("1. Hop sv1 người(nokey)", function() SafeLoad("https://raw.githubusercontent.com/raw-roblox/PrivateServerBypass/refs/heads/main/lua") end)
-tab1:AddNoKey("2. FyyCommunity(lúc có key lúc no key)", function() SafeLoad("https://FyyCommunity.my.id") end)
 tab1:AddNoKey("3. Chilli Hub V4(nokey)", function() SafeLoad("https://id.tomroblox.com/raw/kairoblox/chilli-hub-viet-hoa-v4") end)
-tab1:AddNoKey("4. chilli hub v3.7(nokey)", function() SafeLoad("https://raw.githubusercontent.com/napun87/stealanegg/refs/heads/main/chilli.otcaydodaiNoKey3.7.lua") end)
-tab1:AddNoKey("5. chilli hub v5(nokey)", function() SafeLoad("https://raw.githubusercontent.com/ronnei/hihi/refs/heads/main/chillihubv5.lua") end)
+tab1:AddNoKey("2. FyyCommunity(lúc có key lúc no key)", function() SafeLoad("https://FyyCommunity.my.id") end)
+tab1:AddNoKey("4. ớt v3.7(nokey)", function() SafeLoad("https://raw.githubusercontent.com/napun87/stealanegg/refs/heads/main/chilli.otcaydodaiNoKey3.7.lua") end)
 tab1:AddNoKey("6. Night hub(nokey)", function() SafeLoad("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau") end)
+tab1:AddNoKey("5. ớt v5(nokey)", function() SafeLoad("https://raw.githubusercontent.com/ronnei/hihi/refs/heads/main/chillihubv5.lua") end)
 tab1:AddHasKey("1. Lemon Hub v4(có key)", function() SafeLoad("https://raw.githubusercontent.com/owenzeke99-tech/lennonhubv4/refs/heads/main/lennonhubkeyless.txt") end)
 tab1:AddHasKey("2. Hoshi hub(có key)", function() SafeLoad("https://raw.githubusercontent.com/napun87/stealanegg/refs/heads/main/hosi.lua") end)
 tab1:AddHasKey("3. Bigfroot(có key)", function() SafeLoad("https://raw.githubusercontent.com/hanniii1/Loader/refs/heads/main/BFLoader.lua") end)
@@ -723,7 +723,7 @@ tab1:AddHasKey("4. Chữ A(ajjans)|(có key)", function() SafeLoad("https://api.
 tab1:AddHasKey("5. Speed hub(có key)", function() SafeLoad("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua") end)
 tab1:AddHasKey("6. Neohub(có key)", function() SafeLoad("https://raw.githubusercontent.com/neohubdev/script/main/script") end)
 tab1:AddHasKey("7. Real kid(có key)", function() SafeLoad("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua") end)
-tab1:AddHasKey("8. Chilli v2(có key)", function() SafeLoad("https://gist.githubusercontent.com/ronnei/1fa67c56dd9af203b192d15e752928e5/raw/4e2d5105640e09a008b4ae6df23f9708cadfef06/chilliv2-stealanegg") end)
+tab1:AddHasKey("8. ớt v2(có key)", function() SafeLoad("https://gist.githubusercontent.com/ronnei/1fa67c56dd9af203b192d15e752928e5/raw/4e2d5105640e09a008b4ae6df23f9708cadfef06/chilliv2-stealanegg") end)
 
 -- ═════════════════ TAB: BLOX FRUIT ═════════════════
 local tab2 = CreateCategoryTab("🌸BLOX FRUIT🌸", 2)
