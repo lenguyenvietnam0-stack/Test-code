@@ -1,13 +1,13 @@
 --[[
     ═══════════════════════════════════════════════════════
-    VzNam Hub v4 : Tổng Hợp (Bản Fix Triệt Để Lỗi Chèn Nút & Vuốt)
+    VzNam Hub v4 : Tổng Hợp (Bản Khóa Cứng Kích Thước & Nút)
     ═══════════════════════════════════════════════════════
 ]]
 
 local CoreGui   = game:GetService("CoreGui")
 local Players   = game:GetService("Players")
 local TweenService    = game:GetService("TweenService")
-local UserInputService= game:getService("UserInputService")
+local UserInputService= game:GetService("UserInputService")
 local SoundService    = game:GetService("SoundService")
 local HttpService     = game:GetService("HttpService")
 local RunService      = game:GetService("RunService")
@@ -69,7 +69,6 @@ end
 
 -- Bộ nhớ đệm chứa các nút để bảo vệ
 local ProtectedButtons = {}
-local ScrollingFramesToLock = {}
 
 local function CreateCustomButton(parent, text, themeType)
     local f = Instance.new("Frame", parent)
@@ -81,6 +80,7 @@ local function CreateCustomButton(parent, text, themeType)
     RegTheme(f, themeType)
 
     local lbl = Instance.new("TextLabel", f)
+    lbl.Name = "VzNamTextLabel" -- Đánh dấu để bảo vệ
     lbl.BackgroundTransparency = 1
     lbl.Text = text
     lbl.TextColor3 = Color3.fromRGB(255,255,255)
@@ -91,20 +91,19 @@ local function CreateCustomButton(parent, text, themeType)
     lbl.Size = UDim2.new(1, -5, 1, 0)
     lbl.ZIndex = 10
     
-    -- Đưa vào danh sách bảo vệ
-    table.insert(ProtectedButtons, {
-        Frame = f,
-        Label = lbl,
-        OriginalText = text,
-        ThemeType = themeType
-    })
-    
     return f, lbl, s
 end
 
--- Đăng ký ScrollingFrame để khóa kích thước
-local function RegisterScroll(s, layout)
-    table.insert(ScrollingFramesToLock, {Scroll = s, Layout = layout})
+-- Hàm đăng ký bảo vệ sau khi đã set Size chuẩn
+local function ProtectButton(Btn, themeType)
+    table.insert(ProtectedButtons, {
+        Frame = Btn,
+        OriginalTransparency = Btn.BackgroundTransparency,
+        OriginalSize = Btn.Size,
+        OriginalPosition = Btn.Position,
+        OriginalText = Btn:FindFirstChild("VzNamTextLabel") and Btn.VzNamTextLabel.Text or "",
+        ThemeType = themeType
+    })
 end
 
 -- ═════════════════ SAFE LOAD ═════════════════
@@ -242,13 +241,16 @@ local SidebarLayout = Instance.new("UIListLayout", SidebarScroll)
 SidebarLayout.SortOrder, SidebarLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(0, 3)
 local SidebarPadding = Instance.new("UIPadding", SidebarScroll)
 SidebarPadding.PaddingLeft, SidebarPadding.PaddingRight = UDim.new(0, 2), UDim.new(0, 6)
-RegisterScroll(SidebarScroll, SidebarLayout)
+
+Track(SidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y + 10)
+end))
 
 Track(SearchBoxTab:GetPropertyChangedSignal("Text"):Connect(function()
     local q = string.lower(SearchBoxTab.Text)
     for _, item in ipairs(SidebarScroll:GetChildren()) do
         if item:IsA("Frame") then
-            local lbl = item:FindFirstChildOfClass("TextLabel")
+            local lbl = item:FindFirstChild("VzNamTextLabel")
             if lbl then
                 item.Visible = (q == "" or string.find(string.lower(lbl.Text), q, 1, true)) and true or false
             end
@@ -300,33 +302,39 @@ HeaderDivider.BackgroundColor3, HeaderDivider.BorderSizePixel = Color3.fromRGB(0
 
 local Tabs = {}
 
--- ═════════════════ VÒNG LẶP BẢO VỆ TUYỆT ĐỐI ═════════════════
-RunService:BindToRenderStep("VzNamProtect", 3000, function()
-    -- 1. Bảo vệ nút: Ép lại tên, màu sắc, và xóa rác
+-- ═════════════════ VÒNG LẶP BẢO VỆ (CHẠY SAU CÙNG) ═════════════════
+RunService:BindToRenderStep("VzNamProtect", 10000, function()
     for _, data in ipairs(ProtectedButtons) do
-        local f = data.Frame
-        if f and f.Parent then
-            local lbl = data.Label
-            
-            -- Ép lại chữ
-            if lbl.Text ~= data.OriginalText then
-                lbl.Text = data.OriginalText
+        local btn = data.Frame
+        if btn and btn.Parent then
+            -- 1. Ép lại Kích thước (Chống thu nhỏ để chèn nút)
+            if btn.Size ~= data.OriginalSize then
+                btn.Size = data.OriginalSize
             end
             
-            -- Xóa mọi phần tử lạ bị chèn vào trong nút (như nút Việt Hóa)
-            for _, child in ipairs(f:GetChildren()) do
-                if child ~= lbl and (child:IsA("GuiObject") or child:IsA("UIStroke") == false) then
-                    -- Giữ lại UICorner và UIStroke
-                    if not child:IsA("UICorner") and not child:IsA("UIStroke") and not child:IsA("UIPadding") then
-                        pcall(function() child:Destroy() end)
-                    end
+            -- 2. Ép lại Vị trí (Chống xô lệch)
+            if btn.Position ~= data.OriginalPosition then
+                btn.Position = data.OriginalPosition
+            end
+
+            -- 3. Quét và tiêu diệt mọi thứ không phải chữ gốc (Xóa nút Việt Hóa)
+            for _, child in ipairs(btn:GetChildren()) do
+                if child:IsA("GuiObject") and child.Name ~= "VzNamTextLabel" then
+                    child:Destroy()
                 end
             end
 
-            -- Ép lại màu nền
-            if f.BackgroundTransparency ~= (data.OriginalTransparency or 0) then
-                f.BackgroundTransparency = data.OriginalTransparency or 0
+            -- 4. Ép lại chữ (Chống đổi tên)
+            local lbl = btn:FindFirstChild("VzNamTextLabel")
+            if lbl and lbl.Text ~= data.OriginalText then
+                lbl.Text = data.OriginalText
             end
+
+            -- 5. Ép lại màu nền (Chống đổi màu)
+            if btn.BackgroundTransparency ~= data.OriginalTransparency then
+                btn.BackgroundTransparency = data.OriginalTransparency
+            end
+            
             local base = State.ThemeBase
             local targetBg
             if data.ThemeType == "Primary" then targetBg = base:Lerp(Color3.new(1,1,1), 0.08)
@@ -335,18 +343,8 @@ RunService:BindToRenderStep("VzNamProtect", 3000, function()
             elseif data.ThemeType == "DropItem" then targetBg = base:Lerp(Color3.new(1,1,1), 0.3)
             elseif data.ThemeType == "Input" then targetBg = base:Lerp(Color3.new(0,0,0), 0.4)
             end
-            if targetBg and f.BackgroundColor3 ~= targetBg then
-                f.BackgroundColor3 = targetBg
-            end
-        end
-    end
-
-    -- 2. Khóa thanh cuộn: Ép lại CanvasSize để không bị mất nút vuốt
-    for _, data in ipairs(ScrollingFramesToLock) do
-        if data.Scroll and data.Scroll.Parent and data.Layout then
-            local targetSize = UDim2.new(0, 0, 0, data.Layout.AbsoluteContentSize.Y + 10)
-            if data.Scroll.CanvasSize ~= targetSize then
-                data.Scroll.CanvasSize = targetSize
+            if targetBg and btn.BackgroundColor3 ~= targetBg then
+                btn.BackgroundColor3 = targetBg
             end
         end
     end
@@ -356,6 +354,7 @@ end)
 local tabHomeFrame, tabHomeLbl, _ = CreateCustomButton(SidebarScroll, " 🏠 Trang Chủ", "Primary")
 tabHomeFrame.LayoutOrder = 0
 tabHomeFrame.Size = UDim2.new(1, 0, 0, 26)
+ProtectButton(tabHomeFrame, "Primary")
 
 local homeIndicator = Instance.new("Frame", tabHomeFrame)
 homeIndicator.Size, homeIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -373,7 +372,10 @@ homeLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 local homePad = Instance.new("UIPadding", homeScroll)
 homePad.PaddingLeft, homePad.PaddingRight = UDim.new(0, 4), UDim.new(0, 10)
 homePad.PaddingTop, homePad.PaddingBottom = UDim.new(0, 4), UDim.new(0, 4)
-RegisterScroll(homeScroll, homeLayout)
+
+Track(homeLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    homeScroll.CanvasSize = UDim2.new(0, 0, 0, homeLayout.AbsoluteContentSize.Y + 15)
+end))
 
 Track(tabHomeFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -394,8 +396,10 @@ ActiveTabTitle.Text = "🏠 Trang Chủ"
 local infoToggleFrame, infoToggleLbl, _ = CreateCustomButton(homeScroll, " → thông tin", "Secondary")
 infoToggleFrame.LayoutOrder = 1
 infoToggleFrame.Size = UDim2.new(1, 0, 0, 32)
+ProtectButton(infoToggleFrame, "Secondary")
 
 local infoSubLabel = Instance.new("TextLabel", infoToggleFrame)
+infoSubLabel.Name = "VzNamTextLabel_Sub"
 infoSubLabel.Size, infoSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
 infoSubLabel.BackgroundTransparency, infoSubLabel.Text = 1, "Xem các thông tin Hub"
 infoSubLabel.TextColor3, infoSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
@@ -488,6 +492,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     local tabFrame, tabLbl, _ = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
     tabFrame.LayoutOrder = layoutOrder or 0
     tabFrame.Size = UDim2.new(1, 0, 0, 26)
+    ProtectButton(tabFrame, "Primary")
 
     local indicator = Instance.new("Frame", tabFrame)
     indicator.Size, indicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -514,12 +519,14 @@ local function CreateCategoryTab(tabName, layoutOrder)
     nkStroke.Color, nkStroke.Thickness = Color3.fromRGB(255,50,50), 2
     noKeyLbl.TextXAlignment = Enum.TextXAlignment.Center
     noKeyLbl.Position = UDim2.new(0, 0, 0, 0)
+    ProtectButton(noKeyFrame, "Primary")
 
     local hasKeyFrame, hasKeyLbl, hkStroke = CreateCustomButton(subBar, "có key", "Primary")
     hasKeyFrame.Size = UDim2.new(0.48, 0, 1, 0)
     hasKeyFrame.ZIndex = 6
     hasKeyLbl.TextXAlignment = Enum.TextXAlignment.Center
     hasKeyLbl.Position = UDim2.new(0, 0, 0, 0)
+    ProtectButton(hasKeyFrame, "Primary")
 
     local function makeScroll()
         local s = Instance.new("ScrollingFrame", containerFrame)
@@ -530,7 +537,9 @@ local function CreateCategoryTab(tabName, layoutOrder)
         p.PaddingLeft, p.PaddingRight, p.PaddingTop = UDim.new(0,4), UDim.new(0,10), UDim.new(0,4)
         local l = Instance.new("UIListLayout", s)
         l.Padding, l.HorizontalAlignment = UDim.new(0, 3), Enum.HorizontalAlignment.Center
-        RegisterScroll(s, l)
+        Track(l:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            s.CanvasSize = UDim2.new(0, 0, 0, l.AbsoluteContentSize.Y + 10)
+        end))
         return s
     end
 
@@ -543,7 +552,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
         local target = scrollNoKey.Visible and scrollNoKey or scrollHasKey
         for _, item in ipairs(target:GetChildren()) do
             if item:IsA("Frame") then
-                local lbl = item:FindFirstChildOfClass("TextLabel")
+                local lbl = item:FindFirstChild("VzNamTextLabel")
                 if lbl then
                     item.Visible = (q == "" or string.find(string.lower(lbl.Text), q, 1, true)) and true or false
                 end
@@ -585,6 +594,7 @@ local function CreateCategoryTab(tabName, layoutOrder)
     local function AddBtnTo(parent, name, callback)
         local f, lbl, bStroke = CreateCustomButton(parent, " ▶ " .. name, "Primary")
         f.Size = UDim2.new(1, 0, 0, 26)
+        ProtectButton(f, "Primary")
 
         Track(f.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -614,6 +624,7 @@ local function CreateSimpleTab(tabName, layoutOrder)
     local tabFrame, tabLbl, _ = CreateCustomButton(SidebarScroll, " " .. tabName, "Primary")
     tabFrame.LayoutOrder = layoutOrder or 0
     tabFrame.Size = UDim2.new(1, 0, 0, 26)
+    ProtectButton(tabFrame, "Primary")
 
     local indicator = Instance.new("Frame", tabFrame)
     indicator.Size, indicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -636,14 +647,16 @@ local function CreateSimpleTab(tabName, layoutOrder)
     p.PaddingLeft, p.PaddingRight, p.PaddingTop = UDim.new(0,4), UDim.new(0,10), UDim.new(0,4)
     local l = Instance.new("UIListLayout", scroll)
     l.Padding, l.HorizontalAlignment = UDim.new(0, 3), Enum.HorizontalAlignment.Center
-    RegisterScroll(scroll, l)
+    Track(l:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scroll.CanvasSize = UDim2.new(0, 0, 0, l.AbsoluteContentSize.Y + 10)
+    end))
 
     local function applySearchFilter()
         if not containerFrame.Visible then return end
         local q = string.lower(SearchInputContent.Text)
         for _, item in ipairs(scroll:GetChildren()) do
             if item:IsA("Frame") then
-                local lbl = item:FindFirstChildOfClass("TextLabel")
+                local lbl = item:FindFirstChild("VzNamTextLabel")
                 if lbl then
                     item.Visible = (q == "" or string.find(string.lower(lbl.Text), q, 1, true)) and true or false
                 end
@@ -670,6 +683,7 @@ local function CreateSimpleTab(tabName, layoutOrder)
     local function AddBtn(name, callback)
         local f, lbl, bStroke = CreateCustomButton(scroll, " ▶ " .. name, "Primary")
         f.Size = UDim2.new(1, 0, 0, 26)
+        ProtectButton(f, "Primary")
 
         Track(f.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -741,6 +755,7 @@ end)
 local tabMiscFrame, tabMiscLbl, _ = CreateCustomButton(SidebarScroll, " ⚙️ MISC", "Primary")
 tabMiscFrame.LayoutOrder = 4
 tabMiscFrame.Size = UDim2.new(1, 0, 0, 26)
+ProtectButton(tabMiscFrame, "Primary")
 
 local miscIndicator = Instance.new("Frame", tabMiscFrame)
 miscIndicator.Size, miscIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -757,7 +772,10 @@ miscLayout.SortOrder, miscLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.new(
 miscLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 local miscPad = Instance.new("UIPadding", miscScroll)
 miscPad.PaddingLeft, miscPad.PaddingRight, miscPad.PaddingTop = UDim.new(0,4), UDim.new(0,10), UDim.new(0,4)
-RegisterScroll(miscScroll, miscLayout)
+
+Track(miscLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    miscScroll.CanvasSize = UDim2.new(0, 0, 0, miscLayout.AbsoluteContentSize.Y + 15)
+end))
 
 Track(tabMiscFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -775,8 +793,10 @@ table.insert(Tabs, {Container = miscScroll, Indicator = miscIndicator})
 local autoLoadToggleFrame, autoLoadToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ auto load script", "Secondary")
 autoLoadToggleFrame.LayoutOrder = 1
 autoLoadToggleFrame.Size = UDim2.new(1, 0, 0, 34)
+ProtectButton(autoLoadToggleFrame, "Secondary")
 
 local alSubLabel = Instance.new("TextLabel", autoLoadToggleFrame)
+alSubLabel.Name = "VzNamTextLabel_Sub"
 alSubLabel.Size, alSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
 alSubLabel.BackgroundTransparency, alSubLabel.Text = 1, "Quản lý auto load script"
 alSubLabel.TextColor3, alSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
@@ -803,6 +823,7 @@ end))
 local dropFrame, dropLbl, _ = CreateCustomButton(autoLoadContainer, " 📜 Chọn Script Auto Load...", "Primary")
 dropFrame.LayoutOrder = 1
 dropFrame.Size = UDim2.new(1, 0, 0, 26)
+ProtectButton(dropFrame, "Primary")
 
 local dropListFrame = Instance.new("ScrollingFrame", autoLoadContainer)
 dropListFrame.LayoutOrder = 2
@@ -816,7 +837,6 @@ dropLayout.Padding = UDim.new(0, 3)
 RegTheme(dropListFrame, "DropFrame")
 local dropPad = Instance.new("UIPadding", dropListFrame)
 dropPad.PaddingRight = UDim.new(0, 8)
-RegisterScroll(dropListFrame, dropLayout)
 
 Track(dropFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -831,6 +851,7 @@ local function rebuildScriptDropdown()
     for i, scr in ipairs(RegisteredScripts) do
         local f, lbl, _ = CreateCustomButton(dropListFrame, " ▶ " .. scr.Name, "DropItem")
         f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
+        ProtectButton(f, "DropItem")
         
         Track(f.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -844,6 +865,7 @@ local function rebuildScriptDropdown()
             end
         end))
     end
+    dropListFrame.CanvasSize = UDim2.new(0, 0, 0, #RegisteredScripts * 25)
 end
 _G.__vznam_rebuildScriptDropdown = rebuildScriptDropdown
 rebuildScriptDropdown()
@@ -898,8 +920,10 @@ end))
 local musicToggleFrame, musicToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ âm nhạc", "Secondary")
 musicToggleFrame.LayoutOrder = 3
 musicToggleFrame.Size = UDim2.new(1, 0, 0, 34)
+ProtectButton(musicToggleFrame, "Secondary")
 
 local muSubLabel = Instance.new("TextLabel", musicToggleFrame)
+muSubLabel.Name = "VzNamTextLabel_Sub"
 muSubLabel.Size, muSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
 muSubLabel.BackgroundTransparency, muSubLabel.Text = 1, "Cài đặt âm nhạc nền"
 muSubLabel.TextColor3, muSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
@@ -938,6 +962,7 @@ RegTheme(customIdBox, "Input")
 
 local musicDropFrame, musicDropLbl, _ = CreateCustomButton(musicContainer, " 🎵 Chọn Nhạc...", "Primary")
 musicDropFrame.LayoutOrder, musicDropFrame.Size = 2, UDim2.new(1, 0, 0, 26)
+ProtectButton(musicDropFrame, "Primary")
 
 local musicDropList = Instance.new("ScrollingFrame", musicContainer)
 musicDropList.LayoutOrder, musicDropList.Size = 3, UDim2.new(1, 0, 0, 95)
@@ -950,7 +975,6 @@ musicListLayout.Padding = UDim.new(0, 3)
 RegTheme(musicDropList, "DropFrame")
 local musicPad = Instance.new("UIPadding", musicDropList)
 musicPad.PaddingRight = UDim.new(0, 8)
-RegisterScroll(musicDropList, musicListLayout)
 
 local presetMusics = {
     {Name = "🎵 Chill Lofi",        Id = "1837879082"},
@@ -962,6 +986,7 @@ local presetMusics = {
 for i, m in ipairs(presetMusics) do
     local f, lbl, _ = CreateCustomButton(musicDropList, " " .. m.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
+    ProtectButton(f, "DropItem")
 
     Track(f.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -975,6 +1000,7 @@ for i, m in ipairs(presetMusics) do
         end
     end))
 end
+musicDropList.CanvasSize = UDim2.new(0, 0, 0, #presetMusics * 25)
 Track(musicDropFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         musicDropList.Visible = not musicDropList.Visible
@@ -1071,8 +1097,10 @@ end))
 local menuColorToggleFrame, menuColorToggleLbl, _ = CreateCustomButton(miscScroll, " ↓ màu menu", "Secondary")
 menuColorToggleFrame.LayoutOrder = 5
 menuColorToggleFrame.Size = UDim2.new(1, 0, 0, 34)
+ProtectButton(menuColorToggleFrame, "Secondary")
 
 local mcSubLabel = Instance.new("TextLabel", menuColorToggleFrame)
+mcSubLabel.Name = "VzNamTextLabel_Sub"
 mcSubLabel.Size, mcSubLabel.Position = UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14)
 mcSubLabel.BackgroundTransparency, mcSubLabel.Text = 1, "Tùy chỉnh màu sắc & độ trong suốt"
 mcSubLabel.TextColor3, mcSubLabel.TextSize = Color3.fromRGB(140,140,150), 7
@@ -1128,6 +1156,7 @@ end
 
 local themeDropFrame, themeDropLbl, _ = CreateCustomButton(menuColorContainer, " 🎨 Theme: 🌊 Xanh Đại Dương", "Primary")
 themeDropFrame.LayoutOrder, themeDropFrame.Size = 1, UDim2.new(1, 0, 0, 26)
+ProtectButton(themeDropFrame, "Primary")
 
 local themeDropList = Instance.new("ScrollingFrame", menuColorContainer)
 themeDropList.LayoutOrder, themeDropList.Size = 2, UDim2.new(1, 0, 0, 95)
@@ -1140,11 +1169,11 @@ themeListLayout.Padding = UDim.new(0, 3)
 RegTheme(themeDropList, "DropFrame")
 local themePad = Instance.new("UIPadding", themeDropList)
 themePad.PaddingRight = UDim.new(0, 8)
-RegisterScroll(themeDropList, themeListLayout)
 
 for i, th in ipairs(menuThemeList) do
     local f, lbl, _ = CreateCustomButton(themeDropList, " " .. th.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
+    ProtectButton(f, "DropItem")
 
     Track(f.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1154,6 +1183,7 @@ for i, th in ipairs(menuThemeList) do
         end
     end))
 end
+themeDropList.CanvasSize = UDim2.new(0, 0, 0, #menuThemeList * 25)
 Track(themeDropFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         themeDropList.Visible = not themeDropList.Visible
@@ -1219,6 +1249,7 @@ local selectedColorObj = colorList[1]
 
 local colorDropFrame, colorDropLbl, _ = CreateCustomButton(menuColorContainer, " 🎨 Viền: 🔵 Xanh Dương", "Primary")
 colorDropFrame.LayoutOrder, colorDropFrame.Size = 4, UDim2.new(1, 0, 0, 26)
+ProtectButton(colorDropFrame, "Primary")
 
 local colorDropList = Instance.new("ScrollingFrame", menuColorContainer)
 colorDropList.LayoutOrder, colorDropList.Size = 5, UDim2.new(1, 0, 0, 95)
@@ -1231,7 +1262,6 @@ colorListLayout.Padding = UDim.new(0, 3)
 RegTheme(colorDropList, "DropFrame")
 local colorPad = Instance.new("UIPadding", colorDropList)
 colorPad.PaddingRight = UDim.new(0, 8)
-RegisterScroll(colorDropList, colorListLayout)
 
 local function UpdateAllStrokes(target)
     if target == "None" then
@@ -1249,6 +1279,7 @@ end
 for i, cItem in ipairs(colorList) do
     local f, lbl, _ = CreateCustomButton(colorDropList, " " .. cItem.Name, "DropItem")
     f.LayoutOrder, f.Size = i, UDim2.new(1, 0, 0, 22)
+    ProtectButton(f, "DropItem")
 
     Track(f.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1268,6 +1299,7 @@ for i, cItem in ipairs(colorList) do
         end
     end))
 end
+colorDropList.CanvasSize = UDim2.new(0, 0, 0, #colorList * 25)
 Track(colorDropFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         colorDropList.Visible = not colorDropList.Visible
@@ -1287,6 +1319,7 @@ Track(rainbowConn)
 local tabConfigFrame, tabConfigLbl, _ = CreateCustomButton(SidebarScroll, " 📦 CẤU HÌNH", "Primary")
 tabConfigFrame.LayoutOrder = 5
 tabConfigFrame.Size = UDim2.new(1, 0, 0, 26)
+ProtectButton(tabConfigFrame, "Primary")
 
 local configIndicator = Instance.new("Frame", tabConfigFrame)
 configIndicator.Size, configIndicator.Position = UDim2.new(0, 3, 0, 12), UDim2.new(0, 0, 0.5, -6)
@@ -1303,7 +1336,10 @@ configLayout.SortOrder, configLayout.Padding = Enum.SortOrder.LayoutOrder, UDim.
 configLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 local cfgPad = Instance.new("UIPadding", configScroll)
 cfgPad.PaddingLeft, cfgPad.PaddingRight, cfgPad.PaddingTop = UDim.new(0,4), UDim.new(0,10), UDim.new(0,4)
-RegisterScroll(configScroll, configLayout)
+
+Track(configLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    configScroll.CanvasSize = UDim2.new(0, 0, 0, configLayout.AbsoluteContentSize.Y + 15)
+end))
 
 Track(tabConfigFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1473,7 +1509,6 @@ delDropLayout.Padding = UDim.new(0, 3)
 local delPad = Instance.new("UIPadding", delDropFrame)
 delPad.PaddingRight = UDim.new(0, 8)
 RegTheme(delDropFrame, "DropFrame")
-RegisterScroll(delDropFrame, delDropLayout)
 
 local loadConfigFrame = Instance.new("Frame", mainConfigContainer)
 loadConfigFrame.LayoutOrder, loadConfigFrame.Size = 6, UDim2.new(1, 0, 0, 30)
@@ -1510,7 +1545,6 @@ ldDropLayout.Padding = UDim.new(0, 3)
 local ldPad = Instance.new("UIPadding", ldDropFrame)
 ldPad.PaddingRight = UDim.new(0, 8)
 RegTheme(ldDropFrame, "DropFrame")
-RegisterScroll(ldDropFrame, ldDropLayout)
 
 local saveFrame = Instance.new("Frame", mainConfigContainer)
 saveFrame.LayoutOrder, saveFrame.Size = 8, UDim2.new(1, 0, 0, 34)
@@ -1622,6 +1656,7 @@ local function refreshAllDropdowns()
         local f1, lbl1, _ = CreateCustomButton(delDropFrame, " 🗑️ " .. name, "DropItem")
         f1.Size = UDim2.new(1, 0, 0, 22)
         lbl1.TextColor3 = Color3.fromRGB(255,100,100)
+        ProtectButton(f1, "DropItem")
 
         Track(f1.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1634,6 +1669,7 @@ local function refreshAllDropdowns()
 
         local f3, lbl3, _ = CreateCustomButton(ldDropFrame, " 📂 " .. name, "DropItem")
         f3.Size = UDim2.new(1, 0, 0, 22)
+        ProtectButton(f3, "DropItem")
 
         Track(f3.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1701,4 +1737,4 @@ ApplyTheme(Color3.fromRGB(15, 16, 22))
 UpdateAllStrokes(Color3.fromRGB(0, 191, 255))
 RefreshStartupLabel()
 
-print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Đã fix triệt để lỗi chèn nút và thanh cuộn).")
+print("[VzNam Hub v4 : Tổng Hợp] ✅ Loaded (Bản Khóa Cứng - Chống chèn nút).")
